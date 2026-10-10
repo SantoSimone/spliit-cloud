@@ -17,6 +17,13 @@ export const DEFAULT_SYSTEM_ONE_API_URL = 'https://api.typesafe.ai/v1/systemone'
 /** Same abuse bound as the LLM fallback (~10 tokens). */
 const TITLE_LIMIT = 40
 
+/**
+ * Receipt OCR hints forwarded to the decision model. Bounded so a long receipt
+ * cannot bloat the request: top items only, titles truncated.
+ */
+const RECEIPT_ITEMS_LIMIT = 10
+const RECEIPT_ITEM_TITLE_LIMIT = 60
+
 export type SuggestCategoryWithSystemOneOptions = {
   /** API key for the decision-model endpoint (server-side only). */
   apiKey: string
@@ -36,6 +43,17 @@ export type SuggestCategoryWithSystemOneOptions = {
   locale?: string
   /** Group metadata (name, currency) used as soft context. */
   groupContext?: GroupContext
+  /**
+   * Receipt line-item titles from OCR (e.g. a scanned receipt). Primary signal
+   * alongside the expense title when present; local dictionary and history
+   * stages stay title-only. Truncated and capped before sending.
+   */
+  receiptItems?: string[]
+  /**
+   * ISO-4217 currency code read off the receipt. May differ from the group
+   * currency (travel) and hints at the merchant's country.
+   */
+  receiptCurrencyCode?: string | null
   /**
    * Minimum accepted confidence (0–1). Verdicts below it map to a null category
    * (no confident fit) while keeping the raw confidence figures for logging and
@@ -215,7 +233,9 @@ export async function requestSystemOneCategories(args: {
 /**
  * Title → category judgment via a System One decision model. Asks a single flat
  * `Choice` question over every default category, with the expense title,
- * locale, group context, and recent group expenses as structured state.
+ * locale, group context, and recent group expenses as structured state. Receipt
+ * scans additionally pass OCR line-item titles plus the receipt currency as
+ * primary signal (see `receiptItems` / `receiptCurrencyCode`).
  *
  * Returns null when the model picks the default `general` category (or anything
  * outside the allowlist), or when confidence falls below `minConfidence`,
@@ -231,6 +251,12 @@ export async function suggestCategoryWithSystemOne(
     ? resolveLanguageName(options.locale)
     : undefined
 
+  const receiptItems = (options.receiptItems ?? [])
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, RECEIPT_ITEMS_LIMIT)
+    .map((item) => item.substring(0, RECEIPT_ITEM_TITLE_LIMIT))
+
   const state = {
     expenseTitle: description.substring(0, TITLE_LIMIT),
     appLanguage: languageName ?? null,
@@ -245,6 +271,8 @@ export async function suggestCategoryWithSystemOne(
       title: expense.title,
       categoryId: expense.categoryId,
     })),
+    receiptItems,
+    receiptCurrency: options.receiptCurrencyCode ?? null,
   }
 
   const answers = await requestSystemOneCategories({
@@ -252,7 +280,9 @@ export async function suggestCategoryWithSystemOne(
     questions: {
       category: {
         instructions:
-          'Which expense category best describes this expense title? Use the group context, app language hint, and recent expenses as supporting context. If no category fits, choose general.',
+          receiptItems.length > 0
+            ? 'Which expense category best describes this expense? Use the expense title plus the receipt line items as the primary signal, with the receipt currency, group context, app language hint, and recent expenses as supporting context. If no category fits, choose general.'
+            : 'Which expense category best describes this expense title? Use the group context, app language hint, and recent expenses as supporting context. If no category fits, choose general.',
       },
     },
     apiKey: options.apiKey,

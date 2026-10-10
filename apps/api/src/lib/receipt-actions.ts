@@ -43,6 +43,13 @@ export type ReceiptAIContext = {
   locale?: string
   groupContext?: GroupContext
   translateToLocale?: boolean
+  /**
+   * OCR-only mode: skip the category list plus group/history hints so the
+   * vision prompt stays small and the LLM acts purely as OCR. The caller
+   * categorizes the extracted title separately via the decision model. Category
+   * output is always null in this mode.
+   */
+  ocrOnly?: boolean
 }
 
 function parseAIAmount(value: unknown) {
@@ -167,16 +174,35 @@ export async function extractExpenseInformationFromImage(
   const categories = DEFAULT_CATEGORIES
   const categoryIds = categories.map((category) => category.id)
   const groupCurrency = getCurrencyFromGroup(groupCurrencyInput)
-  const groupSection = buildGroupContextSection(context.groupContext)
+  const ocrOnly = context.ocrOnly ?? false
+  // OCR-only mode drops the category list plus group/history hints: the
+  // decision model gets that signal separately from the extracted title.
+  const groupSection = ocrOnly
+    ? ''
+    : buildGroupContextSection(context.groupContext)
   const localeHint = buildLocaleHint(context.locale)
   const translationDirective = buildTranslationDirective(
     context.locale,
     context.translateToLocale,
   )
-  const recentSection = buildRecentExpensesSection(context.recentExpenses ?? [])
+  const recentSection = ocrOnly
+    ? ''
+    : buildRecentExpensesSection(context.recentExpenses ?? [])
   const currentExpenseSection = context.currentExpense
     ? `\nCurrent form values are soft hints only. Re-check them against the receipt and improve or replace them when the image supports it:\n${JSON.stringify(context.currentExpense)}`
     : ''
+  const taskLine = ocrOnly
+    ? 'Extract the receipt total, receipt currency, receipt date, and merchant/title.'
+    : 'Extract the receipt total, best category ID, receipt currency, receipt date, and merchant/title.'
+  const categoryLine = ocrOnly
+    ? ''
+    : `Return the categoryId from this allowed list only: ${categories.map((category) => formatCategoryForAIPrompt(category)).join(', ')}.`
+  const hintsLine = ocrOnly
+    ? 'The receipt image is the source of truth.'
+    : "Use the group context and past-expense examples only as soft hints for currency, merchant/title, and category; the receipt image is the source of truth. Do not copy an example's amount, date, or items."
+  const fieldsLine = ocrOnly
+    ? 'Return exactly one JSON object with these fields: amount (number), currencyCode (string), date (string), title (string), and items (array of objects with title (string), unitPrice (number), and quantity (integer)). Do not explain.'
+    : 'Return exactly one JSON object with these fields: amount (number), categoryId (string), currencyCode (string), date (string), title (string), and items (array of objects with title (string), unitPrice (number), and quantity (integer)). Do not explain.'
 
   const { text: rawContent } = await generateText({
     model: await getModel(env.AI_RECEIPT_MODEL),
@@ -192,7 +218,7 @@ export async function extractExpenseInformationFromImage(
             type: 'text',
             text: `
               This image contains a receipt.
-              Extract the receipt total, best category ID, receipt currency, receipt date, and merchant/title.
+              ${taskLine}
               Use the final amount charged, including tax and service charges when visible.
               Return the amount as a plain number without currency symbols or thousands separators.
               Return currencyCode as the ISO 4217 code printed or implied by the receipt.
@@ -200,16 +226,16 @@ export async function extractExpenseInformationFromImage(
               If those clues strongly indicate a country, use that country's normal currency.
               Only return an empty string when there is no reasonable currency inference.
               Return the date as yyyy-mm-dd. If the date is unreadable, return an empty string.
-              Return the categoryId from this allowed list only: ${categories.map((category) => formatCategoryForAIPrompt(category)).join(', ')}.
+              ${categoryLine}
               ${groupSection}
               ${localeHint}
               ${translationDirective}
               ${recentSection}
               ${currentExpenseSection}
-              Use the group context and past-expense examples only as soft hints for currency, merchant/title, and category; the receipt image is the source of truth. Do not copy an example's amount, date, or items.
+              ${hintsLine}
               Make a best-effort attempt to extract the purchased receipt line items. For each clearly readable item, return its display title, signed non-zero unit price in the receipt currency, and positive integer quantity. Preserve explicit discounts or credits as negative line items; exclude taxes, service charges, subtotals, totals, payment details, and unreadable or uncertain lines. Return an empty items array when no line items can be identified.
               The group's currency is ${groupCurrency.code || groupCurrency.symbol}; use the receipt total as written and do not convert currencies.
-              Return exactly one JSON object with these fields: amount (number), categoryId (string), currencyCode (string), date (string), title (string), and items (array of objects with title (string), unitPrice (number), and quantity (integer)). Do not explain.`,
+              ${fieldsLine}`,
           },
         ],
       },
@@ -221,9 +247,15 @@ export async function extractExpenseInformationFromImage(
   })
 
   const parsed = parseReceiptAIResponse(rawContent)
-  parsed.categoryId =
-    extractAllowedIdFromAIResponse(parsed.categoryId, categoryIds) ??
-    extractAllowedIdFromAIResponse(rawContent, categoryIds)
+  if (ocrOnly) {
+    // The decision model owns categorization on this path; ignore any
+    // hallucinated categoryId the vision model returns unasked.
+    parsed.categoryId = null
+  } else {
+    parsed.categoryId =
+      extractAllowedIdFromAIResponse(parsed.categoryId, categoryIds) ??
+      extractAllowedIdFromAIResponse(rawContent, categoryIds)
+  }
   const receiptCurrency = parsed.currencyCode
     ? (getCurrency(parsed.currencyCode) ?? groupCurrency)
     : groupCurrency

@@ -32,6 +32,12 @@ export type SuggestExpenseCategoryArgs = {
   allowAi?: boolean
   /** Invoked immediately before the AI engine runs, after local misses. */
   beforeAi?: () => void
+  /**
+   * Receipt OCR hints (line-item titles + receipt currency). Forwarded to the
+   * System One engine only — local dictionary/history stages stay title-only.
+   */
+  receiptItems?: string[]
+  receiptCurrencyCode?: string | null
 }
 
 export type SuggestExpenseCategoryResult = {
@@ -142,6 +148,8 @@ export async function suggestExpenseCategory(
         recentExpenses,
         locale: args.locale,
         groupContext,
+        receiptItems: args.receiptItems,
+        receiptCurrencyCode: args.receiptCurrencyCode,
       })
       const verdict = adaptSystemOneCategory(
         {

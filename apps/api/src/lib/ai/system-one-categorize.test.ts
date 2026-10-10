@@ -112,6 +112,35 @@ describe('suggestCategoryWithSystemOne', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it('sends receipt items and currency as state with item-aware instructions', async () => {
+    fetchMock.mockResolvedValueOnce(systemOneResponse('groceries'))
+
+    await suggestCategoryWithSystemOne('Corner Market', {
+      apiKey: 'test-key',
+      receiptItems: ['Apples', 'Bread'],
+      receiptCurrencyCode: 'USD',
+    })
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const body = JSON.parse(init.body as string)
+    expect(body.state.receiptItems).toEqual(['Apples', 'Bread'])
+    expect(body.state.receiptCurrency).toBe('USD')
+    expect(body.questions.category.instructions).toContain('line items')
+  })
+
+  it('defaults receipt state to empty items and null currency', async () => {
+    fetchMock.mockResolvedValueOnce(systemOneResponse('groceries'))
+
+    await suggestCategoryWithSystemOne('Mercadona weekly shop', {
+      apiKey: 'test-key',
+    })
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const body = JSON.parse(init.body as string)
+    expect(body.state.receiptItems).toEqual([])
+    expect(body.state.receiptCurrency).toBeNull()
+  })
+
   it('truncates long titles to 40 characters like the LLM fallback', async () => {
     fetchMock.mockResolvedValueOnce(systemOneResponse('groceries'))
 

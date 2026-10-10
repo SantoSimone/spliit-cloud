@@ -370,7 +370,7 @@ System One validates every Choice answer at runtime before the floor applies: th
 
 What reaches the configured System One endpoint (credentials stay server-side, never in the web client):
 
-- Single suggestion (`suggestCategoryWithSystemOne`): truncated title (40 chars), app language, group name/currency, and recent title/category pairs.
+- Single suggestion (`suggestCategoryWithSystemOne`): truncated title (40 chars), app language, group name/currency, and recent title/category pairs — plus, for receipt scans, OCR line-item titles (top 10) and the receipt currency.
 - Bulk categorization (`categorizeExpensesWithSystemOne`, up to 5 questions per request): per expense title (80-char slice) plus expense date; shared group name (100 chars) and locale; per-expense confirmed/recent examples (top 8), title-matched rejected categories, and opt-in nearby categorized expenses (±7 days, up to 3 before + 3 after with title/category/date).
 
 Single suggestions run only when the user opts into AI extract; bulk runs are group-admin gated. Suggestion paths log no expense titles or group IDs — bulk run logs record only run lifecycle counts, phases, and durations.

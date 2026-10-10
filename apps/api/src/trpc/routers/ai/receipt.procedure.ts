@@ -5,6 +5,7 @@ import { categoryIdSchema } from '@spliit/domain'
 
 import { getRecentExpenseContext } from '../../../lib/ai/context'
 import { isTimeoutError } from '../../../lib/ai/timeout'
+import { suggestExpenseCategory } from '../../../lib/api/expenses/suggest-category'
 import { env } from '../../../lib/env'
 import { extractExpenseInformationFromImage } from '../../../lib/receipt-actions'
 import {
@@ -58,7 +59,16 @@ export const extractExpenseInformationFromImageProcedure = protectedProcedure
       groupId: input.groupId,
       accountId: ctx.auth.user.id,
     })
-    const context = await getRecentExpenseContext(input.groupId)
+    // Fast path: OCR-only vision call (no expense history in the prompt),
+    // then the System One decision model categorizes the extracted title plus
+    // receipt line items. Only when the decision-model engine is configured;
+    // the LLM engine keeps the single joint vision call below.
+    const useSeparateCategorization =
+      env.AI_CATEGORY_ENGINE === 'system-one' &&
+      env.PUBLIC_ENABLE_CATEGORY_EXTRACT
+    const context = useSeparateCategorization
+      ? undefined
+      : await getRecentExpenseContext(input.groupId)
     enforceAiRequestLimit(
       ctx.auth.user.id,
       'ai.extractExpenseInformationFromImage',
@@ -73,13 +83,20 @@ export const extractExpenseInformationFromImageProcedure = protectedProcedure
           currency: input.currency,
           currencyCode: input.currencyCode,
         },
-        {
-          recentExpenses: context.expenses,
-          groupContext: context.group,
-          locale: input.locale,
-          translateToLocale: input.translateToLocale,
-          currentExpense: input.currentExpense,
-        },
+        useSeparateCategorization
+          ? {
+              ocrOnly: true,
+              locale: input.locale,
+              translateToLocale: input.translateToLocale,
+              currentExpense: input.currentExpense,
+            }
+          : {
+              recentExpenses: context!.expenses,
+              groupContext: context!.group,
+              locale: input.locale,
+              translateToLocale: input.translateToLocale,
+              currentExpense: input.currentExpense,
+            },
       )
     } catch (error) {
       if (isTimeoutError(error)) {
@@ -90,9 +107,28 @@ export const extractExpenseInformationFromImageProcedure = protectedProcedure
       }
       throw error
     }
-    const categoryId = categoryIdSchema.safeParse(result.categoryId)
+
+    let categoryId: string | null = result.categoryId
+    if (useSeparateCategorization && result.title) {
+      // Best-effort: OCR data is complete without a category, so a failed
+      // suggestion degrades to null instead of failing the whole scan.
+      try {
+        const suggestion = await suggestExpenseCategory({
+          groupId: input.groupId,
+          title: result.title,
+          locale: input.locale,
+          allowAi: true,
+          receiptItems: result.items.map((item) => item.title),
+          receiptCurrencyCode: result.currencyCode,
+        })
+        categoryId = suggestion.categoryId
+      } catch {
+        categoryId = null
+      }
+    }
+    const category = categoryIdSchema.safeParse(categoryId)
     return {
       ...result,
-      categoryId: categoryId.success ? categoryId.data : null,
+      categoryId: category.success ? category.data : null,
     }
   })

@@ -241,6 +241,74 @@ describe('extractExpenseInformationFromImage', () => {
     expect(prompt).toContain('soft hints')
   })
 
+  it('omits category and history hints in ocrOnly mode', async () => {
+    generateTextMock.mockResolvedValue({
+      text: JSON.stringify({ amount: 1, items: [] }),
+    })
+
+    await extractExpenseInformationFromImage(
+      'https://example.com/receipt.jpg',
+      groupCurrency,
+      {
+        ocrOnly: true,
+        locale: 'es',
+        groupContext: {
+          name: 'Madrid Trip',
+          currency: '€',
+          currencyCode: 'EUR',
+        },
+        recentExpenses: [{ title: 'Mercadona', categoryId: 'groceries' }],
+      },
+    )
+
+    const request = generateTextMock.mock.calls[0]?.[0] as {
+      messages: Array<{
+        content: Array<{ type: string; text?: string }>
+      }>
+    }
+    const prompt = request.messages[0]?.content.find(
+      (part) => part.type === 'text',
+    )?.text
+
+    expect(prompt).not.toContain('categoryId')
+    expect(prompt).not.toContain('Madrid Trip')
+    expect(prompt).not.toContain('"Mercadona" -> groceries')
+    expect(prompt).not.toContain('Past expenses in this group')
+    // OCR-relevant hints stay: locale, group currency, line items.
+    expect(prompt).toContain("user's app language is Español")
+    expect(prompt).toContain('USD')
+    expect(prompt).toContain('unitPrice')
+    expect(prompt).toMatch(/items/i)
+  })
+
+  it('returns a null category in ocrOnly mode even when the model returns one', async () => {
+    generateTextMock.mockResolvedValue({
+      text: JSON.stringify({
+        amount: 18.5,
+        categoryId: 'groceries',
+        currencyCode: 'USD',
+        date: '2025-01-02',
+        title: 'Corner Market',
+        items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+      }),
+    })
+
+    const result = await extractExpenseInformationFromImage(
+      'https://example.com/receipt.jpg',
+      groupCurrency,
+      { ocrOnly: true },
+    )
+
+    expect(result).toMatchObject({
+      amount: 1850,
+      categoryId: null,
+      currencyCode: 'USD',
+      date: '2025-01-02',
+      title: 'Corner Market',
+      items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+    })
+  })
+
   it('does not add a forced-translation instruction when translateToLocale is omitted', async () => {
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({ amount: 1, items: [] }),

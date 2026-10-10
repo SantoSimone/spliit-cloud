@@ -436,6 +436,22 @@ describe('suggestExpenseCategory with AI_CATEGORY_ENGINE=system-one', () => {
     expect(generateText).not.toHaveBeenCalled()
   })
 
+  it('forwards receipt items and currency to System One state', async () => {
+    await suggestExpenseCategory({
+      groupId: 'group-1',
+      title: 'xyzzy-unknown',
+      allowAi: true,
+      receiptItems: ['Apples', 'Bread'],
+      receiptCurrencyCode: 'USD',
+    })
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const body = JSON.parse(init.body as string)
+    expect(body.state.receiptItems).toEqual(['Apples', 'Bread'])
+    expect(body.state.receiptCurrency).toBe('USD')
+    expect(generateText).not.toHaveBeenCalled()
+  })
+
   it('returns null when System One picks the general no-match category', async () => {
     fetchMock.mockResolvedValueOnce(systemOneResponse('general', 0.4))
 
