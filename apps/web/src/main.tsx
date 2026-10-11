@@ -1,3 +1,4 @@
+import '@fontsource-variable/nunito/wght.css'
 import '@/app/globals.css'
 import { RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'

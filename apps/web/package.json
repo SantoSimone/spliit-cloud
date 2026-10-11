@@ -24,6 +24,7 @@
     "@base-ui/react": "^1.8.0",
     "@better-auth/oauth-provider": "~1.7.5",
     "@better-auth/passkey": "~1.7.5",
+    "@fontsource-variable/nunito": "^5.3.0",
     "@hookform/resolvers": "^5.9.1",
     "@spliit/domain": "workspace:*",
     "@tanstack/react-query": "^5.103.1",

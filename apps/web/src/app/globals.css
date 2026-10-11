@@ -175,9 +175,8 @@
   --animate-sparkle-pulse: sparkle-pulse 1.3s ease-in-out infinite;
 
   --font-rounded:
-    ui-rounded, Hiragino Maru Gothic ProN, Quicksand, Comfortaa, Manjari,
-    Arial Rounded MT, Arial Rounded MT Bold, Calibri, source-sans-pro,
-    sans-serif;
+    'Nunito Variable', system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Noto Sans', sans-serif;
 
   --drop-shadow-title: 0.25vw 0.25vw 0 rgb(252 165 165 / var(--tw-text-opacity));
 
