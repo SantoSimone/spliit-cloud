@@ -3558,8 +3558,15 @@
     "itemsGapMismatch": "आइटम का कुल {items} है, लेकिन रसीद का कुल {total} है (अंतर: {gap})।",
     "addRoundingAsItem": "{amount} राउंडिंग जोड़ें",
     "roundingItemTitle": "राउंडिंग",
-    "roundingRequiredError": "आइटम का योग कुल राशि के बराबर होना चाहिए। राउंडिंग लाइन रखें या खर्च मैन्युअल रूप से संपादित करें।",
-    "subtractRoundingAsItem": "{amount} राउंडिंग घटाएँ"
+    "subtractRoundingAsItem": "{amount} राउंडिंग घटाएँ",
+    "addOtherAsItem": "{amount} अन्य के रूप में जोड़ें",
+    "largeGapNote": "यह राउंडिंग से बड़ा अंतर है — आइटम को रसीद से मिलाकर देखें। चुनें कि कौन-सा कुल सही है, या संपादन फॉर्म में ठीक करें।",
+    "otherExcessItemTitle": "अन्य (अधिक)",
+    "subtractOtherExcessAsItem": "{amount} अन्य (अधिक) के रूप में घटाएँ",
+    "itemsTotalNote": "खर्च की राशि आइटम के कुल के बराबर रखी जाती है।",
+    "sourceOfTruth": "कौन-सा कुल सही है?",
+    "useExpenseTotal": "रसीद का कुल {total}",
+    "useItemsTotal": "आइटम का कुल {items}"
   },
   "Feedback": {
     "navigationLabel": "प्रतिक्रिया",

@@ -3630,8 +3630,15 @@
     "itemsGapMismatch": "Die Artikel ergeben {items}, aber die Gesamtsumme auf dem Beleg beträgt {total} (Differenz: {gap}).",
     "addRoundingAsItem": "{amount} Rundung hinzufügen",
     "roundingItemTitle": "Rundung",
-    "roundingRequiredError": "Die Artikel müssen die Gesamtsumme ergeben. Behalte die Rundungszeile bei oder bearbeite die Ausgabe manuell.",
-    "subtractRoundingAsItem": "{amount} Rundung abziehen"
+    "subtractRoundingAsItem": "{amount} Rundung abziehen",
+    "addOtherAsItem": "{amount} als Sonstiges hinzufügen",
+    "largeGapNote": "Das ist mehr als eine Rundung — prüfe die Artikel anhand des Belegs. Wähle, welche Summe stimmt, oder korrigiere sie im Bearbeitungsformular.",
+    "otherExcessItemTitle": "Sonstiges (Überschuss)",
+    "subtractOtherExcessAsItem": "{amount} als Sonstiges (Überschuss) abziehen",
+    "itemsTotalNote": "Der Ausgabenbetrag wird auf die Artikelsumme gesetzt.",
+    "sourceOfTruth": "Welche Summe stimmt?",
+    "useExpenseTotal": "Gesamtsumme auf dem Beleg {total}",
+    "useItemsTotal": "Artikelsumme {items}"
   },
   "Feedback": {
     "navigationLabel": "Rückmeldung",

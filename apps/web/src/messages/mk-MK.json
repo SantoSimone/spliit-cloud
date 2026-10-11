@@ -3564,8 +3564,15 @@
     "itemsGapMismatch": "Вкупниот износ на ставките е {items}, а вкупниот износ на сметката е {total} (разлика: {gap}).",
     "addRoundingAsItem": "Додај заокружување од {amount}",
     "roundingItemTitle": "Заокружување",
-    "roundingRequiredError": "Ставките мора да се вклопат во вкупниот износ. Задржете ја ставката за заокружување или изменете го трошокот рачно.",
-    "subtractRoundingAsItem": "Одземи заокружување од {amount}"
+    "subtractRoundingAsItem": "Одземи заокружување од {amount}",
+    "addOtherAsItem": "Додај {amount} како Друго",
+    "largeGapNote": "Ова е повеќе од заокружување — проверете ги ставките според сметката. Изберете кој вкупен износ е точен или поправете го во формуларот за уредување.",
+    "otherExcessItemTitle": "Друго (вишок)",
+    "subtractOtherExcessAsItem": "Одземи {amount} како Друго (вишок)",
+    "itemsTotalNote": "Износот на трошокот се поставува на вкупниот износ на ставките.",
+    "sourceOfTruth": "Кој вкупен износ е точен?",
+    "useExpenseTotal": "Вкупен износ на сметката {total}",
+    "useItemsTotal": "Вкупен износ на ставките {items}"
   },
   "Feedback": {
     "navigationLabel": "Повратни информации",

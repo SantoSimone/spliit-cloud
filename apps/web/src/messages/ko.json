@@ -3628,8 +3628,15 @@
     "itemsGapMismatch": "항목 합계는 {items}이지만 영수증 합계는 {total}입니다 (차이: {gap}).",
     "addRoundingAsItem": "{amount} 반올림 추가",
     "roundingItemTitle": "반올림",
-    "roundingRequiredError": "항목 합계는 총액과 일치해야 합니다. 반올림 항목을 유지하거나, 지출을 직접 수정하세요.",
-    "subtractRoundingAsItem": "{amount} 반올림 차감"
+    "subtractRoundingAsItem": "{amount} 반올림 차감",
+    "addOtherAsItem": "{amount} 기타로 추가",
+    "largeGapNote": "반올림 수준을 넘는 차이입니다 — 항목을 영수증과 대조해 확인하세요. 어느 합계가 맞는지 선택하거나, 편집 양식에서 수정하세요.",
+    "otherExcessItemTitle": "기타(초과)",
+    "subtractOtherExcessAsItem": "{amount} 기타(초과)로 차감",
+    "itemsTotalNote": "지출 금액이 항목 합계로 설정됩니다.",
+    "sourceOfTruth": "어느 합계가 맞습니까?",
+    "useExpenseTotal": "영수증 합계 {total}",
+    "useItemsTotal": "항목 합계 {items}"
   },
   "Feedback": {
     "navigationLabel": "피드백",

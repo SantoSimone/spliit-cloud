@@ -3543,8 +3543,15 @@
     "itemsGapMismatch": "Item berjumlah {items}, tetapi total struk adalah {total} (selisih: {gap}).",
     "addRoundingAsItem": "Tambahkan pembulatan {amount}",
     "roundingItemTitle": "Pembulatan",
-    "roundingRequiredError": "Item harus berjumlah sama dengan total. Pertahankan baris pembulatan, atau edit pengeluaran secara manual.",
-    "subtractRoundingAsItem": "Kurangi pembulatan {amount}"
+    "subtractRoundingAsItem": "Kurangi pembulatan {amount}",
+    "addOtherAsItem": "Tambahkan {amount} sebagai Lainnya",
+    "largeGapNote": "Ini lebih dari sekadar pembulatan — cocokkan item dengan struk. Pilih total mana yang benar, atau perbaiki di formulir edit.",
+    "otherExcessItemTitle": "Lainnya (kelebihan)",
+    "subtractOtherExcessAsItem": "Kurangi {amount} sebagai Lainnya (kelebihan)",
+    "itemsTotalNote": "Jumlah pengeluaran diatur ke total item.",
+    "sourceOfTruth": "Total mana yang benar?",
+    "useExpenseTotal": "Total struk {total}",
+    "useItemsTotal": "Total item {items}"
   },
   "Feedback": {
     "navigationLabel": "Masukan",

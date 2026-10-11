@@ -3602,8 +3602,15 @@
     "itemsGapMismatch": "Сума позицій — {items}, а сума чека — {total} (різниця: {gap}).",
     "addRoundingAsItem": "Додати округлення {amount}",
     "roundingItemTitle": "Округлення",
-    "roundingRequiredError": "Сума позицій має збігатися з підсумком. Залиште рядок округлення або відредагуйте витрату вручну.",
-    "subtractRoundingAsItem": "Відняти округлення {amount}"
+    "subtractRoundingAsItem": "Відняти округлення {amount}",
+    "addOtherAsItem": "Додати {amount} як Інше",
+    "largeGapNote": "Це більше, ніж округлення, — звірте позиції з чеком. Виберіть, яка сума правильна, або виправте її у формі редагування.",
+    "otherExcessItemTitle": "Інше (надлишок)",
+    "subtractOtherExcessAsItem": "Відняти {amount} як Інше (надлишок)",
+    "itemsTotalNote": "Сума витрати буде дорівнювати сумі позицій.",
+    "sourceOfTruth": "Яка сума правильна?",
+    "useExpenseTotal": "Сума чека {total}",
+    "useItemsTotal": "Сума позицій {items}"
   },
   "Feedback": {
     "navigationLabel": "Зворотний зв’язок",

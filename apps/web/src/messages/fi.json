@@ -3558,8 +3558,15 @@
     "itemsGapMismatch": "Tuotteiden summa on {items}, mutta kuitin loppusumma on {total} (erotus: {gap}).",
     "addRoundingAsItem": "Lisää {amount} pyöristys",
     "roundingItemTitle": "Pyöristys",
-    "roundingRequiredError": "Tuotteiden on täsmättävä loppusummaan. Pidä pyöristysrivi mukana tai muokkaa kulua manuaalisesti.",
-    "subtractRoundingAsItem": "Vähennä {amount} pyöristys"
+    "subtractRoundingAsItem": "Vähennä {amount} pyöristys",
+    "addOtherAsItem": "Lisää {amount} muu",
+    "largeGapNote": "Tämä on enemmän kuin pyöristys — tarkista tuotteet kuittia vasten. Valitse, mikä summa on oikein, tai korjaa se muokkauslomakkeessa.",
+    "otherExcessItemTitle": "Muu (ylimäärä)",
+    "subtractOtherExcessAsItem": "Vähennä {amount} muu (ylimäärä)",
+    "itemsTotalNote": "Kulun summaksi asetetaan tuotteiden summa.",
+    "sourceOfTruth": "Mikä summa on oikein?",
+    "useExpenseTotal": "Kuitin loppusumma {total}",
+    "useItemsTotal": "Tuotteiden summa {items}"
   },
   "Feedback": {
     "navigationLabel": "Palaute",

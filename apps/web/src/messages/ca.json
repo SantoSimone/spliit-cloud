@@ -3583,8 +3583,15 @@
     "itemsGapMismatch": "Els elements sumen {items}, però el total del rebut és {total} (diferència: {gap}).",
     "addRoundingAsItem": "Afegeix {amount} d'arrodoniment",
     "roundingItemTitle": "Arrodoniment",
-    "roundingRequiredError": "Els elements han de sumar el total. Mantén la línia d'arrodoniment o edita la despesa manualment.",
-    "subtractRoundingAsItem": "Resta {amount} d'arrodoniment"
+    "subtractRoundingAsItem": "Resta {amount} d'arrodoniment",
+    "addOtherAsItem": "Afegeix {amount} com a Altres",
+    "largeGapNote": "Això és més que un arrodoniment: comprova els articles amb el rebut. Tria quin total és correcte o corregeix-lo en el formulari d'edició.",
+    "otherExcessItemTitle": "Altres (excés)",
+    "subtractOtherExcessAsItem": "Resta {amount} com a Altres (excés)",
+    "itemsTotalNote": "L'import de la despesa serà el total dels articles.",
+    "sourceOfTruth": "Quin total és correcte?",
+    "useExpenseTotal": "Total del rebut {total}",
+    "useItemsTotal": "Total dels articles {items}"
   },
   "Feedback": {
     "navigationLabel": "Comentaris",

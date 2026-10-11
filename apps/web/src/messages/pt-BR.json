@@ -1877,7 +1877,7 @@
     "issues": {
       "unsupportedCurrency": "A moeda informada não é compatível; escolha uma no formulário completo da despesa."
     },
-    "roundingRequiredError": "Os itens devem somar o total. Mantenha a linha de arredondamento ou edite a despesa manualmente."
+    "largeGapNote": "Isso é mais do que arredondamento: confira os itens com o recibo. Escolha qual é o total correto ou ajuste o valor no formulário de edição."
   },
   "Feedback": {
     "description": "Relate um problema, sugira uma melhoria ou conte-nos sobre sua experiência. Escolha uma categoria para continuar no GitHub.",

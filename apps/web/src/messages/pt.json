@@ -3583,8 +3583,15 @@
     "itemsGapMismatch": "Os itens somam {items}, mas o total do recibo é {total} (diferença: {gap}).",
     "addRoundingAsItem": "Adicionar {amount} de arredondamento",
     "roundingItemTitle": "Arredondamento",
-    "roundingRequiredError": "Os itens têm de somar o total. Mantém a linha de arredondamento ou edita a despesa manualmente.",
-    "subtractRoundingAsItem": "Subtrair {amount} de arredondamento"
+    "subtractRoundingAsItem": "Subtrair {amount} de arredondamento",
+    "addOtherAsItem": "Adicionar {amount} como Outro",
+    "largeGapNote": "Isto é mais do que um arredondamento: confira os itens com o recibo. Escolha qual é o total correto ou corrija-o no formulário de edição.",
+    "otherExcessItemTitle": "Outro (excesso)",
+    "subtractOtherExcessAsItem": "Subtrair {amount} como Outro (excesso)",
+    "itemsTotalNote": "O valor da despesa será o total dos itens.",
+    "sourceOfTruth": "Qual é o total correto?",
+    "useExpenseTotal": "Total do recibo {total}",
+    "useItemsTotal": "Total dos itens {items}"
   },
   "Feedback": {
     "navigationLabel": "Comentários",

@@ -15,8 +15,7 @@ import { CategoryIcon } from '@/app/groups/[groupId]/expenses/category-icon'
 import Image from '@/components/app-image'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -42,6 +41,7 @@ import {
   gapMinorAsMajor,
   getCategoryById,
   getItemizedFormMinorTotals,
+  isRoundingSizeGap,
   type CategoryId,
   type ExpenseFormInputValues,
 } from '@spliit/domain'
@@ -151,10 +151,18 @@ export function AiExpensePreview({
   // Scanned line items rarely cover the receipt total exactly: the scan
   // prompt excludes taxes and service charges by design, and each line is
   // rounded to minor units independently at save time. Surface that minor-unit
-  // gap (same helper as save serialization) and let the user absorb it with
-  // an explicit "Rounding" row. The row stays hidden from the item list —
-  // the checkbox below is its only UI — but it flows into the edit-form
-  // handoff and quick-create values when checked.
+  // gap (same helper as save serialization) and let the user pick which
+  // total is the source of truth. Either choice balances, so quick-create
+  // stays available; the edit form remains for manual fixes.
+  //
+  // Gaps within the last two minor-unit digits are plausibly rounding and
+  // use the "Rounding" wording. Larger gaps are a real mismatch: the box
+  // says so, and the adjustment item follows the "Other" convention
+  // instead — an "Other" row when items fall short, an "Other (excess)"
+  // row when they overshoot. Both adjustment rows are real items with
+  // non-empty titles (the schemas reject untitled rows); the in-form
+  // untitled filler is display-only and never submitted, so it can't be
+  // reused here.
   const baseItems = useMemo(() => draft.items ?? [], [draft.items])
   const baseTotals = useMemo(
     () =>
@@ -165,44 +173,64 @@ export function AiExpensePreview({
   )
   const gapMinor = baseTotals?.gapMinor ?? 0
   const hasItemsGap = baseTotals != null && gapMinor !== 0
-  const roundingItemMajor =
+  const isRoundingSize = hasItemsGap && isRoundingSizeGap(gapMinor)
+  const adjustmentItemMajor =
     hasItemsGap && baseTotals != null
       ? gapMinorAsMajor(gapMinor, inputCurrency)
       : null
-  // Rounding is pre-checked: most scans need it, and the balanced handoff is
-  // the safer default. Unchecking surfaces an error instead of silently
-  // creating an unbalanced expense.
-  const [addRounding, setAddRounding] = useState(true)
-  const [roundingDraft, setRoundingDraft] = useState(draft)
-  if (roundingDraft !== draft) {
-    // A new scan result must never inherit the previous choice: the
-    // "Rounding" row is derived per draft, so reset during render
+  const adjustmentItemTitle = !hasItemsGap
+    ? null
+    : isRoundingSize
+      ? t('roundingItemTitle')
+      : gapMinor < 0
+        ? t('otherExcessItemTitle')
+        : tForm('items.other')
+  // The receipt total is the preselected source of truth.
+  const [truthSource, setTruthSource] = useState<'total' | 'items'>('total')
+  const [gapDraft, setGapDraft] = useState(draft)
+  if (gapDraft !== draft) {
+    // A new scan result must never inherit the previous choice: the gap
+    // resolution is derived per draft, so reset during render
     // (React-endorsed previous-render comparison, not an effect) to avoid
     // cascading renders.
-    setRoundingDraft(draft)
-    setAddRounding(true)
+    setGapDraft(draft)
+    setTruthSource('total')
   }
+  const useItemsTotal = hasItemsGap && truthSource === 'items'
+  const effectiveAmountMinor =
+    useItemsTotal && baseTotals != null ? baseTotals.itemsMinor : amountMinor
+  const effectiveAmountMajor =
+    effectiveAmountMinor != null
+      ? amountAsDecimal(effectiveAmountMinor, inputCurrency)
+      : null
   const effectiveItems = useMemo(
     () =>
       hasItemsGap &&
-      addRounding &&
-      roundingItemMajor != null &&
-      baseTotals != null
+      truthSource === 'total' &&
+      adjustmentItemMajor != null &&
+      adjustmentItemTitle != null
         ? [
             ...baseItems,
             {
-              title: t('roundingItemTitle'),
-              unitPrice: roundingItemMajor,
+              title: adjustmentItemTitle,
+              unitPrice: adjustmentItemMajor,
               quantity: 1,
             },
           ]
         : baseItems,
-    [addRounding, baseItems, baseTotals, hasItemsGap, roundingItemMajor, t],
+    [
+      truthSource,
+      adjustmentItemTitle,
+      baseItems,
+      hasItemsGap,
+      adjustmentItemMajor,
+    ],
   )
 
   const searchParams = useMemo<CreateExpenseSearch>(() => {
     const params: CreateExpenseSearch = {}
-    if (amountMinor != null) params.amount = String(amountMinor)
+    if (effectiveAmountMinor != null)
+      params.amount = String(effectiveAmountMinor)
     if (draft.title) params.title = draft.title
     if (normalizedCurrencyCode) params.originalCurrency = normalizedCurrencyCode
     if (draft.date && parseDate(draft.date)) params.date = draft.date
@@ -229,7 +257,7 @@ export function AiExpensePreview({
     }
     return params
   }, [
-    amountMinor,
+    effectiveAmountMinor,
     draft,
     effectiveItems,
     normalizedCurrencyCode,
@@ -247,10 +275,10 @@ export function AiExpensePreview({
       today: new Date(),
     })
     const next = { ...defaults }
-    if (draft.payerParticipantId && amountMajor != null) {
+    if (draft.payerParticipantId && effectiveAmountMajor != null) {
       next.paidBySplitMode = 'BY_AMOUNT'
       next.paidByList = [
-        { participant: draft.payerParticipantId, shares: amountMajor },
+        { participant: draft.payerParticipantId, shares: effectiveAmountMajor },
       ]
     }
     if (selectedParticipantIds.size > 0) {
@@ -262,7 +290,7 @@ export function AiExpensePreview({
     }
     return next
   }, [
-    amountMajor,
+    effectiveAmountMajor,
     currentLedgerParticipantId,
     draft.payerParticipantId,
     group,
@@ -275,14 +303,10 @@ export function AiExpensePreview({
   const canCreate = Boolean(
     formValues &&
     draft.title?.trim() &&
-    amountMinor != null &&
-    amountMinor > 0 &&
+    effectiveAmountMinor != null &&
+    effectiveAmountMinor > 0 &&
     !hasUnresolvedCurrency &&
-    draft.issues.length === 0 &&
-    // An unchecked rounding gap would fail itemized validation on save:
-    // force the manual-edit path instead of one-click creating a broken
-    // expense.
-    !(hasItemsGap && !addRounding),
+    draft.issues.length === 0,
   )
 
   const navigateToForm = () => {
@@ -359,8 +383,12 @@ export function AiExpensePreview({
                 {t('amount')}
               </div>
               <div>
-                {amountMinor != null
-                  ? formatCurrency(displayCurrency, amountMinor, locale)
+                {effectiveAmountMinor != null
+                  ? formatCurrency(
+                      displayCurrency,
+                      effectiveAmountMinor,
+                      locale,
+                    )
                   : t('missing')}
               </div>
             </div>
@@ -422,21 +450,9 @@ export function AiExpensePreview({
                 />
                 {hasItemsGap &&
                 baseTotals != null &&
-                roundingItemMajor != null ? (
-                  <div
-                    className={
-                      addRounding
-                        ? 'mt-2 rounded-lg border border-amber-300/60 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/20'
-                        : 'mt-2 rounded-lg border border-destructive/60 bg-destructive/10 p-3'
-                    }
-                  >
-                    <p
-                      className={
-                        addRounding
-                          ? 'text-sm text-amber-900 dark:text-amber-200'
-                          : 'text-sm text-destructive'
-                      }
-                    >
+                adjustmentItemMajor != null ? (
+                  <div className="mt-2 rounded-lg border border-amber-300/60 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/20">
+                    <p className="text-sm text-amber-900 dark:text-amber-200">
                       {t('itemsGapMismatch', {
                         items: formatCurrency(
                           displayCurrency,
@@ -451,43 +467,95 @@ export function AiExpensePreview({
                         gap: formatCurrency(displayCurrency, gapMinor, locale),
                       })}
                     </p>
-                    {!addRounding ? (
-                      <p role="alert" className="mt-1 text-sm text-destructive">
-                        {t('roundingRequiredError')}
+                    {!isRoundingSize ? (
+                      <p className="mt-1 text-sm text-amber-900 dark:text-amber-200">
+                        {t('largeGapNote')}
                       </p>
                     ) : null}
-                    <div className="mt-2 flex items-center gap-2">
-                      <Checkbox
-                        id="ai-expense-add-rounding"
-                        checked={addRounding}
-                        onCheckedChange={(checked) =>
-                          setAddRounding(checked === true)
+                    <p className="mt-2 text-sm font-medium text-amber-900 dark:text-amber-200">
+                      {t('sourceOfTruth')}
+                    </p>
+                    <RadioGroup
+                      value={truthSource}
+                      onValueChange={(value) => {
+                        if (value === 'total' || value === 'items') {
+                          setTruthSource(value)
                         }
-                      />
-                      <Label
-                        htmlFor="ai-expense-add-rounding"
-                        className={
-                          addRounding
-                            ? 'cursor-pointer font-normal text-amber-900 dark:text-amber-200'
-                            : 'cursor-pointer font-normal text-destructive'
-                        }
+                      }}
+                      aria-label={t('sourceOfTruth')}
+                      className="mt-1 grid gap-2"
+                    >
+                      <label
+                        htmlFor="ai-expense-truth-total"
+                        className="flex cursor-pointer flex-col rounded-md border border-amber-300/60 p-2 has-data-[checked]:border-primary dark:border-amber-500/30"
                       >
-                        {t(
-                          gapMinor < 0
-                            ? 'subtractRoundingAsItem'
-                            : 'addRoundingAsItem',
-                          {
-                            // The credit case (items exceed the total) reads
-                            // as "Subtract $0.50 rounding", not "Add -$0.50…".
-                            amount: formatCurrency(
-                              displayCurrency,
-                              Math.abs(gapMinor),
-                              locale,
-                            ),
-                          },
-                        )}
-                      </Label>
-                    </div>
+                        <div className="flex items-start gap-2">
+                          <RadioGroupItem
+                            value="total"
+                            id="ai-expense-truth-total"
+                            className="mt-1"
+                          />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                              {t('useExpenseTotal', {
+                                total: formatCurrency(
+                                  displayCurrency,
+                                  baseTotals.amountMinor,
+                                  locale,
+                                ),
+                              })}
+                            </span>
+                            <span className="text-xs text-amber-900/80 dark:text-amber-200/80">
+                              {t(
+                                isRoundingSize
+                                  ? gapMinor < 0
+                                    ? 'subtractRoundingAsItem'
+                                    : 'addRoundingAsItem'
+                                  : gapMinor < 0
+                                    ? 'subtractOtherExcessAsItem'
+                                    : 'addOtherAsItem',
+                                {
+                                  // The credit case (items exceed the
+                                  // total) reads as "Subtract $0.50 …",
+                                  // not "Add -$0.50…".
+                                  amount: formatCurrency(
+                                    displayCurrency,
+                                    Math.abs(gapMinor),
+                                    locale,
+                                  ),
+                                },
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                      <label
+                        htmlFor="ai-expense-truth-items"
+                        className="flex cursor-pointer flex-col rounded-md border border-amber-300/60 p-2 has-data-[checked]:border-primary dark:border-amber-500/30"
+                      >
+                        <div className="flex items-start gap-2">
+                          <RadioGroupItem
+                            value="items"
+                            id="ai-expense-truth-items"
+                            className="mt-1"
+                          />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                              {t('useItemsTotal', {
+                                items: formatCurrency(
+                                  displayCurrency,
+                                  baseTotals.itemsMinor,
+                                  locale,
+                                ),
+                              })}
+                            </span>
+                            <span className="text-xs text-amber-900/80 dark:text-amber-200/80">
+                              {t('itemsTotalNote')}
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                    </RadioGroup>
                   </div>
                 ) : null}
               </div>

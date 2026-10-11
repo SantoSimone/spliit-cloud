@@ -3583,8 +3583,15 @@
     "itemsGapMismatch": "Les éléments totalisent {items}, mais le total du reçu est de {total} (différence : {gap}).",
     "addRoundingAsItem": "Ajouter {amount} d'arrondi",
     "roundingItemTitle": "Arrondi",
-    "roundingRequiredError": "Les éléments doivent correspondre au total. Conservez la ligne d'arrondi ou modifiez la dépense manuellement.",
-    "subtractRoundingAsItem": "Soustraire {amount} d'arrondi"
+    "subtractRoundingAsItem": "Soustraire {amount} d'arrondi",
+    "addOtherAsItem": "Ajouter {amount} comme Autre",
+    "largeGapNote": "C’est plus qu’un arrondi : vérifiez les articles avec le reçu. Choisissez quel total est correct, ou corrigez-le dans le formulaire de modification.",
+    "otherExcessItemTitle": "Autre (excédent)",
+    "subtractOtherExcessAsItem": "Soustraire {amount} comme Autre (excédent)",
+    "itemsTotalNote": "Le montant de la dépense correspond au total des articles.",
+    "sourceOfTruth": "Quel total est correct ?",
+    "useExpenseTotal": "Total du reçu {total}",
+    "useItemsTotal": "Total des articles {items}"
   },
   "Feedback": {
     "navigationLabel": "Commentaires",

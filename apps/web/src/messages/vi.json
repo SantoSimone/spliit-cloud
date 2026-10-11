@@ -3626,8 +3626,15 @@
     "itemsGapMismatch": "Các mục cộng lại là {items}, nhưng tổng biên lai là {total} (chênh lệch: {gap}).",
     "addRoundingAsItem": "Thêm làm tròn {amount}",
     "roundingItemTitle": "Làm tròn",
-    "roundingRequiredError": "Các mục phải cộng lại bằng tổng. Giữ dòng làm tròn, hoặc chỉnh sửa khoản chi thủ công.",
-    "subtractRoundingAsItem": "Trừ làm tròn {amount}"
+    "subtractRoundingAsItem": "Trừ làm tròn {amount}",
+    "addOtherAsItem": "Thêm {amount} dưới dạng Khác",
+    "largeGapNote": "Chênh lệch này lớn hơn mức làm tròn — hãy đối chiếu các mục với hóa đơn. Chọn tổng nào đúng, hoặc sửa trong biểu mẫu chỉnh sửa.",
+    "otherExcessItemTitle": "Khác (thừa)",
+    "subtractOtherExcessAsItem": "Trừ {amount} dưới dạng Khác (thừa)",
+    "itemsTotalNote": "Số tiền khoản chi được đặt thành tổng các mục.",
+    "sourceOfTruth": "Tổng nào đúng?",
+    "useExpenseTotal": "Tổng biên lai {total}",
+    "useItemsTotal": "Tổng các mục {items}"
   },
   "Feedback": {
     "navigationLabel": "Phản hồi",

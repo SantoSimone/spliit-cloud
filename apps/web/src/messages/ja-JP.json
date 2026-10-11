@@ -3544,8 +3544,15 @@
     "itemsGapMismatch": "品目の合計は {items} ですが、レシートの合計は {total} です（差額：{gap}）。",
     "addRoundingAsItem": "{amount} の端数調整を追加",
     "roundingItemTitle": "端数調整",
-    "roundingRequiredError": "品目の合計は合計金額と一致する必要があります。端数調整の行を残すか、手動で支出を編集してください。",
-    "subtractRoundingAsItem": "{amount} の端数調整を差し引く"
+    "subtractRoundingAsItem": "{amount} の端数調整を差し引く",
+    "addOtherAsItem": "{amount} をその他として追加",
+    "largeGapNote": "端数調整の範囲を超えています — 品目とレシートを照合してください。どちらの合計が正しいかを選択するか、編集フォームで修正してください。",
+    "otherExcessItemTitle": "その他（超過分）",
+    "subtractOtherExcessAsItem": "{amount} をその他（超過分）として差し引く",
+    "itemsTotalNote": "支出額は品目の合計に設定されます。",
+    "sourceOfTruth": "どちらの合計が正しいですか？",
+    "useExpenseTotal": "レシートの合計 {total}",
+    "useItemsTotal": "品目の合計 {items}"
   },
   "Feedback": {
     "navigationLabel": "フィードバック",

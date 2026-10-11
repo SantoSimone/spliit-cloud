@@ -3602,8 +3602,15 @@
     "itemsGapMismatch": "Součet položek je {items}, ale celkem na účtence je {total} (rozdíl: {gap}).",
     "addRoundingAsItem": "Přidat zaokrouhlení {amount}",
     "roundingItemTitle": "Zaokrouhlení",
-    "roundingRequiredError": "Položky musí dát dohromady celkovou částku. Ponechte řádek zaokrouhlení, nebo výdaj upravte ručně.",
-    "subtractRoundingAsItem": "Odečíst zaokrouhlení {amount}"
+    "subtractRoundingAsItem": "Odečíst zaokrouhlení {amount}",
+    "addOtherAsItem": "Přidat {amount} jako Ostatní",
+    "largeGapNote": "To už není jen zaokrouhlení — zkontrolujte položky podle účtenky. Vyberte, která částka je správná, nebo ji opravte v editačním formuláři.",
+    "otherExcessItemTitle": "Ostatní (přebytek)",
+    "subtractOtherExcessAsItem": "Odečíst {amount} jako Ostatní (přebytek)",
+    "itemsTotalNote": "Částka výdaje se nastaví na součet položek.",
+    "sourceOfTruth": "Která částka je správná?",
+    "useExpenseTotal": "Celkem na účtence {total}",
+    "useItemsTotal": "Součet položek {items}"
   },
   "Feedback": {
     "navigationLabel": "Zpětná vazba",

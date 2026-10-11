@@ -3630,8 +3630,15 @@
     "itemsGapMismatch": "আইটেমগুলোর যোগফল {items}, কিন্তু রসিদের মোট {total} (পার্থক্য: {gap})।",
     "addRoundingAsItem": "{amount} রাউন্ডিং যোগ করুন",
     "roundingItemTitle": "রাউন্ডিং",
-    "roundingRequiredError": "আইটেমগুলোর যোগফল মোট অর্থের সমান হতে হবে। রাউন্ডিং লাইনটি রাখুন অথবা খরচটি ম্যানুয়ালি সম্পাদনা করুন।",
-    "subtractRoundingAsItem": "{amount} রাউন্ডিং বিয়োগ করুন"
+    "subtractRoundingAsItem": "{amount} রাউন্ডিং বিয়োগ করুন",
+    "addOtherAsItem": "{amount} অন্যান্য হিসেবে যোগ করুন",
+    "largeGapNote": "এটি রাউন্ডিংয়ের চেয়ে বড় পার্থক্য — আইটেমগুলো রসিদের সাথে মিলিয়ে দেখুন। কোন মোটটি সঠিক তা বেছে নিন, অথবা সম্পাদনা ফর্মে ঠিক করুন।",
+    "otherExcessItemTitle": "অন্যান্য (অতিরিক্ত)",
+    "subtractOtherExcessAsItem": "{amount} অন্যান্য (অতিরিক্ত) হিসেবে বিয়োগ করুন",
+    "itemsTotalNote": "খরচের পরিমাণ আইটেমের মোট অনুযায়ী নির্ধারণ করা হয়েছে।",
+    "sourceOfTruth": "কোন মোটটি সঠিক?",
+    "useExpenseTotal": "রসিদের মোট {total}",
+    "useItemsTotal": "আইটেমের মোট {items}"
   },
   "Feedback": {
     "navigationLabel": "প্রতিক্রিয়া",

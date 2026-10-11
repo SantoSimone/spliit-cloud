@@ -3566,8 +3566,15 @@
     "itemsGapMismatch": "Kalemler toplamı {items}, ancak fiş toplamı {total} (fark: {gap}).",
     "addRoundingAsItem": "{amount} yuvarlama ekle",
     "roundingItemTitle": "Yuvarlama",
-    "roundingRequiredError": "Kalemlerin toplamı genel toplama eşit olmalı. Yuvarlama satırını koruyun veya gideri elle düzenleyin.",
-    "subtractRoundingAsItem": "{amount} yuvarlama çıkar"
+    "subtractRoundingAsItem": "{amount} yuvarlama çıkar",
+    "addOtherAsItem": "{amount} Diğer olarak ekle",
+    "largeGapNote": "Bu fark yuvarlamadan büyük — kalemleri fişle karşılaştırın. Hangi toplamın doğru olduğunu seçin veya düzenleme formunda düzeltin.",
+    "otherExcessItemTitle": "Diğer (fazla)",
+    "subtractOtherExcessAsItem": "{amount} Diğer (fazla) olarak çıkar",
+    "itemsTotalNote": "Gider tutarı kalemler toplamı olarak ayarlanır.",
+    "sourceOfTruth": "Hangi toplam doğru?",
+    "useExpenseTotal": "Fiş toplamı {total}",
+    "useItemsTotal": "Kalemler toplamı {items}"
   },
   "Feedback": {
     "navigationLabel": "Geri bildirim",

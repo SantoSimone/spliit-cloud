@@ -3544,8 +3544,15 @@
     "itemsGapMismatch": "項目合計為 {items}，但收據總額為 {total}（差額：{gap}）。",
     "addRoundingAsItem": "新增 {amount} 捨入",
     "roundingItemTitle": "捨入",
-    "roundingRequiredError": "各項目金額的總和必須等於總金額。請保留捨入行，或手動編輯支出。",
-    "subtractRoundingAsItem": "減去 {amount} 捨入"
+    "subtractRoundingAsItem": "減去 {amount} 捨入",
+    "addOtherAsItem": "將 {amount} 新增為其他",
+    "largeGapNote": "這已超出捨入範圍——請將項目與收據核對。請選擇哪個總額正確，或在編輯表單中修正。",
+    "otherExcessItemTitle": "其他（超額）",
+    "subtractOtherExcessAsItem": "減去 {amount} 作為其他（超額）",
+    "itemsTotalNote": "支出金額將設為項目合計。",
+    "sourceOfTruth": "哪個總額正確？",
+    "useExpenseTotal": "收據總額 {total}",
+    "useItemsTotal": "項目合計 {items}"
   },
   "Feedback": {
     "navigationLabel": "意見回饋",

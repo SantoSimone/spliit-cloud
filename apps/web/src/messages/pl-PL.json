@@ -3602,8 +3602,15 @@
     "itemsGapMismatch": "Suma pozycji to {items}, ale łączna kwota paragonu to {total} (różnica: {gap}).",
     "addRoundingAsItem": "Dodaj zaokrąglenie {amount}",
     "roundingItemTitle": "Zaokrąglenie",
-    "roundingRequiredError": "Pozycje muszą sumować się do kwoty całkowitej. Zachowaj pozycję zaokrąglenia albo edytuj wydatek ręcznie.",
-    "subtractRoundingAsItem": "Odejmij zaokrąglenie {amount}"
+    "subtractRoundingAsItem": "Odejmij zaokrąglenie {amount}",
+    "addOtherAsItem": "Dodaj {amount} jako Inne",
+    "largeGapNote": "To więcej niż zaokrąglenie — sprawdź pozycje z paragonem. Wybierz, która kwota jest poprawna, lub popraw ją w formularzu edycji.",
+    "otherExcessItemTitle": "Inne (nadwyżka)",
+    "subtractOtherExcessAsItem": "Odejmij {amount} jako Inne (nadwyżka)",
+    "itemsTotalNote": "Kwota wydatku zostanie ustawiona na sumę pozycji.",
+    "sourceOfTruth": "Która kwota jest poprawna?",
+    "useExpenseTotal": "Łączna kwota paragonu {total}",
+    "useItemsTotal": "Suma pozycji {items}"
   },
   "Feedback": {
     "navigationLabel": "Opinie",

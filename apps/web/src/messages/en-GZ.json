@@ -46,8 +46,15 @@
     "itemsGapMismatch": "items add up to {items}, but the receipt total is {total} (difference: {gap}).",
     "addRoundingAsItem": "add {amount} rounding",
     "roundingItemTitle": "rounding",
-    "roundingRequiredError": "the items have to add up to the total. keep the rounding line, or just edit the expense manually.",
-    "subtractRoundingAsItem": "subtract {amount} rounding"
+    "subtractRoundingAsItem": "subtract {amount} rounding",
+    "addOtherAsItem": "add {amount} as other",
+    "largeGapNote": "that's more than rounding — check the items against the receipt. pick which total is right, or fix it in the edit form.",
+    "otherExcessItemTitle": "other (excess)",
+    "subtractOtherExcessAsItem": "subtract {amount} as other (excess)",
+    "itemsTotalNote": "the expense amount is set to the items total.",
+    "sourceOfTruth": "which total is right?",
+    "useExpenseTotal": "receipt total {total}",
+    "useItemsTotal": "items total {items}"
   },
   "AccountSettings": {
     "nameLabel": "display name",

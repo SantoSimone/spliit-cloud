@@ -3583,8 +3583,15 @@
     "itemsGapMismatch": "Elementele însumează {items}, dar totalul bonului este {total} (diferența: {gap}).",
     "addRoundingAsItem": "Adaugă {amount} ca rotunjire",
     "roundingItemTitle": "Rotunjire",
-    "roundingRequiredError": "Elementele trebuie să însumeze totalul. Păstrează linia de rotunjire sau editează cheltuiala manual.",
-    "subtractRoundingAsItem": "Scade {amount} ca rotunjire"
+    "subtractRoundingAsItem": "Scade {amount} ca rotunjire",
+    "addOtherAsItem": "Adaugă {amount} ca Altele",
+    "largeGapNote": "E mai mult decât o rotunjire: verifică articolele cu bonul. Alege care total este corect sau corectează-l în formularul de editare.",
+    "otherExcessItemTitle": "Altele (excedent)",
+    "subtractOtherExcessAsItem": "Scade {amount} ca Altele (excedent)",
+    "itemsTotalNote": "Valoarea cheltuielii va fi totalul articolelor.",
+    "sourceOfTruth": "Care total este corect?",
+    "useExpenseTotal": "Totalul bonului {total}",
+    "useItemsTotal": "Totalul articolelor {items}"
   },
   "Feedback": {
     "navigationLabel": "Opinii",

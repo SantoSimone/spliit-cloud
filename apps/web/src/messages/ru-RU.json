@@ -3602,8 +3602,15 @@
     "itemsGapMismatch": "Сумма позиций — {items}, а сумма чека — {total} (разница: {gap}).",
     "addRoundingAsItem": "Добавить округление {amount}",
     "roundingItemTitle": "Округление",
-    "roundingRequiredError": "Сумма позиций должна совпадать с итогом. Оставьте строку округления или измените расход вручную.",
-    "subtractRoundingAsItem": "Вычесть округление {amount}"
+    "subtractRoundingAsItem": "Вычесть округление {amount}",
+    "addOtherAsItem": "Добавить {amount} как Прочее",
+    "largeGapNote": "Это больше, чем округление, — сверьте позиции с чеком. Выберите, какая сумма верна, или исправьте её в форме редактирования.",
+    "otherExcessItemTitle": "Прочее (излишек)",
+    "subtractOtherExcessAsItem": "Вычесть {amount} как Прочее (излишек)",
+    "itemsTotalNote": "Сумма расхода будет равна сумме позиций.",
+    "sourceOfTruth": "Какая сумма верна?",
+    "useExpenseTotal": "Сумма чека {total}",
+    "useItemsTotal": "Сумма позиций {items}"
   },
   "Feedback": {
     "navigationLabel": "Обратная связь",

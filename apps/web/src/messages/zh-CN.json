@@ -3544,8 +3544,15 @@
     "itemsGapMismatch": "项目合计为 {items}，但收据总额为 {total}（差额：{gap}）。",
     "addRoundingAsItem": "添加 {amount} 舍入",
     "roundingItemTitle": "舍入",
-    "roundingRequiredError": "各项目金额之和必须等于总金额。请保留舍入行，或手动编辑支出。",
-    "subtractRoundingAsItem": "减去 {amount} 舍入"
+    "subtractRoundingAsItem": "减去 {amount} 舍入",
+    "addOtherAsItem": "将 {amount} 添加为其他",
+    "largeGapNote": "这已超出舍入范围——请将项目与收据核对。请选择哪个总额正确，或在编辑表单中修正。",
+    "otherExcessItemTitle": "其他（超额）",
+    "subtractOtherExcessAsItem": "减去 {amount} 作为其他（超额）",
+    "itemsTotalNote": "支出金额将设为项目合计。",
+    "sourceOfTruth": "哪个总额正确？",
+    "useExpenseTotal": "收据总额 {total}",
+    "useItemsTotal": "项目合计 {items}"
   },
   "Feedback": {
     "navigationLabel": "反馈",

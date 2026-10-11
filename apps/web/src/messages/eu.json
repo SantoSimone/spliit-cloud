@@ -3581,8 +3581,15 @@
     "itemsGapMismatch": "Elementuek {items} batzen dute, baina ordainagiriaren guztizkoa {total} da (aldea: {gap}).",
     "addRoundingAsItem": "Gehitu {amount} biribiltze gisa",
     "roundingItemTitle": "Biribiltze",
-    "roundingRequiredError": "Elementuek guztizkoa batu behar dute. Mantendu biribiltze-lerroa edo editatu gastua eskuz.",
-    "subtractRoundingAsItem": "Kendu {amount} biribiltze gisa"
+    "subtractRoundingAsItem": "Kendu {amount} biribiltze gisa",
+    "addOtherAsItem": "Gehitu {amount} Bestelakoa gisa",
+    "largeGapNote": "Hori biribiltze hutsa baino gehiago da: egiaztatu atalak ordainagiriarekin. Aukeratu zein guztizko den zuzena, edo zuzendu edizio-inprimakian.",
+    "otherExcessItemTitle": "Bestelakoa (soberakina)",
+    "subtractOtherExcessAsItem": "Kendu {amount} Bestelakoa (soberakina) gisa",
+    "itemsTotalNote": "Gastuaren zenbatekoa atalen guztizkoa izango da.",
+    "sourceOfTruth": "Zein guztizko da zuzena?",
+    "useExpenseTotal": "Ordainagiriaren guztizkoa {total}",
+    "useItemsTotal": "Atalen guztizkoa {items}"
   },
   "Feedback": {
     "navigationLabel": "Iritzia",

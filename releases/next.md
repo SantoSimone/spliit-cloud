@@ -23,6 +23,7 @@ who is affected, and the exact migration steps.
 - Optional dedicated OCR backend for receipt scans: set `AI_OCR_PROVIDER=ocrspace` (plus `AI_OCRSPACE_API_KEY`) to extract receipt text via OCR.space and structure it with a fast text-only model call instead of the vision LLM, with automatic fallback to the vision scan when OCR fails. Scans that find nothing now say so explicitly and keep the photo attached for manual entry. (`TBD` by @TBD)
 - Scan receipts from PDFs and documents: AI receipt scan now accepts PDF invoices plus TXT, CSV, DOCX, and ODT files alongside photos. Digital documents extract their text directly; scanned-image PDFs fall back to OCR or the vision model. (`TBD` by @TBD)
 - Receipt line items now render as a structured list with line totals: the AI scan preview and saved expenses share the same rows, with a `qty × unit price` sub-line only when the quantity isn't 1 and a show-more toggle for long receipts. (`TBD` by @TBD)
+- Clearer receipt total mismatches: when scanned items don't add up to the receipt total, the preview asks which total is correct — cent-size gaps offer the choice immediately (receipt total preselected, with a "Rounding" line), while larger gaps warn they look bigger than rounding and offer an explicit "Other" (or "Other (excess)") line instead. (`TBD` by @TBD)
 
 ### 🐛 Bug fixes
 

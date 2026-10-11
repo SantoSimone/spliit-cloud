@@ -3554,8 +3554,15 @@
     "itemsGapMismatch": "Artiklarna uppgår till {items}, men totalsumman på kvittot är {total} (differens: {gap}).",
     "addRoundingAsItem": "Lägg till avrundning på {amount}",
     "roundingItemTitle": "Avrundning",
-    "roundingRequiredError": "Artiklarna måste uppgå till totalsumman. Behåll avrundningsraden eller redigera utgiften manuellt.",
-    "subtractRoundingAsItem": "Dra av avrundning på {amount}"
+    "subtractRoundingAsItem": "Dra av avrundning på {amount}",
+    "addOtherAsItem": "Lägg till övrigt på {amount}",
+    "largeGapNote": "Det här är mer än avrundning — kontrollera artiklarna mot kvittot. Välj vilken summa som stämmer, eller rätta till det i redigeringsformuläret.",
+    "otherExcessItemTitle": "Övrigt (överskott)",
+    "subtractOtherExcessAsItem": "Dra av övrigt (överskott) på {amount}",
+    "itemsTotalNote": "Utgiftsbeloppet sätts till artikelsumman.",
+    "sourceOfTruth": "Vilken summa stämmer?",
+    "useExpenseTotal": "Totalsumman på kvittot {total}",
+    "useItemsTotal": "Artikelsumma {items}"
   },
   "Feedback": {
     "navigationLabel": "Återkoppling",

@@ -3559,8 +3559,15 @@
     "itemsGapMismatch": "آئٹمز کا مجموعہ {items} ہے، لیکن رسید کا کل {total} ہے (فرق: {gap})۔",
     "addRoundingAsItem": "{amount} راؤنڈنگ شامل کریں",
     "roundingItemTitle": "راؤنڈنگ",
-    "roundingRequiredError": "آئٹمز کا مجموعہ کل رقم کے برابر ہونا چاہیے۔ راؤنڈنگ لائن رکھیں یا خرچ میں دستی طور پر ترمیم کریں۔",
-    "subtractRoundingAsItem": "{amount} راؤنڈنگ کم کریں"
+    "subtractRoundingAsItem": "{amount} راؤنڈنگ کم کریں",
+    "addOtherAsItem": "{amount} دیگر کے طور پر شامل کریں",
+    "largeGapNote": "یہ راؤنڈنگ سے بڑا فرق ہے — آئٹمز کو رسید سے ملا کر دیکھیں۔ منتخب کریں کہ کون سا کل درست ہے، یا ترمیمی فارم میں درست کریں۔",
+    "otherExcessItemTitle": "دیگر (اضافی)",
+    "subtractOtherExcessAsItem": "{amount} دیگر (اضافی) کے طور پر کم کریں",
+    "itemsTotalNote": "خرچ کی رقم آئٹمز کے مجموعے کے برابر رکھی جاتی ہے۔",
+    "sourceOfTruth": "کون سا کل درست ہے؟",
+    "useExpenseTotal": "رسید کا کل {total}",
+    "useItemsTotal": "آئٹمز کا مجموعہ {items}"
   },
   "Feedback": {
     "navigationLabel": "رائے",

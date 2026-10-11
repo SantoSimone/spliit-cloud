@@ -3641,8 +3641,15 @@
     "itemsGapMismatch": "مجموع العناصر {items}، لكن إجمالي الإيصال {total} (الفرق: {gap}).",
     "addRoundingAsItem": "إضافة تقريب بمبلغ {amount}",
     "roundingItemTitle": "التقريب",
-    "roundingRequiredError": "يجب أن يساوي مجموع العناصر الإجمالي. أبقِ سطر التقريب أو عدّل المصروف يدويًا.",
-    "subtractRoundingAsItem": "طرح تقريب بمبلغ {amount}"
+    "subtractRoundingAsItem": "طرح تقريب بمبلغ {amount}",
+    "addOtherAsItem": "إضافة أخرى بمبلغ {amount}",
+    "largeGapNote": "هذا الفرق أكبر من التقريب — قارن العناصر بالإيصال. اختر الإجمالي الصحيح، أو صحّحه في نموذج التعديل.",
+    "otherExcessItemTitle": "أخرى (زائدة)",
+    "subtractOtherExcessAsItem": "طرح أخرى (زائدة) بمبلغ {amount}",
+    "itemsTotalNote": "يُضبط مبلغ المصروف على مجموع العناصر.",
+    "sourceOfTruth": "ما الإجمالي الصحيح؟",
+    "useExpenseTotal": "إجمالي الإيصال {total}",
+    "useItemsTotal": "مجموع العناصر {items}"
   },
   "Feedback": {
     "navigationLabel": "الملاحظات",

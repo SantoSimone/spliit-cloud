@@ -3583,8 +3583,15 @@
     "itemsGapMismatch": "Gli elementi ammontano a {items}, ma il totale dello scontrino è {total} (differenza: {gap}).",
     "addRoundingAsItem": "Aggiungi {amount} di arrotondamento",
     "roundingItemTitle": "Arrotondamento",
-    "roundingRequiredError": "Gli elementi devono corrispondere al totale. Mantieni la riga di arrotondamento o modifica la spesa manualmente.",
-    "subtractRoundingAsItem": "Sottrai {amount} di arrotondamento"
+    "subtractRoundingAsItem": "Sottrai {amount} di arrotondamento",
+    "addOtherAsItem": "Aggiungi {amount} come Altro",
+    "largeGapNote": "È più di un arrotondamento: controlla le voci con lo scontrino. Scegli quale totale è corretto, oppure correggilo nel modulo di modifica.",
+    "otherExcessItemTitle": "Altro (eccedenza)",
+    "subtractOtherExcessAsItem": "Sottrai {amount} come Altro (eccedenza)",
+    "itemsTotalNote": "L'importo della spesa corrisponderà al totale delle voci.",
+    "sourceOfTruth": "Quale totale è corretto?",
+    "useExpenseTotal": "Totale dello scontrino {total}",
+    "useItemsTotal": "Totale delle voci {items}"
   },
   "Feedback": {
     "navigationLabel": "Segnalazioni",

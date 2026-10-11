@@ -3630,8 +3630,15 @@
     "itemsGapMismatch": "De artikelen tellen op tot {items}, maar het totaal op de bon is {total} (verschil: {gap}).",
     "addRoundingAsItem": "Afronding van {amount} toevoegen",
     "roundingItemTitle": "Afronding",
-    "roundingRequiredError": "De artikelen moeten optellen tot het totaal. Behoud de afrondingsregel of bewerk de uitgave handmatig.",
-    "subtractRoundingAsItem": "Afronding van {amount} aftrekken"
+    "subtractRoundingAsItem": "Afronding van {amount} aftrekken",
+    "addOtherAsItem": "Overig van {amount} toevoegen",
+    "largeGapNote": "Dit is meer dan afronding — controleer de artikelen aan de hand van de bon. Kies welk totaal klopt, of corrigeer het in het bewerkformulier.",
+    "otherExcessItemTitle": "Overig (overschot)",
+    "subtractOtherExcessAsItem": "Overig (overschot) van {amount} aftrekken",
+    "itemsTotalNote": "Het uitgavebedrag wordt ingesteld op het artikeltotaal.",
+    "sourceOfTruth": "Welk totaal klopt?",
+    "useExpenseTotal": "Totaal op de bon {total}",
+    "useItemsTotal": "Artikeltotaal {items}"
   },
   "Feedback": {
     "navigationLabel": "Terugkoppeling",

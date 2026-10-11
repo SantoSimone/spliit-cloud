@@ -3585,8 +3585,15 @@
     "itemsGapMismatch": "סכום הפריטים הוא {items}, אבל הסכום הכולל בקבלה הוא {total} (הפרש: {gap}).",
     "addRoundingAsItem": "הוסיפו עיגול של {amount}",
     "roundingItemTitle": "עיגול",
-    "roundingRequiredError": "סכום הפריטים חייב להיות שווה לסכום הכולל. השאירו את שורת העיגול או ערכו את ההוצאה ידנית.",
-    "subtractRoundingAsItem": "החסירו עיגול של {amount}"
+    "subtractRoundingAsItem": "החסירו עיגול של {amount}",
+    "addOtherAsItem": "הוסיפו {amount} כפריט אחר",
+    "largeGapNote": "זה יותר מעיגול — בדקו את הפריטים מול הקבלה. בחרו איזה סכום נכון, או תקנו זאת בטופס העריכה.",
+    "otherExcessItemTitle": "אחר (עודף)",
+    "subtractOtherExcessAsItem": "החסירו {amount} כפריט אחר (עודף)",
+    "itemsTotalNote": "סכום ההוצאה ייקבע לפי סכום הפריטים.",
+    "sourceOfTruth": "איזה סכום נכון?",
+    "useExpenseTotal": "הסכום הכולל בקבלה {total}",
+    "useItemsTotal": "סכום הפריטים {items}"
   },
   "Feedback": {
     "navigationLabel": "משוב",

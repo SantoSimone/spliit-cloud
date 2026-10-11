@@ -3634,8 +3634,15 @@
     "itemsGapMismatch": "Los artículos suman {items}, pero el total del recibo es {total} (diferencia: {gap}).",
     "addRoundingAsItem": "Añadir {amount} de redondeo",
     "roundingItemTitle": "Redondeo",
-    "roundingRequiredError": "Los artículos deben sumar el total. Mantén la línea de redondeo o edita el gasto manualmente.",
-    "subtractRoundingAsItem": "Restar {amount} de redondeo"
+    "subtractRoundingAsItem": "Restar {amount} de redondeo",
+    "addOtherAsItem": "Añadir {amount} como Otros",
+    "largeGapNote": "Esto es más que un redondeo: comprueba los artículos con el recibo. Elige qué total es correcto o corrígelo en el formulario de edición.",
+    "otherExcessItemTitle": "Otros (exceso)",
+    "subtractOtherExcessAsItem": "Restar {amount} como Otros (exceso)",
+    "itemsTotalNote": "El importe del gasto será el total de los artículos.",
+    "sourceOfTruth": "¿Qué total es correcto?",
+    "useExpenseTotal": "Total del recibo {total}",
+    "useItemsTotal": "Total de los artículos {items}"
   },
   "Feedback": {
     "navigationLabel": "Comentarios",
