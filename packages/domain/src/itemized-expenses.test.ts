@@ -833,3 +833,18 @@ describe('getItemizedFormMinorTotals', () => {
     ).toBe(0)
   })
 })
+
+describe('isRoundingSizeGap', () => {
+  it('accepts gaps in the last two minor-unit digits, rejects larger ones', async () => {
+    const { isRoundingSizeGap } = await import('./itemized-expenses')
+
+    // $0.99 / ¥99 and below: plausibly rounding.
+    for (const gap of [0, 1, -1, 50, -99, 99]) {
+      expect(isRoundingSizeGap(gap)).toBe(true)
+    }
+    // $1.00 and above: a real mismatch, not rounding.
+    for (const gap of [100, -100, 500, -2500]) {
+      expect(isRoundingSizeGap(gap)).toBe(false)
+    }
+  })
+})

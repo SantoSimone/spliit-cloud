@@ -213,6 +213,16 @@ export function gapMinorAsMajor(gapMinor: number, currency: Currency): number {
 }
 
 /**
+ * Whether a scan gap fits in the last two digits of the minor-unit amount —
+ * `xx.yy → yy` for decimal currencies, `xxyy → yy` for zero-decimal ones — and
+ * can therefore plausibly be rounding (per-line minor-unit rounding, an
+ * excluded tax line). Anything larger is a real mismatch, not rounding.
+ */
+export function isRoundingSizeGap(gapMinor: number): boolean {
+  return Math.abs(gapMinor) <= 99
+}
+
+/**
  * Exact (non-truncated) paidFor shares from items + filler. Used by getBalances
  * so multi-expense totals don't inherit per-expense remainder tie-breaks sealed
  * into stored paidFor cents.
