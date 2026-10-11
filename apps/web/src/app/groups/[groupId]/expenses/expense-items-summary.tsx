@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { getCurrency, type Currency } from '@/lib/currency'
 import { formatCurrency } from '@/lib/utils'
 import type { SplitMode } from '@spliit/domain'
+import { formatQuantity, quantityFromStored } from '@spliit/domain'
 
 import {
   getBreakdownNames,
@@ -51,9 +52,10 @@ type Item = {
   splitMode?: string
   paidFor?: Array<{ ledgerParticipantId: string; shares: number }>
   /**
-   * Minor-unit unit price and quantity persisted on the item. Optional so
-   * legacy callers (tests, cached shapes without the fields) keep working —
-   * rows without both simply omit the qty sub-line.
+   * Minor-unit unit price and stored milli-unit quantity (see quantity.ts)
+   * persisted on the item. Optional so legacy callers (tests, cached shapes
+   * without the fields) keep working — rows without both simply omit the qty
+   * sub-line.
    */
   unitPrice?: number
   quantity?: number
@@ -189,9 +191,9 @@ export function ExpenseItemsSummary({
               <>
                 {item.unitPrice != null &&
                 item.quantity != null &&
-                item.quantity !== 1 ? (
+                quantityFromStored(item.quantity) !== 1 ? (
                   <div className="min-w-0 truncate text-xs leading-5 text-muted-foreground tabular-nums">
-                    {`${item.quantity} × ${formatCurrency(currency, item.unitPrice, locale)}`}
+                    {`${formatQuantity(quantityFromStored(item.quantity))} × ${formatCurrency(currency, item.unitPrice, locale)}`}
                   </div>
                 ) : null}
                 {names.length > 0 ? (

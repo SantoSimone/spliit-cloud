@@ -1,4 +1,7 @@
-import { spliitGroupExportManifestSchema } from '@spliit/domain/export-manifest'
+import {
+  spliitGroupExportManifestSchema,
+  type SpliitGroupExportManifest,
+} from '@spliit/domain/export-manifest'
 
 import { createExportBundleStream } from './archive'
 import {
@@ -24,9 +27,9 @@ export function createGroupExportArtifact(
 ): ExportArtifact {
   const exportedAt = options.exportedAt.toISOString()
   const { snapshot, documents } = createGroupExportSnapshot(group)
-  const manifest = {
+  const manifest: SpliitGroupExportManifest = {
     format: 'spliit.cloud/export' as const,
-    version: 1 as const,
+    version: 2 as const,
     scope: { type: 'GROUP' as const, sourceId: group.id },
     exportedAt,
     ...snapshot,

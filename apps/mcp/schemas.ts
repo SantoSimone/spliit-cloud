@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { isValidDisplayShare } from '@spliit/domain'
+import { isValidDisplayShare, isValidMajorQuantity } from '@spliit/domain'
 
 const splitModeSchema = z.enum([
   'EVENLY',
@@ -134,7 +134,8 @@ export const previewSchema = z.object({
       lineId: z.string(),
       title: z.string(),
       unitPriceMinor: z.number().int(),
-      quantity: z.number().int().positive(),
+      // Major units for display (fractional allowed for weighed items).
+      quantity: z.number().refine((value) => isValidMajorQuantity(value)),
       amountMinor: z.number().int(),
       split: previewSplitSchema,
     }),

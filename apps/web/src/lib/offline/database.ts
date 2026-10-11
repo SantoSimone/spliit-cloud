@@ -1,5 +1,7 @@
 import { Dexie, type Table } from 'dexie'
 
+import { QUANTITY_SCALE } from '@spliit/domain'
+
 import {
   OFFLINE_DB_NAME,
   OFFLINE_DB_VERSION,
@@ -49,6 +51,11 @@ import { OfflineStorageError, isQuotaError } from './errors'
  * intentionally a no-op: the outbox starts empty and every v1 table is retained
  * untouched until fresh commits replace it — the upgrade never deletes user
  * data as a shortcut.
+ *
+ * Version 3 scales queued `pendingExpenses` item quantities to milli-units (see
+ * quantity.ts): pre-upgrade rows carry whole-unit quantities that would
+ * otherwise flush as 1000× too small. Amounts are invariant for whole-unit
+ * quantities and stay untouched.
  */
 export const OFFLINE_DB_STORES_V1: { [tableName: string]: string } = {
   controls: '&namespace',
@@ -85,7 +92,20 @@ export class OfflineDexieDatabase extends Dexie {
     this.version(2)
       .stores(OFFLINE_DB_STORES)
       .upgrade(() => {})
-    if (OFFLINE_DB_VERSION !== 2) {
+    this.version(3)
+      .stores(OFFLINE_DB_STORES)
+      .upgrade((tx) =>
+        tx
+          .table<PendingExpenseRecord>('pendingExpenses')
+          .toCollection()
+          .modify((row) => {
+            row.expense.items = (row.expense.items ?? []).map((item) => ({
+              ...item,
+              quantity: item.quantity * QUANTITY_SCALE,
+            }))
+          }),
+      )
+    if (OFFLINE_DB_VERSION !== 3) {
       throw new Error(
         'OfflineDexieDatabase version declarations do not match OFFLINE_DB_VERSION',
       )

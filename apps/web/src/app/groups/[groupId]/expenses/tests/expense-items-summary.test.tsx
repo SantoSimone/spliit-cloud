@@ -102,14 +102,24 @@ describe('ExpenseItemsSummary', () => {
             title: 'Milk',
             amount: 4700,
             unitPrice: 4700,
-            quantity: 1,
+            // Stored milli-units: 1000 = 1.
+            quantity: 1000,
           },
           {
             id: 'item-2',
             title: 'Bread',
             amount: 3900,
             unitPrice: 1950,
-            quantity: 2,
+            // Stored milli-units: 2000 = 2.
+            quantity: 2000,
+          },
+          {
+            id: 'item-4',
+            title: 'Cheese',
+            amount: 375,
+            unitPrice: 250,
+            // Stored milli-units: 1500 = 1.5.
+            quantity: 1500,
           },
           { id: 'item-3', title: 'Legacy', amount: 1000 },
         ]}
@@ -118,9 +128,10 @@ describe('ExpenseItemsSummary', () => {
       />,
     )
 
-    // Minor-unit stored prices: only the qty-2 row shows its quantity.
+    // Minor-unit stored prices: only non-single-quantity rows show theirs.
     expect(screen.queryByText('1 × $47.00')).not.toBeInTheDocument()
     expect(screen.getByText('2 × $19.50')).toBeInTheDocument()
+    expect(screen.getByText('1.5 × $2.50')).toBeInTheDocument()
   })
 
   it('expands an item to reveal per-person amounts that sum to the total', async () => {

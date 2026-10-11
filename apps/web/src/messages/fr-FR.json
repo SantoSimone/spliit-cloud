@@ -1422,7 +1422,6 @@
     "duplicateParticipant": "Un autre payeur est déjà sélectionné.",
     "sharesInvalid": "Les parts doivent être comprises entre 0,01 et 1 000 000 avec deux décimales au maximum.",
     "itemTitleRequired": "Le nom de l’élément est obligatoire.",
-    "itemQuantityMin1": "La quantité de l’élément doit être d’au moins 1.",
     "rowErrorsHeading": "Corrigez ces parts :",
     "invalidWallTime": "Cette heure n’existe pas à la date sélectionnée dans ce fuseau horaire.",
     "proportionalUnassignedItems": "Attribuez chaque article à au moins un participant pour répartir le reste proportionnellement, ou utilisez une répartition personnalisée.",
@@ -1430,7 +1429,9 @@
     "proportionalInvalidRatios": "Les sous-totaux des articles de certains participants sont de signes opposés, le reste ne peut donc pas être réparti proportionnellement. Corrigez les articles ou utilisez une répartition personnalisée.",
     "max32": "Entrez au maximum 32 caractères.",
     "invalidEmoji": "Entrez un seul emoji.",
-    "invalidColor": "Entrez une couleur hexadécimale valide, par exemple #1A2B3C."
+    "invalidColor": "Entrez une couleur hexadécimale valide, par exemple #1A2B3C.",
+    "itemQuantityMaxDecimals": "La quantité de l'élément accepte trois décimales au maximum.",
+    "itemQuantityPositive": "La quantité de l'élément doit être supérieure à zéro."
   },
   "Categories": {
     "search": "Rechercher une catégorie…",
@@ -4782,5 +4783,10 @@
     "errorTitle": "Une erreur s'est produite",
     "errorDescription": "Une erreur inattendue s'est produite. Veuillez réessayer ou retourner à l'accueil.",
     "retry": "Réessayer"
+  },
+  "ClientUpgrade": {
+    "description": "Cette version de l'application n'est plus à jour. Actualisez pour obtenir la dernière version et réessayez.",
+    "refresh": "Actualiser",
+    "title": "Mise à jour de l'application disponible"
   }
 }

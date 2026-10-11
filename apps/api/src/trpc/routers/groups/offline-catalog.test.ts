@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import '../../../test/mocks'
 import { offlineTxOptions } from '../../../lib/api/offline'
+import '../../../test/mocks'
 import { prisma$Transaction, prismaMock } from '../../../test/state'
 import { authState } from '../../../test/state'
 import { createTRPCContext } from '../../init'
+import { OFFLINE_CONTRACT_VERSION } from '../../outputs/offline'
 import { groupsRouter } from './index'
 
 function makeCaller(accountId: string) {
@@ -104,7 +105,7 @@ describe('groups.offlineCatalog', () => {
     const result = await makeCaller('acct-self').offlineCatalog()
 
     expect(result).toEqual({
-      schemaVersion: 2,
+      schemaVersion: OFFLINE_CONTRACT_VERSION,
       accountId: 'acct-self',
       capturedAt: expect.any(Date),
       groups: [],
@@ -186,10 +187,10 @@ describe('groups.offlineCatalog', () => {
     const tokens = new Map(
       result.groups.map((g) => [g.overview.id, g.revision]),
     )
-    expect(tokens.get('grp-a')).toBe('o2.c7.v3')
-    expect(tokens.get('grp-b')).toBe('o2.c7.v3')
+    expect(tokens.get('grp-a')).toBe('o3.c7.v3')
+    expect(tokens.get('grp-b')).toBe('o3.c7.v3')
     // No preference row: viewer part falls back to 0, content part matches.
-    expect(tokens.get('grp-friend')).toBe('o2.c7.v0')
+    expect(tokens.get('grp-friend')).toBe('o3.c7.v0')
 
     const hidden = result.groups.find((g) => g.overview.id === 'grp-a')!
     expect(hidden.overview.preference.hidden).toBe(true)

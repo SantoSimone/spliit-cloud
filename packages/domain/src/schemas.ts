@@ -17,6 +17,13 @@ import {
   getItemizedFormMinorTotals,
   itemsExceedExpenseAmount,
 } from './itemized-expenses'
+import {
+  CLIENT_UPGRADE_REQUIRED_ISSUE,
+  isLegacyMajorQuantityItem,
+  isValidMajorQuantity,
+  lineAmountMinorFromMajor,
+  lineAmountMinorFromStored,
+} from './quantity'
 import { recurrenceConfigSchema } from './recurring-expenses'
 import { MAX_STORED_SHARES, getDisplayShareErrorKey } from './shares'
 import {
@@ -24,7 +31,7 @@ import {
   timeZoneSchema,
   toSecondPrecision,
 } from './timezones'
-import { amountAsDecimal } from './utils'
+import { amountAsDecimal, amountAsMinorUnits } from './utils'
 
 const groupFormFields = {
   name: z.string().min(2, { error: 'min2' }).max(50, { error: 'max50' }),
@@ -479,7 +486,13 @@ export const expenseItemFormInputSchema = z
       .refine((v) => Number.isFinite(v), 'invalidNumber')
       .refine((v) => v !== 0, 'amountNotZero')
       .refine((v) => Math.abs(v) <= 10_000_000, 'amountTenMillion'),
-    quantity: z.coerce.number().int().min(1, { error: 'itemQuantityMin1' }),
+    quantity: z.coerce
+      .number()
+      .refine((v) => Number.isFinite(v), 'invalidNumber')
+      // Form quantities are major units and may be fractional (1.5 kg);
+      // stored/API quantities are milli-units (see quantity.ts).
+      .refine((v) => v > 0, 'itemQuantityPositive')
+      .refine((v) => isValidMajorQuantity(v), 'itemQuantityMaxDecimals'),
     paidFor: z
       .array(itemFormPaidForRowSchema)
       .min(0)
@@ -520,12 +533,19 @@ export const expenseItemApiSchema = z
       .int()
       .refine((value) => value !== 0, 'amountNotZero')
       .describe('Integer minor units of the expense currency.'),
-    quantity: z.number().int().min(1, { error: 'itemQuantityMin1' }),
+    quantity: z
+      .number()
+      .int()
+      // Stored milli-units (see quantity.ts): 1 = 0.001 items, so any
+      // positive stored quantity is valid.
+      .min(1, { error: 'itemQuantityPositive' }),
     amount: z
       .number()
       .int()
       .refine((value) => value !== 0, 'amountNotZero')
-      .describe('Integer minor units. Must equal unitPrice * quantity.'),
+      .describe(
+        'Integer minor units. Must equal lineAmountMinorFromStored(unitPrice, quantity).',
+      ),
     paidFor: z
       .array(itemApiPaidForRowSchema)
       .min(0)
@@ -548,11 +568,19 @@ export const expenseItemApiSchema = z
         })
       }
     })
-    if (item.amount !== item.unitPrice * item.quantity) {
+    if (
+      item.amount !== lineAmountMinorFromStored(item.unitPrice, item.quantity)
+    ) {
+      // Pre-milli-unit clients send whole-unit quantities with the legacy
+      // `unitPrice * quantity` amount. That signature is unambiguous (the
+      // two formulas never coincide), so answer with an actionable upgrade
+      // signal instead of a cryptic amount error.
       ctx.addIssue({
         code: 'custom',
-        message: 'amountSum',
-        path: ['amount'],
+        message: isLegacyMajorQuantityItem(item)
+          ? CLIENT_UPGRADE_REQUIRED_ISSUE
+          : 'amountSum',
+        path: isLegacyMajorQuantityItem(item) ? ['quantity'] : ['amount'],
       })
     }
     validateItemShareTotal(
@@ -1051,6 +1079,37 @@ export function createExpenseFormInputSchema(fallbackCurrency: Currency) {
     })
     .superRefine((expense, ctx) => {
       validateFormItemizedTotals(expense, ctx, fallbackCurrency)
+      // A penny price times a tiny quantity rounds to a zero line amount,
+      // which the API rejects with amountNotZero. Flag it inline (with the
+      // resolved input currency) instead of failing cryptically on save.
+      const inputCurrency = resolveFormInputCurrency(
+        expense.originalCurrency,
+        fallbackCurrency,
+      )
+      ;(expense.items ?? []).forEach((item, index) => {
+        // Skip rows the field refines already flag (non-finite, zero, or
+        // negative inputs) to avoid duplicate issues on one row.
+        if (
+          !Number.isFinite(item.unitPrice) ||
+          !Number.isFinite(item.quantity) ||
+          item.unitPrice === 0 ||
+          item.quantity <= 0
+        ) {
+          return
+        }
+        if (
+          lineAmountMinorFromMajor(
+            amountAsMinorUnits(item.unitPrice, inputCurrency),
+            item.quantity,
+          ) === 0
+        ) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'amountNotZero',
+            path: ['items', index, 'quantity'],
+          })
+        }
+      })
     })
 }
 

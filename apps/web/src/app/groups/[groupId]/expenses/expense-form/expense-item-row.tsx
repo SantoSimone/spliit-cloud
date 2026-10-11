@@ -21,6 +21,7 @@ import type {
   ExpenseFormItemValues,
   SplitMode,
 } from '@spliit/domain'
+import { amountAsMinorUnits, lineAmountMinorFromMajor } from '@spliit/domain'
 
 import {
   getBreakdownNames,
@@ -31,7 +32,7 @@ import { AmountInput } from './amount-input'
 import {
   amountPlaceholder,
   enforceCurrencyPattern,
-  enforceIntegerPattern,
+  enforceQuantityPattern,
 } from './currency-utils'
 import { expenseTabPriority } from './focus-navigation'
 
@@ -109,7 +110,10 @@ export function ExpenseItemRow({
   const splitMode = (
     isFiller ? item.splitMode : item.splitMode
   ) as ItemSplitMode
-  const total = Number(unitPrice) * Number(quantity)
+  const totalMinor = lineAmountMinorFromMajor(
+    amountAsMinorUnits(Number(unitPrice) || 0, groupCurrency),
+    Number(quantity) || 0,
+  )
   const participantNameMap = new Map(
     group.participants.map((p) => [p.id, p.name]),
   )
@@ -147,7 +151,7 @@ export function ExpenseItemRow({
     locale,
     true,
   )
-  const totalDisplay = formatCurrency(groupCurrency, total, locale, true)
+  const totalDisplay = formatCurrency(groupCurrency, totalMinor, locale)
 
   const displayOther = t('items.other')
   const displayActionEdit = t('items.modalTitle')
@@ -277,14 +281,21 @@ export function ExpenseItemRow({
                         className="h-9 ps-7 pe-2 text-end tabular-nums"
                         type="text"
                         disabled={readOnly}
-                        value={(field.value as number) ?? ''}
-                        inputMode="numeric"
-                        step={1}
+                        // Keep raw string (incl. trailing ".") like unit
+                        // price: whole numbers stay whole, decimals survive
+                        // only when the user types a separator.
+                        value={localizeCurrencyInput(
+                          typeof field.value === 'string' ||
+                            typeof field.value === 'number'
+                            ? String(field.value)
+                            : '',
+                          locale,
+                        )}
+                        inputMode="decimal"
+                        step="any"
                         onChange={(event) =>
                           field.onChange(
-                            Number(
-                              enforceIntegerPattern(event.target.value, locale),
-                            ) || 0,
+                            enforceQuantityPattern(event.target.value, locale),
                           )
                         }
                         onFocus={(event) => event.target.select()}

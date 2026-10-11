@@ -50,6 +50,9 @@ import {
   computePaidForFromItems,
   getItemizedFormMinorTotals,
   itemsExceedExpenseAmount,
+  lineAmountMinorFromMajor,
+  lineAmountMinorFromStored,
+  quantityToStored,
 } from '@spliit/domain'
 
 import {
@@ -361,13 +364,14 @@ export function ExpenseItemsCard({
           Number(item.unitPrice) || 0,
           groupCurrency,
         )
-        const quantity = Math.max(1, Math.round(Number(item.quantity) || 1))
+        // Stored milli-units (see quantity.ts), matching save serialization.
+        const quantity = quantityToStored(Number(item.quantity) || 0)
         return {
           id: item.id,
           title: item.title,
           unitPrice,
           quantity,
-          amount: unitPrice * quantity,
+          amount: lineAmountMinorFromStored(unitPrice, quantity),
           splitMode: item.splitMode,
           paidFor: toApiRows(item.paidFor, item.splitMode),
         }
@@ -577,10 +581,14 @@ export function ExpenseItemsCard({
                             <span className="text-sm font-medium tabular-nums">
                               {formatCurrency(
                                 groupCurrency,
-                                Number(fillerItem.unitPrice) *
-                                  Number(fillerItem.quantity),
+                                lineAmountMinorFromMajor(
+                                  amountAsMinorUnits(
+                                    Number(fillerItem.unitPrice) || 0,
+                                    groupCurrency,
+                                  ),
+                                  Number(fillerItem.quantity) || 0,
+                                ),
                                 locale,
-                                true,
                               )}
                             </span>
                           </div>
@@ -667,11 +675,16 @@ export function ExpenseItemsCard({
                             itemsWithFiller.reduce(
                               (s, item) =>
                                 s +
-                                Number(item.unitPrice) * Number(item.quantity),
+                                lineAmountMinorFromMajor(
+                                  amountAsMinorUnits(
+                                    Number(item.unitPrice) || 0,
+                                    groupCurrency,
+                                  ),
+                                  Number(item.quantity) || 0,
+                                ),
                               0,
                             ),
                             locale,
-                            true,
                           )}
                         </span>
                       </div>

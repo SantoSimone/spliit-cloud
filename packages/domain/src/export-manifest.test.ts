@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  migrateGroupExportManifestToV2,
   spliitAccountExportManifestSchema,
   spliitGroupExportManifestSchema,
   spliitGroupExportSnapshotSchema,
@@ -59,11 +60,23 @@ describe('spliitGroupExportManifestSchema', () => {
     })
   })
 
-  it('rejects unsupported versions and invalid document checksums', () => {
-    expect(() =>
+  it('accepts versions 1 and 2 but rejects unsupported versions', () => {
+    expect(
+      spliitGroupExportManifestSchema.parse({
+        ...minimalManifest,
+        version: 1,
+      }).version,
+    ).toBe(1)
+    expect(
       spliitGroupExportManifestSchema.parse({
         ...minimalManifest,
         version: 2,
+      }).version,
+    ).toBe(2)
+    expect(() =>
+      spliitGroupExportManifestSchema.parse({
+        ...minimalManifest,
+        version: 3,
       }),
     ).toThrow()
 
@@ -184,5 +197,64 @@ describe('spliitGroupExportManifestSchema', () => {
         ],
       }),
     ).toMatchObject({ orphanDocuments: [{ status: 'OMITTED', path: null }] })
+  })
+
+  it('migrates v1 whole-unit quantities to v2 milli-units, leaving amounts untouched', () => {
+    const parsed = spliitGroupExportManifestSchema.parse({
+      ...minimalManifest,
+      expenses: [
+        {
+          sourceId: 'exp-1',
+          createdAt: '2026-08-08T12:00:00.000Z',
+          expenseDate: '2026-08-08T12:00:00.000Z',
+          expenseTimeZone: 'UTC',
+          title: 'Produce',
+          categoryId: 'groceries',
+          amount: 500,
+          originalAmount: null,
+          originalCurrency: null,
+          conversionRate: null,
+          conversionSource: null,
+          paidBySplitMode: 'EVENLY' as const,
+          splitMode: 'ITEMIZED' as const,
+          version: 1,
+          createdByParticipantId: null,
+          recurringSeriesId: null,
+          recurrenceSequence: null,
+          notes: null,
+          paidByList: [],
+          paidFor: [],
+          items: [
+            {
+              sourceId: 'item-1',
+              title: 'Apples',
+              unitPrice: 250,
+              // v1 whole units (fractional quantities did not exist yet).
+              quantity: 2,
+              amount: 500,
+              splitMode: 'EVENLY' as const,
+              paidFor: [],
+              notes: null,
+              createdAt: null,
+            },
+          ],
+          itemizedRemainder: null,
+          documents: [],
+          comments: [],
+        },
+      ],
+    })
+
+    const migrated = migrateGroupExportManifestToV2(parsed)
+    expect(migrated.version).toBe(2)
+    // 2 whole units → 2000 milli-units; the $5.00 line amount is invariant.
+    expect(migrated.expenses[0]?.items[0]).toMatchObject({
+      quantity: 2000,
+      amount: 500,
+      unitPrice: 250,
+    })
+
+    // v2 manifests pass through unchanged.
+    expect(migrateGroupExportManifestToV2(migrated)).toBe(migrated)
   })
 })

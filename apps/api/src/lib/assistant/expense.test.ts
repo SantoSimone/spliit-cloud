@@ -261,7 +261,8 @@ describe('assistant expense normalization', () => {
       expect.objectContaining({
         title: 'Shared starter',
         unitPrice: 500,
-        quantity: 2,
+        // Stored milli-units: input quantity 2.
+        quantity: 2000,
         amount: 1000,
         splitMode: 'EVENLY',
       }),
@@ -288,6 +289,45 @@ describe('assistant expense normalization', () => {
     expect(
       prepared.expense.paidFor.reduce((sum, row) => sum + row.shares, 0),
     ).toBe(3400)
+  })
+
+  it('scales fractional quantities to milli-units and previews major units', async () => {
+    mockAssistantGroup()
+
+    const prepared = await prepareAssistantExpense(
+      {
+        groupId: 'group-a',
+        amount: '8',
+        title: 'Produce',
+        items: [{ title: 'Apples', unitPrice: '2', quantity: 1.5 }],
+      },
+      'account-a',
+      {
+        now: new Date('2026-07-28T10:00:00.000Z'),
+        resolveConversion: vi.fn().mockResolvedValue({
+          conversionSource: null,
+          conversionRate: null,
+          originalAmount: null,
+          originalCurrency: null,
+          ledgerAmountMinor: 800,
+          inputAmountMinor: 800,
+        }),
+      },
+    )
+
+    // 1.5 × 200 minor = 300 minor; stored quantity is milli-units.
+    expect(prepared.expense.items).toEqual([
+      expect.objectContaining({
+        title: 'Apples',
+        unitPrice: 200,
+        quantity: 1500,
+        amount: 300,
+      }),
+    ])
+    // The widget preview contract stays major units for display.
+    expect(prepared.preview.items).toEqual([
+      expect.objectContaining({ title: 'Apples', quantity: 1.5 }),
+    ])
   })
 
   it('accepts decimal BY_SHARES weights and stores fixed units', async () => {

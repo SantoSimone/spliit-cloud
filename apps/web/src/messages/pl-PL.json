@@ -1430,7 +1430,6 @@
     "duplicateParticipant": "Inny płatnik jest już wybrany.",
     "sharesInvalid": "Udziały muszą wynosić od 0,01 do 1 000 000 z maksymalnie dwoma miejscami po przecinku.",
     "itemTitleRequired": "Nazwa pozycji jest wymagana.",
-    "itemQuantityMin1": "Liczba pozycji musi wynosić co najmniej 1.",
     "rowErrorsHeading": "Popraw te udziały:",
     "invalidWallTime": "Ta godzina nie istnieje w wybranym dniu w tej strefie czasowej.",
     "proportionalUnassignedItems": "Przypisz każdą pozycję do co najmniej jednego uczestnika, aby podzielić resztę proporcjonalnie, lub użyj własnego podziału.",
@@ -1438,7 +1437,9 @@
     "proportionalInvalidRatios": "Sumy częściowe pozycji niektórych uczestników mają przeciwne znaki, więc reszty nie można podzielić proporcjonalnie. Popraw pozycje lub użyj własnego podziału.",
     "max32": "Wprowadź maksymalnie 32 znaki.",
     "invalidEmoji": "Wprowadź jedno emoji.",
-    "invalidColor": "Wprowadź prawidłowy kolor hex, np. #1A2B3C."
+    "invalidColor": "Wprowadź prawidłowy kolor hex, np. #1A2B3C.",
+    "itemQuantityMaxDecimals": "Ilość pozycji obsługuje maksymalnie 3 miejsca po przecinku.",
+    "itemQuantityPositive": "Ilość pozycji musi być większa od zera."
   },
   "Categories": {
     "search": "Szukaj kategorii…",
@@ -4806,5 +4807,10 @@
     "errorTitle": "Coś poszło nie tak",
     "errorDescription": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie lub wróć na stronę główną.",
     "retry": "Spróbuj ponownie"
+  },
+  "ClientUpgrade": {
+    "description": "Ta wersja aplikacji jest nieaktualna. Odśwież, aby pobrać najnowszą wersję, i spróbuj ponownie.",
+    "refresh": "Odśwież",
+    "title": "Dostępna jest aktualizacja aplikacji"
   }
 }

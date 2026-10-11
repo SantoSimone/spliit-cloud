@@ -16,6 +16,10 @@ import {
   getCurrency,
   itemsExceedExpenseAmount,
   isValidDisplayShare,
+  isValidMajorQuantity,
+  lineAmountMinorFromMajor,
+  quantityFromStored,
+  quantityToStored,
   sharesAsFixedUnits,
   type ExactAmount,
   type Expense,
@@ -92,7 +96,11 @@ const splitSchema = z.discriminatedUnion('mode', [
 const itemSchema = z.object({
   title: z.string().trim().min(1).max(120),
   unitPrice: signedDecimalString,
-  quantity: z.number().int().positive().default(1),
+  // Major-unit quantities (fractional allowed); scaled to milli-units below.
+  quantity: z
+    .number()
+    .refine((value) => isValidMajorQuantity(value))
+    .default(1),
   split: splitSchema.optional(),
 })
 
@@ -500,7 +508,7 @@ export async function prepareAssistantExpense(
       if (unitPrice === 0) {
         inputError(`Item unit price must not be zero: ${item.title}`)
       }
-      const itemAmount = unitPrice * item.quantity
+      const itemAmount = lineAmountMinorFromMajor(unitPrice, item.quantity)
       if (!Number.isSafeInteger(itemAmount)) {
         inputError(`Item amount is too large: ${item.title}`)
       }
@@ -523,7 +531,7 @@ export async function prepareAssistantExpense(
       return {
         title: item.title,
         unitPrice,
-        quantity: item.quantity,
+        quantity: quantityToStored(item.quantity),
         amount: itemAmount,
         splitMode: normalized.splitMode,
         paidFor: normalized.paidFor,
@@ -679,7 +687,8 @@ export async function prepareAssistantExpense(
       lineId: `item-${index + 1}`,
       title: item.title,
       unitPriceMinor: item.unitPrice,
-      quantity: item.quantity,
+      // Preview contract is major units for the widget display.
+      quantity: quantityFromStored(item.quantity),
       amountMinor: item.amount,
       split: {
         mode: item.splitMode,

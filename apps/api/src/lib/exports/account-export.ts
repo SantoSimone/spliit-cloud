@@ -112,7 +112,7 @@ export function createAccountExportArtifact(
       group: selected.source,
       manifest: {
         format: 'spliit.cloud/export',
-        version: 1,
+        version: 2,
         scope: { type: 'GROUP', sourceId: selected.source.id },
         exportedAt,
         ...snapshot,
@@ -176,7 +176,7 @@ export function createAccountExportArtifact(
 
   const accountManifest: SpliitAccountExportManifest = {
     format: 'spliit.cloud/export',
-    version: 1,
+    version: 2,
     scope: { type: 'ACCOUNT', sourceId: source.account.id },
     exportedAt,
     complete: true,

@@ -297,4 +297,55 @@ describe('buildSubmitValues', () => {
     )
     expect(expenseApiSchema.safeParse(result).success).toBe(true)
   })
+
+  it('serializes fractional quantities to milli-units with a rounded line amount', () => {
+    const groupCurrency = getCurrency('USD')!
+    const values: ExpenseFormInputValues = {
+      ...baseValues,
+      amount: 8.75,
+      originalCurrency: null,
+      conversionType: undefined,
+      conversionRate: undefined,
+      paidBySplitMode: 'EVENLY',
+      paidByList: [{ participant: 'p1', shares: 1 }],
+      splitMode: 'ITEMIZED',
+      paidFor: [{ participant: 'p1', shares: 1 }],
+      items: [
+        {
+          id: 'apples',
+          title: 'Apples',
+          unitPrice: 2.5,
+          // 1.5 units × $2.50 = $3.75.
+          quantity: 1.5,
+          splitMode: 'EVENLY',
+          paidFor: [{ participant: 'p1', shares: 1 }],
+        },
+        {
+          id: 'flour',
+          title: 'Flour',
+          unitPrice: 2,
+          // 2.5 units × $2.00 = $5.00.
+          quantity: 2.5,
+          splitMode: 'EVENLY',
+          paidFor: [{ participant: 'p1', shares: 1 }],
+        },
+      ],
+      itemizedRemainder: undefined,
+    }
+
+    expect(
+      createExpenseFormInputSchema(groupCurrency).safeParse(values).success,
+    ).toBe(true)
+
+    const result = buildSubmitValues(values, {
+      groupCurrency,
+      conversionRequired: false,
+    })
+    expect(result.items?.map((item) => item.quantity)).toEqual([1500, 2500])
+    expect(result.items?.map((item) => item.amount)).toEqual([375, 500])
+    expect(result.items?.reduce((sum, item) => sum + item.amount, 0)).toBe(
+      result.amount,
+    )
+    expect(expenseApiSchema.safeParse(result).success).toBe(true)
+  })
 })

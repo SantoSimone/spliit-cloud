@@ -5,6 +5,7 @@ import {
   notificationCategorySchema,
   notificationChannelsSchema,
 } from './notifications'
+import { QUANTITY_SCALE } from './quantity'
 
 const sourceId = z.string().min(1)
 const isoDateTime = z.iso.datetime()
@@ -278,7 +279,9 @@ export const spliitGroupExportSnapshotSchema = z.object({
 
 export const spliitGroupExportManifestSchema = z.object({
   format: z.literal('spliit.cloud/export'),
-  version: z.literal(1),
+  // v1 archives store whole-unit quantities; v2 stores milli-units (see
+  // quantity.ts). v1 is accepted and migrated on import, never written.
+  version: z.union([z.literal(1), z.literal(2)]),
   scope: z.object({ type: z.literal('GROUP'), sourceId }),
   exportedAt: isoDateTime,
   ...spliitGroupExportSnapshotSchema.shape,
@@ -295,6 +298,39 @@ export const accountExportGroupSectionValues = [
 export const accountExportGroupSectionSchema = z.enum(
   accountExportGroupSectionValues,
 )
+
+/**
+ * Normalize a parsed group export manifest to v2 (milli-unit quantities). v1
+ * archives store whole-unit quantities; only the quantity fields scale —
+ * amounts are invariant for whole-unit quantities, so they stay untouched. v2
+ * manifests pass through unchanged.
+ */
+export function migrateGroupExportManifestToV2(
+  manifest: SpliitGroupExportManifest,
+): SpliitGroupExportManifest {
+  if (manifest.version !== 1) return manifest
+  return {
+    ...manifest,
+    version: 2 as const,
+    expenses: manifest.expenses.map((expense) => ({
+      ...expense,
+      items: expense.items.map((item) => ({
+        ...item,
+        quantity: item.quantity * QUANTITY_SCALE,
+      })),
+    })),
+    recurrenceSeries: manifest.recurrenceSeries.map((series) => ({
+      ...series,
+      template: {
+        ...series.template,
+        items: series.template.items.map((item) => ({
+          ...item,
+          quantity: item.quantity * QUANTITY_SCALE,
+        })),
+      },
+    })),
+  }
+}
 
 export const accountExportSelectionSchema = z.object({
   sections: z.object({
@@ -396,7 +432,7 @@ export const accountExportWarningSchema = exportWarningSchema.extend({
 
 export const spliitAccountExportManifestSchema = z.object({
   format: z.literal('spliit.cloud/export'),
-  version: z.literal(1),
+  version: z.union([z.literal(1), z.literal(2)]),
   scope: z.object({ type: z.literal('ACCOUNT'), sourceId }),
   exportedAt: isoDateTime,
   complete: z.boolean(),

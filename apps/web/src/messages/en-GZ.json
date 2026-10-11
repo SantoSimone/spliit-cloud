@@ -3491,7 +3491,6 @@
     "duplicateParticipant": "another payer is already selected.",
     "sharesInvalid": "shares must be between 0.01 and 1,000,000 with up to two decimals, fr.",
     "itemTitleRequired": "thingamajig needs a nameroo.",
-    "itemQuantityMin1": "thingamajig count gotta be one-ish or more.",
     "rowErrorsHeading": "fix these shares, fr:",
     "invalidWallTime": "That time doesn't exist on the selected date in this timezone.",
     "proportionalUnassignedItems": "assign every item to at least one person to split the leftover proportionally, or use a custom split.",
@@ -3499,7 +3498,9 @@
     "proportionalInvalidRatios": "some people’s item subtotals have opposite signs, so the leftover can’t be split proportionally. fix the items or use a custom split.",
     "max32": "enter 32 characters max.",
     "invalidEmoji": "enter a single emoji.",
-    "invalidColor": "enter a valid hex color, like #1A2B3C."
+    "invalidColor": "enter a valid hex color, like #1A2B3C.",
+    "itemQuantityMaxDecimals": "item quantity can have 3 decimals max.",
+    "itemQuantityPositive": "item quantity has to be greater than 0."
   },
   "Settings": {
     "title": "settings hub"
@@ -4744,5 +4745,10 @@
     "errorTitle": "yikes, something broke",
     "errorDescription": "an unexpected error happened. try again or head back home.",
     "retry": "run it back"
+  },
+  "ClientUpgrade": {
+    "description": "this version of the app is outdated. refresh to grab the latest and try again.",
+    "refresh": "refresh to update",
+    "title": "app update just dropped"
   }
 }

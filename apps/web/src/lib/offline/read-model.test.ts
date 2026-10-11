@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import type { OfflineSnapshotOutput } from '@spliit/api/offline-contract'
 
-import type { CatalogRecord, GroupRecord } from './contract'
+import {
+  OFFLINE_CONTRACT_VERSION,
+  type CatalogRecord,
+  type GroupRecord,
+} from './contract'
 import {
   OFFLINE_COPY,
   OFFLINE_FRESHNESS_STALE_MS,
@@ -134,7 +138,7 @@ function snapshot(
   overrides: Partial<Record<string, unknown>> = {},
 ) {
   return {
-    schemaVersion: 2,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     accountId: 'account-alice',
     groupId,
     capturedAt: BASE_TIME,
@@ -254,7 +258,7 @@ function catalogWith(
   return {
     namespace: JSON.stringify(['http://localhost:3001', 'account-alice']),
     capturedAt: BASE_TIME,
-    schemaVersion: 2,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     groups: groups.map(({ id, hidden, archived }) => ({
       overview: {
         id,
@@ -1031,7 +1035,7 @@ describe('global union and filter options', () => {
     const usdCatalog: CatalogRecord = {
       namespace: JSON.stringify(['http://localhost:3001', 'account-alice']),
       capturedAt: BASE_TIME,
-      schemaVersion: 2,
+      schemaVersion: OFFLINE_CONTRACT_VERSION,
       groups: [
         {
           overview: {

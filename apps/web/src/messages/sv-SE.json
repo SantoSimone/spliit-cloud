@@ -3165,7 +3165,6 @@
     "duplicateParticipant": "En annan betalare är redan vald.",
     "sharesInvalid": "Andelar måste vara mellan 0,01 och 1 000 000 med högst två decimaler.",
     "itemTitleRequired": "Postens namn krävs.",
-    "itemQuantityMin1": "Postens antal måste vara minst 1.",
     "rowErrorsHeading": "Korrigera dessa andelar:",
     "invalidWallTime": "Den här tiden finns inte på det valda datumet i den här tidszonen.",
     "proportionalUnassignedItems": "Tilldela varje rad till minst en deltagare för att fördela restbeloppet proportionellt, eller använd en anpassad fördelning.",
@@ -3173,7 +3172,9 @@
     "proportionalInvalidRatios": "Vissa deltagares radsubtotaler har motsatta tecken, så restbeloppet kan inte fördelas proportionellt. Korrigera raderna eller använd en anpassad fördelning.",
     "max32": "Ange högst 32 tecken.",
     "invalidEmoji": "Ange en enda emoji.",
-    "invalidColor": "Ange en giltig hexfärg, till exempel #1A2B3C."
+    "invalidColor": "Ange en giltig hexfärg, till exempel #1A2B3C.",
+    "itemQuantityMaxDecimals": "Postens antal får ha högst 3 decimaler.",
+    "itemQuantityPositive": "Postens antal måste vara större än 0."
   },
   "Settings": {
     "title": "Inställningar"
@@ -4748,5 +4749,10 @@
     "errorTitle": "Något gick fel",
     "errorDescription": "Ett oväntat fel uppstod. Försök igen eller gå tillbaka till startsidan.",
     "retry": "Försök igen"
+  },
+  "ClientUpgrade": {
+    "description": "Den här versionen av appen är föråldrad. Läs in den senaste versionen och försök igen.",
+    "refresh": "Ladda om",
+    "title": "Appuppdatering tillgänglig"
   }
 }

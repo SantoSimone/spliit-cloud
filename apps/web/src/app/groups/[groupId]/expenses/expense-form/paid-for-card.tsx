@@ -21,7 +21,12 @@ import type {
   ExpenseFormInputValues,
   ExpenseFormItemValues,
 } from '@spliit/domain'
-import { computePaidForFromItems, type SplitMode } from '@spliit/domain'
+import {
+  computePaidForFromItems,
+  lineAmountMinorFromStored,
+  quantityToStored,
+  type SplitMode,
+} from '@spliit/domain'
 
 import { safeSharesToFixedUnits } from './currency-utils'
 import { expenseTabPriority } from './focus-navigation'
@@ -117,13 +122,14 @@ function getItemizedPaidForResult({
             Number(item.unitPrice) || 0,
             inputCurrency,
           )
-          const quantity = Math.max(1, Math.round(Number(item.quantity) || 1))
+          // Stored milli-units (see quantity.ts), matching save serialization.
+          const quantity = quantityToStored(Number(item.quantity) || 0)
           return {
             id: item.id,
             title: item.title,
             unitPrice,
             quantity,
-            amount: unitPrice * quantity,
+            amount: lineAmountMinorFromStored(unitPrice, quantity),
             splitMode: item.splitMode,
             paidFor: toApiRows(item.paidFor, item.splitMode),
           }

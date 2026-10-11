@@ -1407,7 +1407,6 @@
     "duplicateParticipant": "另一位付款人已经选择。",
     "sharesInvalid": "份额必须在 0.01 到 1,000,000 之间，且最多保留两位小数。",
     "itemTitleRequired": "项目名称为必填项。",
-    "itemQuantityMin1": "项目数量必须至少为1。",
     "rowErrorsHeading": "请修正以下份额：",
     "invalidWallTime": "所选日期在此时区中不存在这个时间。",
     "proportionalUnassignedItems": "请将每个项目分配给至少一位参与者，以便按比例分摊余款，或改用自定义分摊。",
@@ -1415,7 +1414,9 @@
     "proportionalInvalidRatios": "部分参与者的项目小计符号相反，因此无法按比例分摊余款。请修正项目或改用自定义分摊。",
     "max32": "输入至多 32 个字符。",
     "invalidEmoji": "请输入单个表情符号。",
-    "invalidColor": "请输入有效的十六进制颜色，例如 #1A2B3C。"
+    "invalidColor": "请输入有效的十六进制颜色，例如 #1A2B3C。",
+    "itemQuantityMaxDecimals": "数量最多支持3位小数。",
+    "itemQuantityPositive": "数量必须大于0。"
   },
   "Categories": {
     "search": "搜寻类别……",
@@ -4733,5 +4734,10 @@
     "errorTitle": "出了点问题",
     "errorDescription": "发生意外错误，请重试或返回首页。",
     "retry": "重试"
+  },
+  "ClientUpgrade": {
+    "description": "当前应用版本已过期。请刷新以获取最新版本，然后重试。",
+    "refresh": "刷新",
+    "title": "应用更新可用"
   }
 }

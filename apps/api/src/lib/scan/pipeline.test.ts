@@ -104,14 +104,14 @@ describe('scanReceiptDocument image flow', () => {
   it('extracts receipt metadata and best-effort item details from JSON', async () => {
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 18.5,
+        amount: 1850,
         categoryId: 'groceries',
         currencyCode: 'USD',
         date: '2025-01-02',
         title: 'Corner Market',
         items: [
-          { title: 'Apples', unitPrice: 2.5, quantity: 2 },
-          { title: 'Bread', unitPrice: 3.5, quantity: 1 },
+          { title: 'Apples', unitPrice: 250, quantity: 2000 },
+          { title: 'Bread', unitPrice: 350, quantity: 1000 },
         ],
       }),
     })
@@ -127,8 +127,8 @@ describe('scanReceiptDocument image flow', () => {
       date: '2025-01-02',
       title: 'Corner Market',
       items: [
-        { title: 'Apples', unitPrice: 2.5, quantity: 2 },
-        { title: 'Bread', unitPrice: 3.5, quantity: 1 },
+        { title: 'Apples', unitPrice: 250, quantity: 2000 },
+        { title: 'Bread', unitPrice: 350, quantity: 1000 },
       ],
       empty: false,
       ocrUsed: false,
@@ -138,15 +138,16 @@ describe('scanReceiptDocument image flow', () => {
   it('filters malformed item entries while retaining valid items despite total mismatch', async () => {
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 10,
+        amount: 1000,
         currencyCode: 'USD',
         items: [
-          { title: 'Valid item', unitPrice: 4.25, quantity: 1 },
-          { title: '   ', unitPrice: 2, quantity: 1 },
-          { title: 'Zero price', unitPrice: 0, quantity: 1 },
-          { title: 'Negative quantity', unitPrice: 2, quantity: -1 },
-          { title: 'Fractional quantity', unitPrice: 2, quantity: 1.5 },
-          { title: 'Missing price', quantity: 1 },
+          { title: 'Valid item', unitPrice: 425, quantity: 1000 },
+          { title: '   ', unitPrice: 200, quantity: 1000 },
+          { title: 'Zero price', unitPrice: 0, quantity: 1000 },
+          { title: 'Negative quantity', unitPrice: 200, quantity: -1000 },
+          { title: 'Fractional minor price', unitPrice: 2.5, quantity: 1000 },
+          { title: 'Non-integer quantity', unitPrice: 200, quantity: 1000.5 },
+          { title: 'Missing price', quantity: 1000 },
           null,
         ],
       }),
@@ -157,18 +158,18 @@ describe('scanReceiptDocument image flow', () => {
     )
 
     expect(result.items).toEqual([
-      { title: 'Valid item', unitPrice: 4.25, quantity: 1 },
+      { title: 'Valid item', unitPrice: 425, quantity: 1000 },
     ])
   })
 
-  it('keeps signed discount items from the receipt response', async () => {
+  it('keeps fractional milli-unit quantities from the receipt response', async () => {
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 9,
+        amount: 800,
         currencyCode: 'USD',
         items: [
-          { title: 'Subtotal', unitPrice: 10, quantity: 1 },
-          { title: 'Discount', unitPrice: -1, quantity: 1 },
+          { title: 'Apples', unitPrice: 200, quantity: 1500 },
+          { title: 'Flour', unitPrice: 200, quantity: 2500 },
         ],
       }),
     })
@@ -178,14 +179,36 @@ describe('scanReceiptDocument image flow', () => {
     )
 
     expect(result.items).toEqual([
-      { title: 'Subtotal', unitPrice: 10, quantity: 1 },
-      { title: 'Discount', unitPrice: -1, quantity: 1 },
+      { title: 'Apples', unitPrice: 200, quantity: 1500 },
+      { title: 'Flour', unitPrice: 200, quantity: 2500 },
+    ])
+  })
+
+  it('keeps signed discount items from the receipt response', async () => {
+    generateTextMock.mockResolvedValue({
+      text: JSON.stringify({
+        amount: 900,
+        currencyCode: 'USD',
+        items: [
+          { title: 'Subtotal', unitPrice: 1000, quantity: 1000 },
+          { title: 'Discount', unitPrice: -100, quantity: 1000 },
+        ],
+      }),
+    })
+
+    const result = await run(
+      scanReceiptDocument(image, groupCurrency, {}, imageDeps),
+    )
+
+    expect(result.items).toEqual([
+      { title: 'Subtotal', unitPrice: 1000, quantity: 1000 },
+      { title: 'Discount', unitPrice: -100, quantity: 1000 },
     ])
   })
 
   it('returns no items for the legacy comma-separated response format', async () => {
     generateTextMock.mockResolvedValue({
-      text: '12.34,groceries,2025-01-02,USD,Corner Market',
+      text: '1234,groceries,2025-01-02,USD,Corner Market',
     })
 
     const result = await run(
@@ -234,6 +257,9 @@ describe('scanReceiptDocument image flow', () => {
     expect(prompt).toMatch(/items/i)
     expect(prompt).toMatch(/unitPrice/i)
     expect(prompt).toMatch(/quantity/i)
+    // Integer contract: minor-unit money, milli-unit quantities.
+    expect(prompt).toMatch(/minor units/i)
+    expect(prompt).toMatch(/milli-units/i)
   })
 
   it('uses the current AI SDK file part for receipt images', async () => {
@@ -376,12 +402,12 @@ describe('scanReceiptDocument image flow', () => {
   it('returns a null category in ocrOnly mode even when the model returns one', async () => {
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 18.5,
+        amount: 1850,
         categoryId: 'groceries',
         currencyCode: 'USD',
         date: '2025-01-02',
         title: 'Corner Market',
-        items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+        items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
       }),
     })
 
@@ -454,12 +480,12 @@ describe('structureDocumentText', () => {
   it('structures text with a text-only call and no category', async () => {
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 18.5,
+        amount: 1850,
         categoryId: 'groceries',
         currencyCode: 'USD',
         date: '2025-01-02',
         title: 'Corner Market',
-        items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+        items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
       }),
     })
 
@@ -520,6 +546,11 @@ describe('structureDocumentText', () => {
     }
     expect(ocrRequest.prompt).toContain('extracted from a receipt by OCR')
     expect(ocrRequest.prompt).toContain('misread characters')
+    // OCR-only caution: digit confusion with arithmetic reconciliation.
+    expect(ocrRequest.prompt).toContain('0/8')
+    expect(ocrRequest.prompt).toContain(
+      'quantity × minor-unit unitPrice ÷ 1000',
+    )
   })
 })
 
@@ -544,11 +575,11 @@ describe('scanReceiptDocument document flow', () => {
     mockPdfDownload()
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 18.5,
+        amount: 1850,
         currencyCode: 'USD',
         date: '2025-01-02',
         title: 'Corner Market',
-        items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+        items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
       }),
     })
 
@@ -589,7 +620,7 @@ describe('scanReceiptDocument document flow', () => {
     })
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 18.5,
+        amount: 1850,
         currencyCode: 'USD',
         date: '2025-01-02',
         title: 'Corner Market',
@@ -629,7 +660,7 @@ describe('scanReceiptDocument document flow', () => {
     })
     generateTextMock.mockResolvedValue({
       text: JSON.stringify({
-        amount: 10,
+        amount: 1000,
         categoryId: 'groceries',
         currencyCode: 'USD',
         date: '2025-01-02',

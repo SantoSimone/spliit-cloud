@@ -2526,5 +2526,9 @@
   },
   "Updates": {
     "backToUpdates": "Voltar para as atualizações"
+  },
+  "ClientUpgrade": {
+    "description": "Esta versão do app está desatualizada. Atualize para obter a versão mais recente e tente novamente.",
+    "title": "Atualização do app disponível"
   }
 }

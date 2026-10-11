@@ -268,7 +268,7 @@ describe('expense file import', () => {
             {
               title: 'Coffee',
               unitPrice: 1250,
-              quantity: 1,
+              quantity: 1000,
               amount: 1250,
               splitMode: 'EVENLY',
               paidFor: [{ participant: participantId, shares: 1 }],
@@ -1495,7 +1495,7 @@ describe('expense file import', () => {
     const sharedItems = Array.from({ length: 100 }, (_, index) => ({
       title: `Cap item ${index}`,
       unitPrice: 100,
-      quantity: 1,
+      quantity: 1000,
       amount: 100,
       splitMode: 'EVENLY' as const,
       paidFor: [{ participant: participantId, shares: 1 }],
@@ -1734,7 +1734,7 @@ describe('expense file import', () => {
     const manyItems = Array.from({ length: 101 }, (_, index) => ({
       title: `Item ${index}`,
       unitPrice: 100,
-      quantity: 1,
+      quantity: 1000,
       amount: 100,
       splitMode: 'EVENLY' as const,
       paidFor: [{ participant: participantId, shares: 1 }],
@@ -2488,7 +2488,7 @@ describe('expense file import', () => {
           {
             title: 'Over budget item',
             unitPrice: 9999,
-            quantity: 1,
+            quantity: 1000,
             amount: 9999,
             splitMode: 'EVENLY' as const,
             paidFor: [{ participant: participantId, shares: 1 }],
@@ -2645,7 +2645,7 @@ describe('expense file import', () => {
                 {
                   title: 'Filler item',
                   unitPrice: 600,
-                  quantity: 1,
+                  quantity: 1000,
                   amount: 600,
                   splitMode: 'EVENLY' as const,
                   paidFor: [{ participant: participantId, shares: 1 }],

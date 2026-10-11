@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import '../../../test/mocks'
 import { prismaMock } from '../../../test/state'
+import '../../../test/mocks'
+import { OFFLINE_CONTRACT_VERSION } from '../../outputs/offline'
 import { groupsRouter } from './index'
 
 function makeCaller(accountId: string) {
@@ -603,12 +604,12 @@ describe('groups.offlineSnapshot content', () => {
       groupId: 'grp-1',
     })
 
-    expect(result.schemaVersion).toBe(2)
+    expect(result.schemaVersion).toBe(OFFLINE_CONTRACT_VERSION)
     expect(result.accountId).toBe('acct-self')
     expect(result.groupId).toBe('grp-1')
     // Same RepeatableRead inputs as the catalog entry: content revision 7,
     // no preference row, so the snapshot token matches the catalog token.
-    expect(result.revision).toBe('o2.c7.v0')
+    expect(result.revision).toBe('o3.c7.v0')
     expect(result.capturedAt).toBeInstanceOf(Date)
     expect(result.totalCount).toBe(0)
     expect(result.downloadedCount).toBe(0)

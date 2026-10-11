@@ -195,7 +195,7 @@ describe('createGroupExportArtifact', () => {
     expect(new TextDecoder().decode(archive[path])).toBe('PDF')
     expect(manifest).toMatchObject({
       format: 'spliit.cloud/export',
-      version: 1,
+      version: 2,
       scope: { type: 'GROUP', sourceId: 'grp-1' },
       exportedAt: EXPORTED_AT.toISOString(),
       complete: true,

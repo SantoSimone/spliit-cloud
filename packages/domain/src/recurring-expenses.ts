@@ -54,6 +54,7 @@ export type RecurringExpenseTemplate = {
   items: Array<{
     title: string
     unitPrice: number
+    /** Stored milli-units (see quantity.ts), like ExpenseItem.quantity. */
     quantity: number
     amount: number
     splitMode: string

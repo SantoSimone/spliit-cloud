@@ -10,6 +10,8 @@ import {
 import superjson from 'superjson'
 import { z } from 'zod'
 
+import { isValidMajorQuantity } from '@spliit/domain'
+
 import { parseMcpEnv } from './config'
 import { createOpenAiAppsChallengeResponse } from './domain-verification'
 import { createExpensePreviewResult } from './expense-preview-response'
@@ -246,10 +248,11 @@ const expenseItem = z.object({
   ),
   quantity: z
     .number()
-    .int()
-    .positive()
+    .refine((value) => isValidMajorQuantity(value))
     .default(1)
-    .describe('Positive whole-number quantity shown on the receipt'),
+    .describe(
+      'Positive quantity shown on the receipt: whole normally, fractional (up to 3 decimals) for weighed items',
+    ),
   split: beneficiarySplitSchema
     .optional()
     .describe(

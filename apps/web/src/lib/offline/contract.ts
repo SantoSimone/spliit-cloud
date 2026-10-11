@@ -64,22 +64,25 @@ export type {
 
 export const OFFLINE_DB_NAME = 'spliit-offline-v2'
 /**
- * Storage structure version 2 adds the `pendingExpenses` outbox for
- * offline-created expenses (Phase 1 flush pipeline). The group snapshot payload
- * format is unchanged, so v1 snapshots stay readable and refresh in place — see
+ * Storage structure version 3 scales the `pendingExpenses` outbox to milli-unit
+ * quantities (see quantity.ts). The group snapshot payload format is unchanged,
+ * so v1 snapshots stay readable and refresh in place — see
  * OFFLINE_SUPPORTED_GROUP_META_VERSIONS. The Dexie upgrade step retains every
  * existing table untouched.
  */
-export const OFFLINE_DB_VERSION = 2
+export const OFFLINE_DB_VERSION = 3
 /**
  * Group-meta storage versions this client can read. Additive storage changes
  * (new tables, new indexes) extend this set; a group payload format change
  * retires old entries instead. Never reinterpret persisted rows across a
  * payload break — but do not retire them for a table-only bump either, or every
  * existing offline cache bricks until manual storage clear.
+ *
+ * Version 3 retires v1/v2 meta rows: cached snapshots carry whole-unit
+ * quantities that the milli-unit readers would show 1000× too small.
  */
 export const OFFLINE_SUPPORTED_GROUP_META_VERSIONS: ReadonlySet<number> =
-  new Set([1, OFFLINE_DB_VERSION])
+  new Set([OFFLINE_DB_VERSION])
 /** After this long, `opening` stops blocking and offers a retry hook. */
 export const OFFLINE_OPEN_TIMEOUT_MS = 3000
 export const OFFLINE_STORAGE_BLOCKED_MESSAGE =

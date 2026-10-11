@@ -64,17 +64,19 @@ import { listSubgroupsOutputSchema } from './subgroups'
  */
 
 /**
- * Offline wire/projection version (v2: comments, budgets, split presets,
- * subgroups, and recent activity join expenses/balances). This versions the
- * shape and semantics of the catalog/snapshot DTOs below. It is intentionally
- * separate from the browser IndexedDB structure version (`OFFLINE_DB_VERSION`
- * in `apps/web/src/lib/offline/contract.ts`): a projection change bumps this
+ * Offline wire/projection version (v3: milli-unit item quantities — v2 payloads
+ * carry whole-unit quantities that v3 readers would show 1000× too small; v2
+ * also had comments, budgets, split presets, subgroups, and recent activity
+ * joining expenses/balances). This versions the shape and semantics of the
+ * catalog/snapshot DTOs below. It is intentionally separate from the browser
+ * IndexedDB structure version (`OFFLINE_DB_VERSION` in
+ * `apps/web/src/lib/offline/contract.ts`): a projection change bumps this
  * constant (and composes into every revision token, forcing refetch), while a
  * browser-only storage restructure bumps only the DB version. Never reinterpret
  * persisted payloads across a contract bump — treat them as
  * replacement-required.
  */
-export const OFFLINE_CONTRACT_VERSION = 2 as const
+export const OFFLINE_CONTRACT_VERSION = 3 as const
 /**
  * Backwards-compatible alias. New code should use OFFLINE_CONTRACT_VERSION for
  * wire payloads and the web OFFLINE_DB_VERSION for storage structure.

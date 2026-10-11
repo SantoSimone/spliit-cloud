@@ -5,6 +5,7 @@ import {
   exactFromFraction,
   type ExactAmount,
 } from './exact-math'
+import { lineAmountMinorFromMajor } from './quantity'
 import { distributeRemainder } from './remainder-distribution'
 import type { ExpenseApiItem } from './schemas'
 import { calculateExactShares } from './totals'
@@ -164,8 +165,9 @@ export type FormItemLike = {
 
 /**
  * Item + expense totals in the selected expense currency's minor units,
- * mirroring save serialization (`submit-values.ts`): each line's unit price is
- * rounded to minor units first, then multiplied by the integer quantity.
+ * mirroring save serialization (`submit-values.ts`): each line's amount is its
+ * minor-unit price times its quantity (major decimals allowed, stored
+ * milli-units upstream), rounded once via `lineAmountMinorFromMajor`.
  *
  * Summing raw JS decimals instead (`0.1 + 0.2 > 0.3`) produces false
  * exceeds-errors for totals that are visually equal. All form comparisons
@@ -193,8 +195,10 @@ export function getItemizedFormMinorTotals(
       Number(item.unitPrice) || 0,
       currency,
     )
-    const quantity = Math.max(1, Math.round(Number(item.quantity) || 1))
-    itemsMinor += unitPriceMinor * quantity
+    itemsMinor += lineAmountMinorFromMajor(
+      unitPriceMinor,
+      Number(item.quantity) || 0,
+    )
   }
   return {
     itemsMinor,

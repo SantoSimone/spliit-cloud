@@ -1,7 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
+import { createElement } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useMascotController } from '@/components/mascot/mascot-context'
+import type { ToastActionElement } from '@/components/ui/toast'
 import { useToast } from '@/components/ui/use-toast'
+import { isClientUpgradeRequiredError } from '@/lib/client-upgrade'
 import { invalidateAccountGroupLists } from '@/lib/invalidate-account-groups'
 import { useOptionalOfflineSync } from '@/lib/offline/provider'
 import {
@@ -11,6 +15,8 @@ import {
 } from '@/lib/offline/write-guard'
 import { trpc } from '@/trpc/client'
 import { isSettlementCategory } from '@spliit/domain'
+
+import { UpgradeToastAction } from './upgrade-toast-action'
 
 /**
  * Mirrors `getRecurringSeriesProgress`'s return shape. Kept inline so the web
@@ -176,6 +182,29 @@ function toastOfflineBlocked(notify: (message: string) => void) {
   notifyOfflineWriteBlocked(notify)
 }
 
+/**
+ * Version gate: a write rejected with the stale-client quantity signal means
+ * this tab predates milli-unit quantities. Offer a one-tap refresh into the new
+ * client instead of a cryptic amount error. Returns true when the error was
+ * handled.
+ */
+function toastClientUpgradeRequired(
+  error: unknown,
+  toast: ReturnType<typeof useToast>['toast'],
+  tUpgrade: (key: string) => string,
+) {
+  if (!isClientUpgradeRequiredError(error)) return false
+  toast({
+    title: tUpgrade('title'),
+    description: tUpgrade('description'),
+    variant: 'destructive',
+    action: createElement(UpgradeToastAction, {
+      label: tUpgrade('refresh'),
+    }) as unknown as ToastActionElement,
+  })
+  return true
+}
+
 export function useUpdateExpenseMutation({
   onConflict,
 }: {
@@ -185,6 +214,9 @@ export function useUpdateExpenseMutation({
   const mascot = useMascotController()
   const invalidateExpenseDependencies = useInvalidateExpenseDependencies()
   const sync = useOptionalOfflineSync()
+  const { t: tUpgrade } = useTranslation(undefined, {
+    keyPrefix: 'ClientUpgrade',
+  })
 
   return trpc.groups.expenses.update.useMutation({
     onSuccess: (_data, variables) => {
@@ -216,6 +248,7 @@ export function useUpdateExpenseMutation({
         onConflict?.()
         return
       }
+      if (toastClientUpgradeRequired(error, toast, tUpgrade)) return
       mascot.react('failure')
       toast({ description: error.message, variant: 'destructive' })
     },
@@ -228,6 +261,9 @@ export function useCreateExpenseMutation() {
   const utils = trpc.useUtils()
   const invalidateExpenseDependencies = useInvalidateExpenseDependencies()
   const sync = useOptionalOfflineSync()
+  const { t: tUpgrade } = useTranslation(undefined, {
+    keyPrefix: 'ClientUpgrade',
+  })
 
   return trpc.groups.expenses.create.useMutation({
     onSuccess: (data, variables) => {
@@ -274,6 +310,7 @@ export function useCreateExpenseMutation() {
         )
         return
       }
+      if (toastClientUpgradeRequired(error, toast, tUpgrade)) return
       mascot.react('failure')
       toast({ description: error.message, variant: 'destructive' })
     },

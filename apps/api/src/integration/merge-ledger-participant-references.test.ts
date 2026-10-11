@@ -182,7 +182,7 @@ describe('mergeLedgerParticipantReferences — same-expense coalesce', () => {
               id: itemId,
               title: 'Shared item',
               unitPrice: 700,
-              quantity: 1,
+              quantity: 1000,
               amount: 700,
               splitMode: SplitMode.BY_AMOUNT,
               paidFor: {

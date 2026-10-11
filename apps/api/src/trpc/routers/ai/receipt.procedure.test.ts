@@ -195,7 +195,7 @@ describe('receipt extraction categorization', () => {
     currencyCode: 'USD',
     date: '2025-01-02',
     title: 'Corner Market',
-    items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+    items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
   }
 
   it('keeps the joint vision call and skips the decision model with the llm engine', async () => {
@@ -301,7 +301,7 @@ describe('receipt extraction with a dedicated OCR provider', () => {
     currencyCode: 'USD',
     date: '2025-01-02',
     title: 'Corner Market',
-    items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+    items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
     empty: false,
     ocrUsed: true,
   }
@@ -470,7 +470,7 @@ describe('receipt extraction tracing', () => {
     currencyCode: 'USD',
     date: '2025-01-02',
     title: 'Corner Market',
-    items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+    items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
     ocrUsed: true,
     empty: false,
   }

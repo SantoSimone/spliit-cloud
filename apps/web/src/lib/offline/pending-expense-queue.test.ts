@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { buildNamespace, OFFLINE_DB_NAME } from './contract'
 import {
   deleteOfflineDatabaseForTests,
+  OFFLINE_DB_STORES,
   OFFLINE_DB_STORES_V1,
   openOfflineDatabase,
 } from './database'
@@ -243,44 +244,84 @@ describe('pending expense Dexie outbox', () => {
     })
   })
 
-  it('upgrades v1 databases to v2 keeping existing rows', async () => {
-    // Freeze a realistic v1 database: full v1 stores plus a group-meta row
-    // stamped schemaVersion 1 (the shape real clients persisted), then close.
-    const v1 = new Dexie(OFFLINE_DB_NAME)
-    v1.version(1).stores(OFFLINE_DB_STORES_V1)
-    await v1.open()
-    await v1.table('groupMeta').put({
+  it('upgrades v2 databases to v3, scaling queued quantities and retiring old snapshots', async () => {
+    // Freeze a realistic v2 database: full v2 stores, a group-meta row
+    // stamped schemaVersion 2, and a queued expense with a whole-unit
+    // quantity (the shape real clients persisted), then close.
+    const v2 = new Dexie(OFFLINE_DB_NAME)
+    v2.version(1).stores(OFFLINE_DB_STORES_V1)
+    v2.version(2).stores(OFFLINE_DB_STORES)
+    await v2.open()
+    await v2.table('groupMeta').put({
       namespace: NAMESPACE_A,
       groupId: 'g1',
-      schemaVersion: 1,
+      schemaVersion: 2,
       serverRevision: 'o2.c0.v0',
       capturedAt: new Date('2026-01-01T00:00:00.000Z'),
       storedAt: new Date('2026-01-01T00:00:00.000Z'),
-      commitNonce: 'nonce-v1',
+      commitNonce: 'nonce-v2',
       dirtySince: null,
       lastConfirmedAt: new Date('2026-01-01T00:00:00.000Z'),
       totalCount: 0,
       hasMore: false,
       truncatedAt: null,
     })
-    v1.close()
+    await v2.table('pendingExpenses').put({
+      namespace: NAMESPACE_A,
+      groupId: 'g1',
+      clientId: 'pending-qty',
+      requestId: '123e4567-e89b-12d3-a456-426614174000',
+      createdAtMs: 1,
+      status: 'pending',
+      expense: {
+        expenseDate: new Date('2026-01-01T00:00:00.000Z'),
+        expenseTimeZone: 'UTC',
+        title: 'Queued produce',
+        category: 'general',
+        amount: 400,
+        paidBySplitMode: 'EVENLY',
+        paidByList: [{ participant: 'p1', shares: 1 }],
+        paidFor: [{ participant: 'p1', shares: 1 }],
+        isMultiPayer: false,
+        splitMode: 'ITEMIZED',
+        documents: [],
+        recurrenceRule: 'NONE',
+        items: [
+          {
+            title: 'Apples',
+            unitPrice: 200,
+            // Pre-milli-unit whole units: 2 × 200 minor = 400.
+            quantity: 2,
+            amount: 400,
+            splitMode: 'EVENLY',
+            paidFor: [{ participant: 'p1', shares: 1 }],
+          },
+        ],
+      },
+    })
+    v2.close()
 
     const db = await openOfflineDatabase()
     try {
-      expect(db.verno).toBe(2)
+      expect(db.verno).toBe(3)
       await expect(db.table('groupMeta').count()).resolves.toBe(1)
-      // The new outbox starts empty and accepts writes.
-      await expect(db.table('pendingExpenses').count()).resolves.toBe(0)
+      // The queued whole-unit quantity scales to milli-units (2 → 2000)
+      // so it flushes at the true amount; the line amount is invariant.
+      const queued = await db.table('pendingExpenses').toArray()
+      expect(queued).toHaveLength(1)
+      expect(queued[0].expense.items).toEqual([
+        expect.objectContaining({ quantity: 2000, amount: 400 }),
+      ])
     } finally {
       db.close()
     }
 
-    // The v1 snapshot must stay readable (not `unsupported`) so the next
-    // pass refreshes it in place instead of bricking the offline cache.
+    // The v2 snapshot carries whole-unit quantities, so it must report
+    // `unsupported` (refresh required) rather than read as milli-units.
     const repository = await OfflineRepository.open()
     try {
       const meta = await repository.readGroupMeta(NAMESPACE_A, 'g1')
-      expect(meta.status).toBe('ready')
+      expect(meta.status).toBe('unsupported')
     } finally {
       repository.close()
     }

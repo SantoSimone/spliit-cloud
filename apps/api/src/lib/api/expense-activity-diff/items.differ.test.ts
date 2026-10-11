@@ -30,7 +30,7 @@ function item(overrides: Partial<ExpenseApiItem> = {}): ExpenseApiItem {
     id: undefined,
     title: 'Pizza',
     unitPrice: 1500,
-    quantity: 1,
+    quantity: 1000,
     amount: 1500,
     splitMode: 'EVENLY',
     paidFor: [{ participant: 'lp-alice', shares: 1 }],
@@ -81,8 +81,8 @@ describe('itemsDiffer', () => {
     it('returns true when item quantity changes', () => {
       expect(
         itemsDiffer.check(
-          makeExpense({ items: [item({ id: 'i-1', quantity: 1 })] }),
-          makeExpense({ items: [item({ id: 'i-1', quantity: 2 })] }),
+          makeExpense({ items: [item({ id: 'i-1', quantity: 1000 })] }),
+          makeExpense({ items: [item({ id: 'i-1', quantity: 2000 })] }),
         ),
       ).toBe(true)
     })
@@ -266,7 +266,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Tip',
-              quantity: 1,
+              quantity: 1000,
               unitPrice: 1000,
               amount: 1000,
             }),
@@ -288,7 +288,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Water',
-              quantity: 1,
+              quantity: 1000,
               unitPrice: 500,
               amount: 500,
             }),
@@ -304,6 +304,29 @@ describe('itemsDiffer', () => {
       })
     })
 
+    it('renders stored milli-units as major quantities', () => {
+      const result = itemsDiffer.diff(
+        makeExpense({ items: [] }),
+        makeExpense({
+          items: [
+            item({
+              id: 'i-1',
+              title: 'Apples',
+              quantity: 1500,
+              unitPrice: 200,
+              amount: 300,
+            }),
+          ],
+        }),
+        ctx,
+      )
+      expect(result).toEqual({
+        field: 'items',
+        before: '+ Apples 1.5 × EUR 2.00 = EUR 3.00',
+        after: null,
+      })
+    })
+
     it('emits "before → after" line when an item is modified', () => {
       const result = itemsDiffer.diff(
         makeExpense({
@@ -311,7 +334,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Pizza',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 1400,
               amount: 2800,
             }),
@@ -322,7 +345,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Pizza',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 1500,
               amount: 3000,
             }),
@@ -345,7 +368,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Beer',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 1000,
               amount: 2000,
             }),
@@ -356,7 +379,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Radler',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 900,
               amount: 1800,
             }),
@@ -379,7 +402,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Pizza',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 1400,
               amount: 2800,
               paidFor: [{ participant: 'lp-alice', shares: 1 }],
@@ -391,7 +414,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Pizza',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 1400,
               amount: 2800,
               paidFor: [
@@ -417,14 +440,14 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Beer',
-              quantity: 2,
+              quantity: 2000,
               unitPrice: 1000,
               amount: 2000,
             }),
             item({
               id: 'i-2',
               title: 'Water',
-              quantity: 1,
+              quantity: 1000,
               unitPrice: 500,
               amount: 500,
             }),
@@ -435,14 +458,14 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Beer',
-              quantity: 3,
+              quantity: 3000,
               unitPrice: 1000,
               amount: 3000,
             }),
             item({
               id: 'i-3',
               title: 'Tip',
-              quantity: 1,
+              quantity: 1000,
               unitPrice: 1000,
               amount: 1000,
             }),
@@ -468,7 +491,7 @@ describe('itemsDiffer', () => {
             item({
               id: undefined,
               title: 'New',
-              quantity: 1,
+              quantity: 1000,
               unitPrice: 1000,
               amount: 1000,
             }),
@@ -493,7 +516,7 @@ describe('itemsDiffer', () => {
             item({
               id: 'i-1',
               title: 'Chips',
-              quantity: 1,
+              quantity: 1000,
               unitPrice: 500,
               amount: 500,
             }),

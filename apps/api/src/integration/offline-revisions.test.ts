@@ -175,7 +175,7 @@ describe('Offline revision tokens — real DB', () => {
         expenseId,
         title: 'Item',
         unitPrice: 500,
-        quantity: 2,
+        quantity: 2000,
         amount: 1000,
       },
     })

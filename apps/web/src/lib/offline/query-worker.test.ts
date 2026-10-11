@@ -3,7 +3,11 @@ import 'fake-indexeddb/auto'
 
 import type { OfflineSnapshotOutput } from '@spliit/api/offline-contract'
 
-import type { CatalogRecord, GroupRecord } from './contract'
+import {
+  OFFLINE_CONTRACT_VERSION,
+  type CatalogRecord,
+  type GroupRecord,
+} from './contract'
 import { OfflineDexieDatabase, deleteOfflineDatabaseForTests } from './database'
 import {
   OFFLINE_WORKER_REQUEST_TIMEOUT_MS,
@@ -20,7 +24,7 @@ import {
 
 function snapshot(groupId: string, ids: string[]): OfflineSnapshotOutput {
   return {
-    schemaVersion: 2,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     accountId: 'account-a',
     groupId,
     capturedAt: new Date('2026-03-08T12:00:00.000Z'),
@@ -197,7 +201,7 @@ async function seedSnapshots(snaps: OfflineSnapshotOutput[]): Promise<void> {
     await db.catalogs.put({
       namespace: 'ns',
       capturedAt: new Date(),
-      schemaVersion: 2,
+      schemaVersion: OFFLINE_CONTRACT_VERSION,
       groups: snaps.map((snap) => ({
         overview: snap.overview,
         global: snap.global,

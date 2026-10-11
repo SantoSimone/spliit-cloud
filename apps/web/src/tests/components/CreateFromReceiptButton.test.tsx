@@ -540,6 +540,30 @@ describe('ReceiptScanTrigger update protection', () => {
   })
 })
 
+describe('ReceiptScanTrigger stored-unit conversion', () => {
+  it('converts API minor/milli units to major display units once', async () => {
+    mockMutateAsync.mockResolvedValue({
+      ...scanResult,
+      items: [{ title: 'Milk', unitPrice: 4700, quantity: 2000 }],
+    })
+    const onAccept = vi.fn()
+    const { user } = renderTrigger({
+      mode: 'create',
+      directAccept: true,
+      onAccept,
+    })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    await waitFor(() => {
+      expect(onAccept).toHaveBeenCalledTimes(1)
+    })
+    expect(onAccept.mock.calls[0][0].info.items).toEqual([
+      { title: 'Milk', unitPrice: 47, quantity: 2 },
+    ])
+    expect(onAccept.mock.calls[0][0].info.amount).toBe(1000)
+  })
+})
+
 describe('ReceiptScanTrigger empty results', () => {
   it('shows the empty notice instead of auto-accepting with directAccept', async () => {
     mockMutateAsync.mockResolvedValue(emptyScanResult)

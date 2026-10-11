@@ -1414,7 +1414,6 @@
     "duplicateParticipant": "Toinen maksaja on jo valittu.",
     "sharesInvalid": "Osuuksien on oltava välillä 0,01–1 000 000 ja niissä saa olla enintään kaksi desimaalia.",
     "itemTitleRequired": "Kohteen nimi on pakollinen.",
-    "itemQuantityMin1": "Kohteen määrän on oltava vähintään 1.",
     "rowErrorsHeading": "Korjaa nämä osuudet:",
     "invalidWallTime": "Tätä kellonaikaa ei ole valittuna päivänä tällä aikavyöhykkeellä.",
     "proportionalUnassignedItems": "Määritä jokainen kohde vähintään yhdelle osallistujalle, jotta loppusumma voidaan jakaa suhteessa, tai käytä mukautettua jakoa.",
@@ -1422,7 +1421,9 @@
     "proportionalInvalidRatios": "Joidenkin osallistujien kohdekohtaisilla välisummilla on eri etumerkit, joten loppusummaa ei voi jakaa suhteessa. Korjaa kohteet tai käytä mukautettua jakoa.",
     "max32": "Syötä enintään 32 merkkiä.",
     "invalidEmoji": "Syötä yksi emoji.",
-    "invalidColor": "Syötä kelvollinen heksaväri, esimerkiksi #1A2B3C."
+    "invalidColor": "Syötä kelvollinen heksaväri, esimerkiksi #1A2B3C.",
+    "itemQuantityMaxDecimals": "Kohteen määrässä saa olla enintään 3 desimaalia.",
+    "itemQuantityPositive": "Kohteen määrän on oltava suurempi kuin 0."
   },
   "Categories": {
     "search": "Etsi kategoriaa...",
@@ -4752,5 +4753,10 @@
     "errorTitle": "Jokin meni pieleen",
     "errorDescription": "Tapahtui odottamaton virhe. Yritä uudelleen tai palaa etusivulle.",
     "retry": "Yritä uudelleen"
+  },
+  "ClientUpgrade": {
+    "description": "Tämä sovellusversio on vanhentunut. Lataa uusin versio ja yritä uudelleen.",
+    "refresh": "Lataa uudelleen",
+    "title": "Sovelluspäivitys saatavilla"
   }
 }

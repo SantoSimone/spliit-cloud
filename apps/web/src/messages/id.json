@@ -1716,7 +1716,6 @@
     "duplicateParticipant": "Pembayar lain sudah dipilih.",
     "sharesInvalid": "Bagian harus antara 0,01 dan 1.000.000 dengan maksimal dua angka desimal.",
     "itemTitleRequired": "Nama item wajib diisi.",
-    "itemQuantityMin1": "Kuantitas item harus setidaknya 1.",
     "rowErrorsHeading": "Silakan perbaiki porsi berikut:",
     "invalidWallTime": "Waktu ini tidak tersedia pada tanggal yang dipilih di zona waktu ini.",
     "proportionalUnassignedItems": "Tetapkan setiap item ke setidaknya satu peserta untuk membagi sisa jumlah secara proporsional, atau gunakan pembagian kustom.",
@@ -1724,7 +1723,9 @@
     "proportionalInvalidRatios": "Subtotal item sebagian peserta bertanda berlawanan, sehingga sisa jumlah tidak dapat dibagi secara proporsional. Perbaiki item atau gunakan pembagian kustom.",
     "max32": "Masukkan maksimal 32 karakter.",
     "invalidEmoji": "Masukkan satu emoji.",
-    "invalidColor": "Masukkan warna hex yang valid, seperti #1A2B3C."
+    "invalidColor": "Masukkan warna hex yang valid, seperti #1A2B3C.",
+    "itemQuantityMaxDecimals": "Jumlah item mendukung maksimal 3 angka desimal.",
+    "itemQuantityPositive": "Jumlah item harus lebih besar dari 0."
   },
   "Categories": {
     "search": "Cari kategori...",
@@ -4732,5 +4733,10 @@
     "errorTitle": "Terjadi kesalahan",
     "errorDescription": "Terjadi kesalahan tak terduga. Coba lagi atau kembali ke beranda.",
     "retry": "Coba lagi"
+  },
+  "ClientUpgrade": {
+    "description": "Versi aplikasi ini sudah kedaluwarsa. Segarkan untuk mendapatkan versi terbaru dan coba lagi.",
+    "refresh": "Segarkan",
+    "title": "Pembaruan aplikasi tersedia"
   }
 }

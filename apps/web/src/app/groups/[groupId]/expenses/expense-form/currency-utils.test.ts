@@ -7,6 +7,7 @@ import {
   amountPlaceholder,
   enforceIntegerPattern,
   enforcePercentagePattern,
+  enforceQuantityPattern,
   enforceSharePattern,
   formatDate,
   nextShareRowsFromInput,
@@ -207,6 +208,41 @@ describe('enforceIntegerPattern', () => {
 
   it('accepts native locale digits', () => {
     expect(enforceIntegerPattern('١٢٣', 'ar-SA')).toBe('123')
+  })
+})
+
+describe('enforceQuantityPattern', () => {
+  it('passes whole numbers through unchanged', () => {
+    expect(enforceQuantityPattern('2')).toBe('2')
+    expect(enforceQuantityPattern('100')).toBe('100')
+  })
+
+  it('keeps decimals only when the user types a separator', () => {
+    expect(enforceQuantityPattern('1.5')).toBe('1.5')
+    expect(enforceQuantityPattern('0.5')).toBe('0.5')
+    expect(enforceQuantityPattern('2.375')).toBe('2.375')
+    expect(enforceQuantityPattern('1,5')).toBe('1.5')
+  })
+
+  it('caps fraction digits at three', () => {
+    expect(enforceQuantityPattern('2.3755')).toBe('2.375')
+    expect(enforceQuantityPattern('0.123456')).toBe('0.123')
+  })
+
+  it('preserves in-progress typing states', () => {
+    expect(enforceQuantityPattern('1.')).toBe('1.')
+    expect(enforceQuantityPattern('')).toBe('')
+    expect(enforceQuantityPattern('.5')).toBe('0.5')
+  })
+
+  it('strips minus signs and letters', () => {
+    expect(enforceQuantityPattern('-5')).toBe('5')
+    expect(enforceQuantityPattern('abc123')).toBe('123')
+    expect(enforceQuantityPattern('1e5')).toBe('15')
+  })
+
+  it('accepts native locale digits', () => {
+    expect(enforceQuantityPattern('١٢٣', 'ar-SA')).toBe('123')
   })
 })
 

@@ -494,7 +494,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'BY_AMOUNT',
           paidFor: [{ participant: 'p0', shares: 900 }],
@@ -512,7 +512,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'BY_PERCENTAGE',
           paidFor: [
@@ -532,7 +532,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Receipt detail',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'BY_AMOUNT',
           paidFor: [],
@@ -608,7 +608,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'BY_SHARES',
           paidFor: [{ participant: 'p0', shares: 0 }],
@@ -628,7 +628,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -668,7 +668,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'BY_SHARES',
           paidFor: [{ participant: 'p0', shares: -50 }],
@@ -693,7 +693,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -722,7 +722,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'A',
           unitPrice: 8591,
-          quantity: 1,
+          quantity: 1000,
           amount: 8591,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -730,7 +730,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'B',
           unitPrice: 500,
-          quantity: 1,
+          quantity: 1000,
           amount: 500,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p1', shares: 1 }],
@@ -755,7 +755,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'A',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -763,7 +763,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Refund',
           unitPrice: -200,
-          quantity: 1,
+          quantity: 1000,
           amount: -200,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p1', shares: 1 }],
@@ -795,7 +795,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'A',
           unitPrice: 500,
-          quantity: 1,
+          quantity: 1000,
           amount: 500,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -820,7 +820,7 @@ describe('expenseApiSchema', () => {
         {
           title: 'Coffee',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -1217,7 +1217,7 @@ describe('signed API item amounts', () => {
         {
           title: 'Subtotal',
           unitPrice: 1200,
-          quantity: 1,
+          quantity: 1000,
           amount: 1200,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -1225,7 +1225,7 @@ describe('signed API item amounts', () => {
         {
           title: 'Discount',
           unitPrice: -200,
-          quantity: 1,
+          quantity: 1000,
           amount: -200,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -1246,7 +1246,7 @@ describe('signed API item amounts', () => {
         {
           title: 'Refund',
           unitPrice: -500,
-          quantity: 1,
+          quantity: 1000,
           amount: -500,
           splitMode: 'BY_AMOUNT',
           paidFor: [{ participant: 'p0', shares: -500 }],
@@ -1306,7 +1306,8 @@ describe('cross-currency paidByList BY_AMOUNT', () => {
         {
           title: 'beer',
           unitPrice: 1,
-          quantity: 100,
+          // Stored milli-units: 100_000 = 100 units × 1 minor unit.
+          quantity: 100_000,
           amount: 100,
           splitMode: 'EVENLY',
           paidFor: [{ participant: 'p0', shares: 1 }],
@@ -1824,5 +1825,158 @@ describe('expenseFormInputSchema itemized minor-unit totals (#134)', () => {
     // Minor-unit remainder is zero, so the stray remainder rows are ignored
     // rather than failing amountSum.
     expect(result.success).toBe(true)
+  })
+})
+
+describe('fractional quantities (milli-units)', () => {
+  const itemizedBase = {
+    ...baseInput,
+    splitMode: 'ITEMIZED',
+  }
+  const evenRow = (participant = 'p0') => ({
+    splitMode: 'EVENLY',
+    paidFor: [{ participant, shares: 1 }],
+  })
+
+  it('form accepts major-unit decimals and rejects a fourth decimal place', () => {
+    const ok = expenseFormInputSchema.safeParse({
+      ...itemizedBase,
+      amount: 3.75,
+      items: [{ title: 'Apples', unitPrice: 2.5, quantity: 1.5, ...evenRow() }],
+    })
+    expect(ok.success).toBe(true)
+
+    const tooPrecise = expenseFormInputSchema.safeParse({
+      ...itemizedBase,
+      amount: 3.75,
+      items: [
+        { title: 'Apples', unitPrice: 2.5, quantity: 1.0001, ...evenRow() },
+      ],
+    })
+    expect(tooPrecise.success).toBe(false)
+    if (tooPrecise.success) return
+    expect(
+      tooPrecise.error.issues.some(
+        (issue) => issue.message === 'itemQuantityMaxDecimals',
+      ),
+    ).toBe(true)
+  })
+
+  it('form rejects zero and negative quantities', () => {
+    for (const quantity of [0, -1.5]) {
+      const result = expenseFormInputSchema.safeParse({
+        ...itemizedBase,
+        amount: 3.75,
+        items: [{ title: 'Apples', unitPrice: 2.5, quantity, ...evenRow() }],
+      })
+      expect(result.success).toBe(false)
+      if (result.success) continue
+      expect(
+        result.error.issues.some(
+          (issue) => issue.message === 'itemQuantityPositive',
+        ),
+      ).toBe(true)
+    }
+  })
+
+  it('form flags a valid-looking line that rounds to zero minor units', () => {
+    // $0.01 × 0.001 rounds to 0 minor units, which the API rejects with
+    // amountNotZero. The form must flag it inline instead of failing on save.
+    const result = expenseFormInputSchema.safeParse({
+      ...itemizedBase,
+      amount: 0.01,
+      items: [
+        { title: 'Spice', unitPrice: 0.01, quantity: 0.001, ...evenRow() },
+      ],
+    })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(
+      result.error.issues.some((issue) => issue.message === 'amountNotZero'),
+    ).toBe(true)
+  })
+
+  it('api accepts stored milli-units with the scaled amount invariant', () => {
+    // 1.5 units × 250 minor = 375 minor.
+    const ok = expenseApiSchema.safeParse({
+      ...baseApi,
+      amount: 375,
+      splitMode: 'ITEMIZED',
+      paidFor: [{ participant: 'p0', shares: 375 }],
+      items: [
+        {
+          title: 'Apples',
+          unitPrice: 250,
+          quantity: 1500,
+          amount: 375,
+          splitMode: 'EVENLY',
+          paidFor: [{ participant: 'p0', shares: 1 }],
+        },
+      ],
+    })
+    expect(ok.success).toBe(true)
+
+    const wrongAmount = expenseApiSchema.safeParse({
+      ...baseApi,
+      amount: 375,
+      splitMode: 'ITEMIZED',
+      paidFor: [{ participant: 'p0', shares: 375 }],
+      items: [
+        {
+          title: 'Apples',
+          unitPrice: 250,
+          quantity: 1500,
+          amount: 250,
+          splitMode: 'EVENLY',
+          paidFor: [{ participant: 'p0', shares: 1 }],
+        },
+      ],
+    })
+    expect(wrongAmount.success).toBe(false)
+  })
+
+  it('api rounds fractional line amounts once (2.375 × $19.99 → $47.48)', () => {
+    const ok = expenseApiSchema.safeParse({
+      ...baseApi,
+      amount: 4748,
+      splitMode: 'ITEMIZED',
+      paidFor: [{ participant: 'p0', shares: 4748 }],
+      items: [
+        {
+          title: 'Flour',
+          unitPrice: 1999,
+          quantity: 2375,
+          amount: 4748,
+          splitMode: 'EVENLY',
+          paidFor: [{ participant: 'p0', shares: 1 }],
+        },
+      ],
+    })
+    expect(ok.success).toBe(true)
+  })
+
+  it('flags pre-milli-unit payloads with the upgrade signal, not amountSum', () => {
+    // Old client: 2 whole units at 1000 minor with the legacy amount.
+    const legacy = expenseApiSchema.safeParse({
+      ...baseApi,
+      amount: 2000,
+      splitMode: 'ITEMIZED',
+      paidFor: [{ participant: 'p0', shares: 2000 }],
+      items: [
+        {
+          title: 'Beer',
+          unitPrice: 1000,
+          quantity: 2,
+          amount: 2000,
+          splitMode: 'EVENLY',
+          paidFor: [{ participant: 'p0', shares: 1 }],
+        },
+      ],
+    })
+    expect(legacy.success).toBe(false)
+    if (legacy.success) return
+    const messages = legacy.error.issues.map((issue) => issue.message)
+    expect(messages).toContain('clientUpgradeRequired')
+    expect(messages).not.toContain('amountSum')
   })
 })

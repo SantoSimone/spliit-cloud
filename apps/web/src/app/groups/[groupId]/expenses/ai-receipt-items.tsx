@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { Currency } from '@/lib/currency'
 import { formatCurrency } from '@/lib/utils'
+import { amountAsMinorUnits, lineAmountMinorFromMajor } from '@spliit/domain'
 
 import { ExpenseItemsOverflowToggle } from './expense-items-overflow-toggle'
 import { ReceiptItemRow, ReceiptItemsShell } from './receipt-items-shell'
@@ -57,9 +58,11 @@ export function AiReceiptItems({
           title={item.title}
           amount={formatCurrency(
             currency,
-            item.unitPrice * item.quantity,
+            lineAmountMinorFromMajor(
+              amountAsMinorUnits(item.unitPrice, currency),
+              item.quantity,
+            ),
             locale,
-            true,
           )}
           detail={
             item.quantity !== 1 ? (

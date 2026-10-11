@@ -2151,7 +2151,6 @@
     "duplicateParticipant": "Another payer is already selected.",
     "sharesInvalid": "Shares must be between 0.01 and 1,000,000 with up to two decimals.",
     "itemTitleRequired": "Item name is required.",
-    "itemQuantityMin1": "Item quantity must be at least 1.",
     "rowErrorsHeading": "Fix these shares:",
     "invalidWallTime": "This time does not exist on the selected date in this timezone.",
     "proportionalUnassignedItems": "Assign every item to at least one participant to split the remainder proportionally, or use a custom split.",
@@ -2159,7 +2158,9 @@
     "proportionalInvalidRatios": "Some participants' item subtotals have opposite signs, so the remainder cannot be split proportionally. Fix the items or use a custom split.",
     "max32": "Enter at most 32 characters.",
     "invalidEmoji": "Enter a single emoji.",
-    "invalidColor": "Enter a valid hex color, like #1A2B3C."
+    "invalidColor": "Enter a valid hex color, like #1A2B3C.",
+    "itemQuantityMaxDecimals": "Item quantity supports at most 3 decimals.",
+    "itemQuantityPositive": "Item quantity must be greater than 0."
   },
   "Categories": {
     "search": "Search category...",
@@ -4855,5 +4856,10 @@
     "errorTitle": "Something went wrong",
     "errorDescription": "An unexpected error occurred. Try again or go back home.",
     "retry": "Try again"
+  },
+  "ClientUpgrade": {
+    "description": "This version of the app is out of date. Refresh to get the latest version and try again.",
+    "refresh": "Refresh",
+    "title": "App update available"
   }
 }

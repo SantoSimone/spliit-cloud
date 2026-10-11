@@ -21,8 +21,8 @@ import { getOcrProvider, type OcrProvider } from '../ocr'
 import {
   emptyReceiptResult,
   isEmptyReceiptResult,
-  normalizeParsedReceipt,
   parseReceiptAIResponse,
+  resolveReceiptCurrency,
   type GroupCurrencyInput,
 } from './parse'
 import { buildStructurePrompt, buildVisionPrompt } from './prompts'
@@ -140,7 +140,7 @@ export const structureDocumentText = Effect.fnUntraced(function* (
   // The decision model owns categorization on this path; ignore any
   // hallucinated categoryId the structuring model returns unasked.
   parsed.categoryId = null
-  normalizeParsedReceipt(parsed, groupCurrencyInput)
+  resolveReceiptCurrency(parsed, groupCurrencyInput)
   return { ...parsed, empty: isEmptyReceiptResult(parsed), ocrUsed: true }
 })
 
@@ -263,7 +263,7 @@ const extractWithVision = Effect.fnUntraced(function* (
       extractAllowedIdFromAIResponse(parsed.categoryId, RECEIPT_CATEGORY_IDS) ??
       extractAllowedIdFromAIResponse(rawContent, RECEIPT_CATEGORY_IDS)
   }
-  normalizeParsedReceipt(parsed, groupCurrencyInput)
+  resolveReceiptCurrency(parsed, groupCurrencyInput)
   return { ...parsed, empty: isEmptyReceiptResult(parsed), ocrUsed: false }
 })
 

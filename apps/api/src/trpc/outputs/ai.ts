@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { categoryIdSchema } from '@spliit/domain'
 
 export const extractExpenseInformationOutputSchema = z.object({
-  amount: z.number().or(z.nan()),
+  /** Integer minor units of the receipt currency (`NaN` when unreadable). */
+  amount: z.number().int().or(z.nan()),
   categoryId: categoryIdSchema.nullable(),
   currencyCode: z.string().nullable(),
   date: z.string().nullable(),
@@ -11,11 +12,13 @@ export const extractExpenseInformationOutputSchema = z.object({
   items: z.array(
     z.object({
       title: z.string(),
+      /** Integer minor units of the receipt currency. */
       unitPrice: z
         .number()
-        .finite()
+        .int()
         .refine((value) => value !== 0),
-      quantity: z.number().int().positive(),
+      /** Integer milli-units (`1000` = 1 item). */
+      quantity: z.number().int().min(1),
     }),
   ),
   /**

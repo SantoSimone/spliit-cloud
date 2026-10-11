@@ -7,6 +7,7 @@ import {
   amountAsMinorUnits,
   calculateExactShares,
   distributeRemainder,
+  lineAmountMinorFromMajor,
   sharesAsFixedUnits,
 } from '@spliit/domain'
 
@@ -85,9 +86,11 @@ export function getFormItemBreakdown(
   },
   currency: Currency,
 ): Record<string, number> {
-  const totalMinor = amountAsMinorUnits(
-    Number(item.unitPrice) * Number(item.quantity),
-    currency,
+  // Identical to save serialization (submit-values.ts): minor-unit price
+  // times major-unit quantity, rounded once.
+  const totalMinor = lineAmountMinorFromMajor(
+    amountAsMinorUnits(Number(item.unitPrice) || 0, currency),
+    Number(item.quantity) || 0,
   )
   if (!Number.isFinite(totalMinor) || totalMinor === 0) return {}
   if (item.paidFor.length === 0) return {}

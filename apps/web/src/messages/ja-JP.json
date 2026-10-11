@@ -1407,7 +1407,6 @@
     "duplicateParticipant": "その請求者は既に選択されています。",
     "sharesInvalid": "シェアは0.01以上1,000,000以下で、小数点以下2桁以内で入力してください。",
     "itemTitleRequired": "項目名は必須です。",
-    "itemQuantityMin1": "項目の数量は1以上である必要があります。",
     "rowErrorsHeading": "次のシェアを修正してください：",
     "invalidWallTime": "選択した日付のこのタイムゾーンには、この時刻は存在しません。",
     "proportionalUnassignedItems": "残額を按分するには、すべての品目を1人以上のメンバーに割り当ててください。またはカスタム分割を使用してください。",
@@ -1415,7 +1414,9 @@
     "proportionalInvalidRatios": "一部のメンバーの品目小計の符号が異なるため、残額を按分できません。品目を修正するか、カスタム分割を使用してください。",
     "max32": "最大32文字まで入力してください。",
     "invalidEmoji": "絵文字を1つ入力してください。",
-    "invalidColor": "有効な16進カラーを入力してください（例: #1A2B3C）。"
+    "invalidColor": "有効な16進カラーを入力してください（例: #1A2B3C）。",
+    "itemQuantityMaxDecimals": "数量は小数点以下3桁までです。",
+    "itemQuantityPositive": "数量は0より大きくなければなりません。"
   },
   "Categories": {
     "search": "カテゴリーを検索...",
@@ -4733,5 +4734,10 @@
     "errorTitle": "問題が発生しました",
     "errorDescription": "予期しないエラーが発生しました。もう一度お試しいただくか、ホームにお戻りください。",
     "retry": "再試行"
+  },
+  "ClientUpgrade": {
+    "description": "このアプリのバージョンは古くなっています。更新して最新バージョンを取得し、もう一度お試しください。",
+    "refresh": "更新",
+    "title": "アプリの更新があります"
   }
 }

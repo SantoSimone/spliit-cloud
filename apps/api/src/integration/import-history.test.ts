@@ -221,7 +221,7 @@ describe('Spliit import history', () => {
             {
               title: 'Shared dish',
               unitPrice: 3000,
-              quantity: 1,
+              quantity: 1000,
               amount: 3000,
               splitMode: 'EVENLY',
               paidFor: [{ participant: lpB, shares: 1 }],

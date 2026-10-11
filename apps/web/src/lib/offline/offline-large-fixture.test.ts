@@ -5,7 +5,11 @@ import 'fake-indexeddb/auto'
 
 import type { OfflineSnapshotOutput } from '@spliit/api/offline-contract'
 
-import type { CatalogRecord, GroupRecord } from './contract'
+import {
+  OFFLINE_CONTRACT_VERSION,
+  type CatalogRecord,
+  type GroupRecord,
+} from './contract'
 import { OfflineDexieDatabase, deleteOfflineDatabaseForTests } from './database'
 import { dropWorkerWorkingSet, runOfflineWorkerQuery } from './query-worker'
 import { getOfflineBalances } from './read-model'
@@ -153,7 +157,7 @@ function snapshotPayload(
   )
   const stamp = new Date('2026-06-01T12:00:00.000Z')
   return {
-    schemaVersion: 2,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     accountId: 'account-large',
     groupId,
     capturedAt: stamp,
@@ -285,7 +289,7 @@ function buildLargeFixture() {
   const catalog: CatalogRecord = {
     namespace: 'ns-large',
     capturedAt: new Date('2026-06-01T12:00:00.000Z'),
-    schemaVersion: 2,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     groups: catalogGroups,
   }
   return { catalog, byGroupId, bigGroupId: 'large-g00', sizes }

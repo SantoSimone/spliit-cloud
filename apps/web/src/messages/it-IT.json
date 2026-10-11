@@ -1422,7 +1422,6 @@
     "duplicateParticipant": "Un altro pagatore è già selezionato.",
     "sharesInvalid": "Le quote devono essere comprese tra 0,01 e 1.000.000 con al massimo due decimali.",
     "itemTitleRequired": "Il nome della voce è obbligatorio.",
-    "itemQuantityMin1": "La quantità della voce deve essere almeno 1.",
     "rowErrorsHeading": "Correggi queste quote:",
     "invalidWallTime": "Questo orario non esiste nella data selezionata per questo fuso orario.",
     "proportionalUnassignedItems": "Assegna ogni voce ad almeno un partecipante per dividere l’importo restante proporzionalmente, oppure usa una divisione personalizzata.",
@@ -1430,7 +1429,9 @@
     "proportionalInvalidRatios": "I subtotali delle voci di alcuni partecipanti hanno segni opposti, quindi l’importo restante non può essere diviso proporzionalmente. Correggi le voci o usa una divisione personalizzata.",
     "max32": "Inserisci al massimo trentadue caratteri.",
     "invalidEmoji": "Inserisci un solo emoji.",
-    "invalidColor": "Inserisci un colore esadecimale valido, ad esempio #1A2B3C."
+    "invalidColor": "Inserisci un colore esadecimale valido, ad esempio #1A2B3C.",
+    "itemQuantityMaxDecimals": "La quantità della voce supporta al massimo tre decimali.",
+    "itemQuantityPositive": "La quantità della voce deve essere maggiore di zero."
   },
   "Categories": {
     "search": "Cerca categoria...",
@@ -4782,5 +4783,10 @@
     "errorTitle": "Qualcosa è andato storto",
     "errorDescription": "Si è verificato un errore imprevisto. Riprova o torna alla home.",
     "retry": "Riprova"
+  },
+  "ClientUpgrade": {
+    "description": "Questa versione dell'app non è aggiornata. Aggiorna per ottenere l'ultima versione e riprova.",
+    "refresh": "Aggiorna",
+    "title": "Aggiornamento dell'app disponibile"
   }
 }

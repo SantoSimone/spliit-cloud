@@ -1430,7 +1430,6 @@
     "duplicateParticipant": "Jiný plátce je již vybrán.",
     "sharesInvalid": "Podíly musí být mezi 0,01 a 1 000 000 s maximálně dvěma desetinnými místy.",
     "itemTitleRequired": "Název položky je povinný.",
-    "itemQuantityMin1": "Množství položky musí být alespoň 1.",
     "rowErrorsHeading": "Opravte tyto podíly:",
     "invalidWallTime": "Tento čas ve vybraném datu v tomto časovém pásmu neexistuje.",
     "proportionalUnassignedItems": "Přiřaďte každou položku alespoň jednomu účastníkovi, aby bylo možné zbytek rozdělit poměrně, nebo použijte vlastní rozdělení.",
@@ -1438,7 +1437,9 @@
     "proportionalInvalidRatios": "Mezisoučty položek některých účastníků mají opačná znaménka, takže zbytek nelze rozdělit poměrně. Opravte položky nebo použijte vlastní rozdělení.",
     "max32": "Zadejte nejvýše 32 znaků.",
     "invalidEmoji": "Zadejte jedno emoji.",
-    "invalidColor": "Zadejte platnou hex barvu, např. #1A2B3C."
+    "invalidColor": "Zadejte platnou hex barvu, např. #1A2B3C.",
+    "itemQuantityMaxDecimals": "Množství položky podporuje nejvýše 3 desetinná místa.",
+    "itemQuantityPositive": "Množství položky musí být větší než 0."
   },
   "Categories": {
     "search": "Hledat kategorii...",
@@ -4806,5 +4807,10 @@
     "errorTitle": "Něco se pokazilo",
     "errorDescription": "Došlo k neočekávané chybě. Zkuste to znovu, nebo přejděte na domovskou stránku.",
     "retry": "Zkusit znovu"
+  },
+  "ClientUpgrade": {
+    "description": "Tato verze aplikace je zastaralá. Obnovte stránku, abyste získali nejnovější verzi, a zkuste to znovu.",
+    "refresh": "Obnovit",
+    "title": "Je dostupná aktualizace aplikace"
   }
 }

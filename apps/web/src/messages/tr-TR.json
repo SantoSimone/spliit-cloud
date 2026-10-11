@@ -1414,7 +1414,6 @@
     "duplicateParticipant": "Başka bir ödeyen zaten seçili.",
     "sharesInvalid": "Paylar 0,01 ile 1.000.000 arasında olmalı ve en fazla iki ondalık basamak içermelidir.",
     "itemTitleRequired": "Kalem adı gereklidir.",
-    "itemQuantityMin1": "Kalem miktarı en az 1 olmalıdır.",
     "rowErrorsHeading": "Lütfen bu payları düzeltin:",
     "invalidWallTime": "Bu saat, seçilen tarihte bu saat diliminde mevcut değil.",
     "proportionalUnassignedItems": "Kalan tutarı orantılı bölmek için her kalemi en az bir katılımcıya atayın veya özel bölme kullanın.",
@@ -1422,7 +1421,9 @@
     "proportionalInvalidRatios": "Bazı katılımcıların kalem ara toplamları zıt işaretli olduğundan kalan tutar orantılı bölünemez. Kalemleri düzeltin veya özel bölme kullanın.",
     "max32": "En fazla 32 karakter girin.",
     "invalidEmoji": "Tek bir emoji girin.",
-    "invalidColor": "Geçerli bir hex renk girin, örneğin #1A2B3C."
+    "invalidColor": "Geçerli bir hex renk girin, örneğin #1A2B3C.",
+    "itemQuantityMaxDecimals": "Kalem adedi en fazla üç ondalık basamak içerebilir.",
+    "itemQuantityPositive": "Kalem adedi 0'dan büyük olmalıdır."
   },
   "Categories": {
     "search": "Kategori ara...",
@@ -4760,5 +4761,10 @@
     "errorTitle": "Bir şeyler ters gitti",
     "errorDescription": "Beklenmeyen bir hata oluştu. Tekrar deneyin veya ana sayfaya dönün.",
     "retry": "Tekrar dene"
+  },
+  "ClientUpgrade": {
+    "description": "Uygulamanın bu sürümü güncel değil. En güncel sürümü almak için yenileyin ve tekrar deneyin.",
+    "refresh": "Yenile",
+    "title": "Uygulama güncellemesi mevcut"
   }
 }

@@ -1536,7 +1536,6 @@
     "duplicateParticipant": "Outro pagador já está selecionado.",
     "sharesInvalid": "As partes devem estar entre 0,01 e 1.000.000 com no máximo duas casas decimais.",
     "itemTitleRequired": "O nome do item é obrigatório.",
-    "itemQuantityMin1": "A quantidade do item deve ser pelo menos 1.",
     "rowErrorsHeading": "Corrige estas partes:",
     "invalidWallTime": "Esta hora não existe na data selecionada neste fuso horário.",
     "proportionalUnassignedItems": "Atribui cada item a pelo menos um participante para dividir o restante proporcionalmente, ou usa uma divisão personalizada.",
@@ -1544,7 +1543,9 @@
     "proportionalInvalidRatios": "Os subtotais de itens de alguns participantes têm sinais opostos, por isso o restante não pode ser dividido proporcionalmente. Corrige os itens ou usa uma divisão personalizada.",
     "max32": "Introduz no máximo 32 caracteres.",
     "invalidEmoji": "Introduz um único emoji.",
-    "invalidColor": "Introduz uma cor hexadecimal válida, como #1A2B3C."
+    "invalidColor": "Introduz uma cor hexadecimal válida, como #1A2B3C.",
+    "itemQuantityMaxDecimals": "A quantidade do item suporta no máximo três casas decimais.",
+    "itemQuantityPositive": "A quantidade do item deve ser superior a zero."
   },
   "Categories": {
     "search": "Pesquisar categoria...",
@@ -4782,5 +4783,10 @@
     "errorTitle": "Algo correu mal",
     "errorDescription": "Ocorreu um erro inesperado. Tenta novamente ou volta ao início.",
     "retry": "Tentar novamente"
+  },
+  "ClientUpgrade": {
+    "description": "Esta versão da app está desatualizada. Atualiza para obter a versão mais recente e tenta novamente.",
+    "refresh": "Atualizar",
+    "title": "Atualização da app disponível"
   }
 }

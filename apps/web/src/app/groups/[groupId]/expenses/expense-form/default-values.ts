@@ -15,6 +15,7 @@ import {
   amountAsDecimal,
   categoryIdSchema,
   getCurrency,
+  quantityFromStored,
   randomId,
   sharesAsDecimal,
   utcToWallTime,
@@ -47,7 +48,7 @@ const prefilledExpenseItemsSchema = z.array(
     id: z.string().optional(),
     title: z.string().optional().catch(''),
     unitPrice: z.coerce.number().finite().optional().catch(0),
-    quantity: z.coerce.number().int().positive().optional().catch(1),
+    quantity: z.coerce.number().positive().optional().catch(1),
     splitMode: itemSplitModeSchema.optional().catch('EVENLY'),
     paidFor: z
       .array(
@@ -461,7 +462,8 @@ export function buildExpenseFormDefaults(args: {
         id: item.id,
         title: item.title,
         unitPrice,
-        quantity: item.quantity,
+        // Stored milli-units → major units for the form (see quantity.ts).
+        quantity: quantityFromStored(item.quantity),
         paidFor,
         splitMode,
       }

@@ -109,7 +109,7 @@ describe('exportGroupBundle route', () => {
     expect(Object.keys(archive)).toEqual(['manifest.json'])
     expect(manifest).toMatchObject({
       format: 'spliit.cloud/export',
-      version: 1,
+      version: 2,
       scope: { type: 'GROUP', sourceId: 'grp-1' },
       complete: true,
       group: { name: 'Trip to Paris' },

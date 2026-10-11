@@ -67,8 +67,10 @@ event type:
 
 Field conventions:
 
-- Money is integer minor units: `amount.ledger.minor`, and item `unitPrice`,
-  `quantity`, and `amount`. `8450` in EUR means €84.50.
+- Money is integer minor units: `amount.ledger.minor`, and item `unitPrice`
+  and `amount`. `8450` in EUR means €84.50.
+- Item `quantity` is integer milli-units: `1500` means 1.5 items, `2000`
+  means 2. (Whole quantities read as `1000` per unit.)
 - All dates (`occurredAt`, `expenseDate`, `createdAt`) are ISO-8601 UTC
   strings.
 - `apiVersion` is always the literal `"v1"`.

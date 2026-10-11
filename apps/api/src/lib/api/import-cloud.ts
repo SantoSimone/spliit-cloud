@@ -11,6 +11,7 @@ import {
   isGroupColorId,
   isSingleEmoji,
   isSettlementCategory,
+  migrateGroupExportManifestToV2,
   normalizeHexColor,
   splitPresetSchema,
   spliitGroupExportManifestSchema,
@@ -18,6 +19,16 @@ import {
   type GroupColor,
   type SpliitGroupExportManifest,
 } from '@spliit/domain'
+
+/**
+ * Parse an import manifest and normalize pre-v2 archives (whole-unit
+ * quantities) to v2 milli-units. New archives pass through unchanged.
+ */
+function parseImportManifest(manifest: unknown): SpliitGroupExportManifest {
+  return migrateGroupExportManifestToV2(
+    spliitGroupExportManifestSchema.parse(manifest),
+  )
+}
 
 import {
   deleteS3Object,
@@ -756,7 +767,7 @@ export async function prepareCloudImport(
   input: CloudImportInput,
   actorAccountId: string,
 ): Promise<PreparedCloudImport> {
-  const manifest = spliitGroupExportManifestSchema.parse(input.manifest)
+  const manifest = parseImportManifest(input.manifest)
   validateReferences(manifest, input.participants, input.groupPreference)
   if (
     input.groupFormValues.currency !== manifest.group.ledger.currency ||
@@ -868,7 +879,7 @@ export async function importCloudGroup(
   actor: { accountId: string; email?: string | null },
   options: { tx?: Prisma.TransactionClient; prepared: PreparedCloudImport },
 ): Promise<CloudImportResult> {
-  const manifest = spliitGroupExportManifestSchema.parse(input.manifest)
+  const manifest = parseImportManifest(input.manifest)
   const boss = await getApiBoss()
   validateReferences(manifest, input.participants, input.groupPreference)
   const run = async (tx: Prisma.TransactionClient) => {

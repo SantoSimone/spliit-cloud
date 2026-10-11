@@ -188,7 +188,7 @@ describe('Issue #128 — update expense with removed participant — real DB', (
           {
             title: 'Item A',
             unitPrice: 3000,
-            quantity: 1,
+            quantity: 1000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -199,7 +199,7 @@ describe('Issue #128 — update expense with removed participant — real DB', (
           {
             title: 'Item B',
             unitPrice: 7000,
-            quantity: 1,
+            quantity: 1000,
             amount: 7000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -253,7 +253,7 @@ describe('Issue #128 — update expense with removed participant — real DB', (
             id: itemA.id,
             title: 'Item A',
             unitPrice: 3000,
-            quantity: 1,
+            quantity: 1000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -265,7 +265,7 @@ describe('Issue #128 — update expense with removed participant — real DB', (
             id: itemB.id,
             title: 'Item B',
             unitPrice: 7000,
-            quantity: 1,
+            quantity: 1000,
             amount: 7000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -434,7 +434,7 @@ describe('Issue #128 — update expense with removed participant — real DB', (
           {
             title: 'Small item',
             unitPrice: 6000,
-            quantity: 1,
+            quantity: 1000,
             amount: 6000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -487,7 +487,7 @@ describe('Issue #128 — update expense with removed participant — real DB', (
             id: itemId,
             title: 'Small item',
             unitPrice: 6000,
-            quantity: 1,
+            quantity: 1000,
             amount: 6000,
             splitMode: 'EVENLY',
             paidFor: [

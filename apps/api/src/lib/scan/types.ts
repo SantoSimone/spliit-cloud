@@ -2,7 +2,9 @@ import type { GroupContext, RecentExpense } from '../ai/context'
 
 export type ParsedReceiptItem = {
   title: string
+  /** Integer minor units of the receipt currency (e.g. cents). */
   unitPrice: number
+  /** Integer milli-units (`1000` = 1 item, `495` = 0.495 items). */
   quantity: number
 }
 
@@ -22,14 +24,23 @@ export type ReceiptAIContext = {
 
 export type ReceiptCurrentExpenseHints = {
   title?: string
+  /**
+   * Major-unit display values from the expense form (converted by the prompt,
+   * not the parser).
+   */
   amount?: number
   date?: string
   currencyCode?: string
   categoryId?: string
+  /**
+   * Major-unit display values, like the form: decimal prices,
+   * whole-or-fractional quantities.
+   */
   items?: Array<{ title: string; unitPrice: number; quantity: number }>
 }
 
 export type ReceiptExtractedResult = {
+  /** Integer minor units of the receipt currency (`NaN` when unreadable). */
   amount: number
   categoryId: string | null
   currencyCode: string | null

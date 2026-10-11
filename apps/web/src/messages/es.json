@@ -1443,7 +1443,6 @@
     "duplicateParticipant": "Ya hay otro pagador seleccionado.",
     "sharesInvalid": "Las participaciones deben estar entre 0,01 y 1.000.000 con un máximo de dos decimales.",
     "itemTitleRequired": "El nombre del elemento es obligatorio.",
-    "itemQuantityMin1": "La cantidad del elemento debe ser al menos 1.",
     "rowErrorsHeading": "Corrija estas participaciones:",
     "invalidWallTime": "Esta hora no existe en la fecha seleccionada en esta zona horaria.",
     "proportionalUnassignedItems": "Asigna cada artículo al menos a un participante para dividir el resto proporcionalmente, o usa una división personalizada.",
@@ -1451,7 +1450,9 @@
     "proportionalInvalidRatios": "Los subtotales de artículos de algunos participantes tienen signos opuestos, por lo que el resto no se puede dividir proporcionalmente. Corrige los artículos o usa una división personalizada.",
     "max32": "Introduce como máximo 32 caracteres.",
     "invalidEmoji": "Introduce un solo emoji.",
-    "invalidColor": "Introduce un color hexadecimal válido, como #1A2B3C."
+    "invalidColor": "Introduce un color hexadecimal válido, como #1A2B3C.",
+    "itemQuantityMaxDecimals": "La cantidad del elemento admite un máximo de tres decimales.",
+    "itemQuantityPositive": "La cantidad del elemento debe ser mayor que 0."
   },
   "Categories": {
     "search": "Buscar categoría...",
@@ -4833,5 +4834,10 @@
     "errorTitle": "Algo salió mal",
     "errorDescription": "Ocurrió un error inesperado. Inténtalo de nuevo o vuelve al inicio.",
     "retry": "Reintentar"
+  },
+  "ClientUpgrade": {
+    "description": "Esta versión de la app está desactualizada. Actualiza para obtener la última versión e inténtalo de nuevo.",
+    "refresh": "Actualizar",
+    "title": "Actualización de la app disponible"
   }
 }

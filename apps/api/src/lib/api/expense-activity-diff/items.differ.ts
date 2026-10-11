@@ -1,4 +1,5 @@
 import type { ExpenseApiItem } from '@spliit/domain'
+import { formatQuantity, quantityFromStored } from '@spliit/domain'
 
 import { itemsKey } from './helpers'
 import type { ChangeContext, ExpenseDiffer } from './types'
@@ -46,7 +47,10 @@ function formatItemLine(
 ): string {
   const unit = ctx.formatCurrencyCents(item.unitPrice, currency)
   const total = ctx.formatCurrencyCents(item.amount, currency)
-  return `${item.title} ${item.quantity} × ${unit} = ${total}`
+  // Stored milli-units read as major units for display (see quantity.ts);
+  // comparisons elsewhere in this file stay in stored units.
+  const quantity = formatQuantity(quantityFromStored(item.quantity))
+  return `${item.title} ${quantity} × ${unit} = ${total}`
 }
 
 /**

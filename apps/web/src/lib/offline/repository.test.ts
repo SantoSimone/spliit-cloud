@@ -69,7 +69,7 @@ function makeCatalog(
   capturedAt = new Date(),
 ) {
   return {
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     accountId,
     capturedAt,
     groups: groupIds.map((groupId) => overviewEntry(groupId)),
@@ -165,7 +165,7 @@ function makeSnapshot(
   const expenses = opts?.expenses ?? []
   const stamp = new Date(capturedAt)
   return {
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     accountId,
     groupId,
     capturedAt,
@@ -542,7 +542,7 @@ describe('offline repository', () => {
       namespace,
       capturedAt: new Date(),
       groups: [{ bogus: true }],
-      schemaVersion: 2,
+      schemaVersion: 3,
     } as never)
 
     const catalog = await repo.readCatalog(namespace)

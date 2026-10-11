@@ -2123,7 +2123,6 @@
     "duplicateParticipant": "Người tham gia trùng lặp.",
     "sharesInvalid": "Phần chia phải nằm trong khoảng từ 0,01 đến 1.000.000 với tối đa hai chữ số thập phân.",
     "itemTitleRequired": "Tên mục là bắt buộc.",
-    "itemQuantityMin1": "Số lượng của mục phải ít nhất là 1.",
     "rowErrorsHeading": "Vui lòng sửa các phần này:",
     "invalidWallTime": "Thời gian này không tồn tại vào ngày đã chọn trong múi giờ này.",
     "proportionalUnassignedItems": "Hãy gán mỗi mục cho ít nhất một người để chia phần còn lại theo tỷ lệ, hoặc dùng cách chia tùy chỉnh.",
@@ -2131,7 +2130,9 @@
     "proportionalInvalidRatios": "Tổng phụ các mục của một số người có dấu trái nhau nên không thể chia phần còn lại theo tỷ lệ. Hãy sửa các mục hoặc dùng cách chia tùy chỉnh.",
     "max32": "Tối đa 32 ký tự.",
     "invalidEmoji": "Nhập một emoji duy nhất.",
-    "invalidColor": "Nhập mã màu hex hợp lệ, ví dụ #1A2B3C."
+    "invalidColor": "Nhập mã màu hex hợp lệ, ví dụ #1A2B3C.",
+    "itemQuantityMaxDecimals": "Số lượng mục hỗ trợ tối đa 3 chữ số thập phân.",
+    "itemQuantityPositive": "Số lượng mục phải lớn hơn 0."
   },
   "Categories": {
     "search": "Tìm danh mục…",
@@ -4815,5 +4816,10 @@
     "errorTitle": "Đã xảy ra lỗi",
     "errorDescription": "Đã xảy ra lỗi không mong muốn. Hãy thử lại hoặc về trang chủ.",
     "retry": "Thử lại"
+  },
+  "ClientUpgrade": {
+    "description": "Phiên bản ứng dụng này đã lỗi thời. Làm mới để nhận phiên bản mới nhất và thử lại.",
+    "refresh": "Làm mới",
+    "title": "Có bản cập nhật ứng dụng"
   }
 }

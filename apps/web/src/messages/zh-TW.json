@@ -1407,7 +1407,6 @@
     "duplicateParticipant": "另一位付款人已經被選取。",
     "sharesInvalid": "份額必須介於 0.01 到 1,000,000 之間，且最多保留兩位小數。",
     "itemTitleRequired": "項目名稱為必填。",
-    "itemQuantityMin1": "項目數量必須至少為 1。",
     "rowErrorsHeading": "請修正以下份額：",
     "invalidWallTime": "所選日期在此時區中不存在這個時間。",
     "proportionalUnassignedItems": "請將每個項目分配給至少一位參與者，以便按比例分攤餘款，或改用自訂分攤。",
@@ -1415,7 +1414,9 @@
     "proportionalInvalidRatios": "部分參與者的項目小計符號相反，因此無法按比例分攤餘款。請修正項目或改用自訂分攤。",
     "max32": "請輸入至多 32 個字。",
     "invalidEmoji": "請輸入單個表情符號。",
-    "invalidColor": "請輸入有效的十六進位顏色，例如 #1A2B3C。"
+    "invalidColor": "請輸入有效的十六進位顏色，例如 #1A2B3C。",
+    "itemQuantityMaxDecimals": "數量最多支援 3 位小數。",
+    "itemQuantityPositive": "數量必須大於 0。"
   },
   "Categories": {
     "search": "搜尋類別……",
@@ -4733,5 +4734,10 @@
     "errorTitle": "出了點問題",
     "errorDescription": "發生未預期的錯誤，請再試一次或返回首頁。",
     "retry": "重試"
+  },
+  "ClientUpgrade": {
+    "description": "目前應用程式版本已過期。請重新整理以取得最新版本後再試一次。",
+    "refresh": "重新整理",
+    "title": "應用程式更新可用"
   }
 }

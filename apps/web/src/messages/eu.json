@@ -1421,7 +1421,6 @@
     "duplicateParticipant": "Beste ordaintzaile bat dago jada hautatuta.",
     "sharesInvalid": "Partaidetzak 0,01 eta 1.000.000 artekoak izan behar dira, gehienez bi hamartarrekin.",
     "itemTitleRequired": "Elementuaren izena beharrezkoa da.",
-    "itemQuantityMin1": "Elementuaren kopuruak gutxienez 1 izan behar du.",
     "rowErrorsHeading": "Zuzendu parte hauek:",
     "invalidWallTime": "Ordu hau ez dago hautatutako datan ordu-eremu honetan.",
     "proportionalUnassignedItems": "Esleitu artikulu bakoitza gutxienez parte-hartzaile bati gainerakoa proportzionalki banatzeko, edo erabili banaketa pertsonalizatua.",
@@ -1429,7 +1428,9 @@
     "proportionalInvalidRatios": "Parte-hartzaile batzuen artikulu-azpitotalek kontrako zeinuak dituzte; beraz, gainerakoa ezin da proportzionalki banatu. Zuzendu artikuluak edo erabili banaketa pertsonalizatua.",
     "max32": "Sartu gehienez 32 karaktere.",
     "invalidEmoji": "Sartu emoji bakarra.",
-    "invalidColor": "Sartu baliozko kolore hamaseitarra, adibidez #1A2B3C."
+    "invalidColor": "Sartu baliozko kolore hamaseitarra, adibidez #1A2B3C.",
+    "itemQuantityMaxDecimals": "Elementuaren kopuruak gehienez hiru hamartar izan ditzake.",
+    "itemQuantityPositive": "Elementuaren kopurua zero baino handiagoa izan behar da."
   },
   "Categories": {
     "search": "Bilatu kategoria...",
@@ -4780,5 +4781,10 @@
     "errorTitle": "Zerbaitek huts egin du",
     "errorDescription": "Ustekabeko errore bat gertatu da. Saiatu berriro edo itzuli hasierara.",
     "retry": "Saiatu berriro"
+  },
+  "ClientUpgrade": {
+    "description": "Aplikazioaren bertsio hau zaharkituta dago. Freskatu azken bertsioa eskuratzeko eta saiatu berriro.",
+    "refresh": "Freskatu",
+    "title": "Aplikazioaren eguneraketa eskuragarri"
   }
 }

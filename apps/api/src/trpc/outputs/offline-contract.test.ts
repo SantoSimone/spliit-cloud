@@ -45,7 +45,7 @@ describe('offline-contract browser safety', () => {
     expect(source).toContain('listBalancesOutputSchema')
 
     const contract = await import('../outputs/offline')
-    expect(contract.OFFLINE_SCHEMA_VERSION).toBe(2)
+    expect(contract.OFFLINE_SCHEMA_VERSION).toBe(3)
     expect(contract.OFFLINE_MAX_EXPENSES).toBe(500)
     expect(contract.OFFLINE_MAX_ACTIVITIES).toBe(200)
     expect(contract.offlineCatalogOutputSchema).toBeDefined()

@@ -95,8 +95,8 @@ async function seedLegacyData(client: PrismaClient) {
 
     INSERT INTO "ExpenseItem" ("id", "expenseId", "title", "unitPrice", "quantity", "amount", "splitMode", "createdAt")
     VALUES
-      ('it-1', 'e-item', 'Beer', 1000, 1, 1000, 'BY_SHARES', CURRENT_TIMESTAMP),
-      ('it-2', 'e-item', 'Wine', 2000, 1, 2000, 'BY_PERCENTAGE', CURRENT_TIMESTAMP);
+      ('it-1', 'e-item', 'Beer', 1000, 1000, 1000, 'BY_SHARES', CURRENT_TIMESTAMP),
+      ('it-2', 'e-item', 'Wine', 2000, 1000, 2000, 'BY_PERCENTAGE', CURRENT_TIMESTAMP);
 
     INSERT INTO "ExpenseItemPaidFor" ("expenseItemId", "ledgerParticipantId", "shares")
     VALUES
@@ -135,7 +135,7 @@ async function seedLegacyData(client: PrismaClient) {
     )
     VALUES (
       'rs-shares', 'lg-1', 'WEEKLY', 1, CURRENT_DATE, 1, CURRENT_DATE + INTERVAL '7 days', 2, 'INDEFINITE', 1, 'ACTIVE',
-      '{"title":"Shares series","categoryId":"general","amount":3000,"originalAmount":null,"originalCurrency":null,"conversionRate":null,"conversionSource":null,"paidBySplitMode":"BY_SHARES","paidByList":[{"ledgerParticipantId":"lp-a","shares":1},{"ledgerParticipantId":"lp-b","shares":1}],"paidFor":[{"ledgerParticipantId":"lp-a","shares":2},{"ledgerParticipantId":"lp-b","shares":1}],"splitMode":"BY_SHARES","notes":null,"items":[{"title":"Beer","unitPrice":1000,"quantity":1,"amount":1000,"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":2},{"ledgerParticipantId":"lp-b","shares":1}]}],"itemizedRemainder":{"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":3},{"ledgerParticipantId":"lp-b","shares":3}]}}'::JSONB,
+      '{"title":"Shares series","categoryId":"general","amount":3000,"originalAmount":null,"originalCurrency":null,"conversionRate":null,"conversionSource":null,"paidBySplitMode":"BY_SHARES","paidByList":[{"ledgerParticipantId":"lp-a","shares":1},{"ledgerParticipantId":"lp-b","shares":1}],"paidFor":[{"ledgerParticipantId":"lp-a","shares":2},{"ledgerParticipantId":"lp-b","shares":1}],"splitMode":"BY_SHARES","notes":null,"items":[{"title":"Beer","unitPrice":1000,"quantity":1000,"amount":1000,"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":2},{"ledgerParticipantId":"lp-b","shares":1}]}],"itemizedRemainder":{"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":3},{"ledgerParticipantId":"lp-b","shares":3}]}}'::JSONB,
       1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     ),
     (
@@ -148,7 +148,7 @@ async function seedLegacyData(client: PrismaClient) {
       -- is BY_SHARES (×100), one item is BY_SHARES (×100) while the other
       -- is BY_PERCENTAGE (untouched), and the remainder is BY_SHARES (×100).
       'rs-mixed', 'lg-1', 'WEEKLY', 1, CURRENT_DATE, 1, CURRENT_DATE + INTERVAL '7 days', 2, 'INDEFINITE', 1, 'ACTIVE',
-      '{"title":"Mixed series","categoryId":"general","amount":3000,"originalAmount":null,"originalCurrency":null,"conversionRate":null,"conversionSource":null,"paidBySplitMode":"BY_SHARES","paidByList":[{"ledgerParticipantId":"lp-a","shares":1},{"ledgerParticipantId":"lp-b","shares":1}],"paidFor":[{"ledgerParticipantId":"lp-a","shares":1},{"ledgerParticipantId":"lp-b","shares":1}],"splitMode":"EVENLY","notes":null,"items":[{"title":"Beer","unitPrice":1000,"quantity":1,"amount":1000,"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":2},{"ledgerParticipantId":"lp-b","shares":1}]},{"title":"Wine","unitPrice":2000,"quantity":1,"amount":2000,"splitMode":"BY_PERCENTAGE","paidFor":[{"ledgerParticipantId":"lp-a","shares":7000},{"ledgerParticipantId":"lp-b","shares":3000}]}],"itemizedRemainder":{"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":3},{"ledgerParticipantId":"lp-b","shares":3}]}}'::JSONB,
+      '{"title":"Mixed series","categoryId":"general","amount":3000,"originalAmount":null,"originalCurrency":null,"conversionRate":null,"conversionSource":null,"paidBySplitMode":"BY_SHARES","paidByList":[{"ledgerParticipantId":"lp-a","shares":1},{"ledgerParticipantId":"lp-b","shares":1}],"paidFor":[{"ledgerParticipantId":"lp-a","shares":1},{"ledgerParticipantId":"lp-b","shares":1}],"splitMode":"EVENLY","notes":null,"items":[{"title":"Beer","unitPrice":1000,"quantity":1000,"amount":1000,"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":2},{"ledgerParticipantId":"lp-b","shares":1}]},{"title":"Wine","unitPrice":2000,"quantity":1000,"amount":2000,"splitMode":"BY_PERCENTAGE","paidFor":[{"ledgerParticipantId":"lp-a","shares":7000},{"ledgerParticipantId":"lp-b","shares":3000}]}],"itemizedRemainder":{"splitMode":"BY_SHARES","paidFor":[{"ledgerParticipantId":"lp-a","shares":3},{"ledgerParticipantId":"lp-b","shares":3}]}}'::JSONB,
       1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     );
   `)

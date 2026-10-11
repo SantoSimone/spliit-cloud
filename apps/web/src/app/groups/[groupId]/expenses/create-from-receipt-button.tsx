@@ -44,6 +44,7 @@ import {
 } from '@/lib/utils'
 import { trpc } from '@/trpc/client'
 import {
+  amountAsDecimal,
   categoryIdSchema,
   getCategoryById,
   isExpenseDocumentImage,
@@ -51,6 +52,7 @@ import {
   isSupportedExpenseDocumentUpload,
   localeLabels,
   MAX_EXPENSE_DOCUMENT_SIZE,
+  quantityFromStored,
   RECEIPT_SCAN_ACCEPT,
   isExpenseDocumentSizeWithinLimit,
   type CategoryId,
@@ -123,11 +125,16 @@ function writeTranslatePreference(value: boolean): void {
 }
 
 export type ReceiptExtractedInfo = {
+  /** Integer minor units of the receipt currency. */
   amount: number
   categoryId: string | null
   currencyCode: string | null
   date: string | null
   title: string | null
+  /**
+   * Major display units (converted from the API's stored units on receipt):
+   * decimal prices, whole-or-fractional quantities.
+   */
   items: Array<{ title: string; unitPrice: number; quantity: number }>
   empty: boolean
 }
@@ -463,13 +470,27 @@ function ReceiptDialogContent({
         currentExpense,
       })
       if (requestId !== requestIdRef.current) return
-      setReceiptInfo(result)
+      // The API speaks stored units (minor-unit money, milli-unit
+      // quantities); the dialog, preview, and form all work in major display
+      // units, so convert exactly once here at the receipt boundary.
+      const scanCurrency = result.currencyCode
+        ? (getCurrency(result.currencyCode) ?? getCurrencyFromGroup(group))
+        : getCurrencyFromGroup(group)
+      const converted = {
+        ...result,
+        items: result.items.map((item) => ({
+          title: item.title,
+          unitPrice: amountAsDecimal(item.unitPrice, scanCurrency),
+          quantity: quantityFromStored(item.quantity),
+        })),
+      }
+      setReceiptInfo(converted)
       mascot.react('idle')
       // Empty results stay in the dialog with an explicit notice instead of
       // jumping to the preview: the user fills the expense in manually, with
       // the photo already attached, via Continue below.
-      if (mode === 'create' && directAccept && !result.empty) {
-        onAccept?.({ info: result, document })
+      if (mode === 'create' && directAccept && !converted.empty) {
+        onAccept?.({ info: converted, document })
       }
     } catch (err) {
       if (requestId !== requestIdRef.current) return

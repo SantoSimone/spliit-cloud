@@ -4,7 +4,11 @@ import {
   normalizeDigits,
   stripIntegerLeadingZeros,
 } from '@/lib/currency-input'
-import { MAX_DISPLAY_SHARES, sharesAsFixedUnits } from '@spliit/domain'
+import {
+  MAX_DISPLAY_SHARES,
+  QUANTITY_MAX_DECIMALS,
+  sharesAsFixedUnits,
+} from '@spliit/domain'
 
 export { amountPlaceholder }
 
@@ -45,6 +49,29 @@ export const enforcePercentagePattern = (value: string, locale = 'en-US') =>
 
 export const enforceSharePattern = (value: string, locale = 'en-US') =>
   enforceDecimalPattern(value, locale)
+
+/**
+ * Quantity sanitizer: like the share pattern but with up to 3 fraction digits
+ * (QUANTITY_MAX_DECIMALS) and no negatives. Whole numbers pass through
+ * untouched (`2` stays `2`); decimals survive only when the user types an
+ * explicit separator. Raw strings (incl. a trailing ".") are preserved so
+ * in-progress typing round-trips; the schema coerces to numbers at validation.
+ */
+export const enforceQuantityPattern = (value: string, locale = 'en-US') => {
+  const sanitized = baseEnforceCurrencyPattern(
+    value,
+    QUANTITY_MAX_DECIMALS,
+    locale,
+  ).replace(/-/g, '')
+  if (sanitized === '') return sanitized
+  const dot = sanitized.indexOf('.')
+  const integer = stripIntegerLeadingZeros(
+    dot === -1 ? sanitized : sanitized.slice(0, dot),
+  )
+  const fraction = dot === -1 ? '' : sanitized.slice(dot + 1)
+  if (dot === -1) return integer
+  return `${integer || '0'}.${fraction}`
+}
 
 type PasteCurrency = { code: string; symbol: string }
 

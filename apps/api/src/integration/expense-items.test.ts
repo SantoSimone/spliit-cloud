@@ -141,7 +141,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Item A',
             unitPrice: 3000,
-            quantity: 1,
+            quantity: 1000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -153,7 +153,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Item B',
             unitPrice: 7000,
-            quantity: 1,
+            quantity: 1000,
             amount: 7000,
             splitMode: 'BY_SHARES',
             paidFor: [
@@ -225,7 +225,7 @@ describe('Expense items — real DB', () => {
           id: clientItemId,
           title: 'Copied item',
           unitPrice: 1000,
-          quantity: 1,
+          quantity: 1000,
           amount: 1000,
           splitMode: 'EVENLY' as const,
           paidFor: [{ participant: participants['Admin'], shares: 1 }],
@@ -283,7 +283,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Small item',
             unitPrice: 6000,
-            quantity: 1,
+            quantity: 1000,
             amount: 6000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -343,7 +343,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Doc item',
             unitPrice: 2000,
-            quantity: 1,
+            quantity: 1000,
             amount: 2000,
             splitMode: 'EVENLY',
             paidFor: [{ participant: participants['Admin'], shares: 1 }],
@@ -397,7 +397,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Item with participants',
             unitPrice: 8000,
-            quantity: 1,
+            quantity: 1000,
             amount: 8000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -446,7 +446,7 @@ describe('Expense items — real DB', () => {
             id: saved!.items[0].id,
             title: 'Item with participants',
             unitPrice: 8000,
-            quantity: 1,
+            quantity: 1000,
             amount: 8000,
             splitMode: 'EVENLY',
             paidFor: [],
@@ -494,7 +494,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'First item',
             unitPrice: 5000,
-            quantity: 1,
+            quantity: 1000,
             amount: 5000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -533,7 +533,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Second item',
             unitPrice: 7000,
-            quantity: 1,
+            quantity: 1000,
             amount: 7000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -544,7 +544,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Third item',
             unitPrice: 3000,
-            quantity: 1,
+            quantity: 1000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -594,7 +594,7 @@ describe('Expense items — real DB', () => {
             {
               title: 'Expensive item',
               unitPrice: 6000,
-              quantity: 1,
+              quantity: 1000,
               amount: 6000,
               splitMode: 'EVENLY',
               paidFor: [{ participant: participants['Admin'], shares: 1 }],
@@ -666,7 +666,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'List item',
             unitPrice: 3000,
-            quantity: 1,
+            quantity: 1000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -732,7 +732,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Bulk item',
             unitPrice: 1000,
-            quantity: 3,
+            quantity: 3000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -747,10 +747,53 @@ describe('Expense items — real DB', () => {
     const saved = await readExpenseItems(expenseId)
     expect(saved).not.toBeNull()
     expect(saved!.items).toHaveLength(1)
-    expect(saved!.items[0].quantity).toBe(3)
+    expect(saved!.items[0].quantity).toBe(3000)
     expect(saved!.items[0].unitPrice).toBe(1000)
     expect(saved!.items[0].amount).toBe(3000)
     expect(saved!.items[0].paidFor).toHaveLength(2)
+  })
+
+  it('persists fractional milli-unit quantities with a rounded line amount', async () => {
+    const { groupId, participants } = await createGroupWithMembers(
+      `Item-Fractional-${runId}`,
+      ['Alice'],
+    )
+
+    const { expenseId } = await makeCaller().expenses.create({
+      requestId: crypto.randomUUID(),
+      groupId,
+      expense: {
+        title: 'Fractional quantity item',
+        amount: 375,
+        paidByList: [{ participant: participants['Admin'], shares: 375 }],
+        paidBySplitMode: 'BY_AMOUNT',
+        isMultiPayer: false,
+        paidFor: [{ participant: participants['Admin'], shares: 1 }],
+        category: 'general',
+        splitMode: 'EVENLY',
+        expenseDate: new Date().toISOString(),
+        expenseTimeZone: 'UTC',
+        documents: [],
+        recurrenceRule: 'NONE',
+        items: [
+          {
+            title: 'Apples',
+            unitPrice: 250,
+            // Stored milli-units: 1500 = 1.5 units × 250 minor = 375.
+            quantity: 1500,
+            amount: 375,
+            splitMode: 'EVENLY',
+            paidFor: [{ participant: participants['Admin'], shares: 1 }],
+          },
+        ],
+      },
+    })
+
+    const saved = await readExpenseItems(expenseId)
+    expect(saved).not.toBeNull()
+    expect(saved!.items).toHaveLength(1)
+    expect(saved!.items[0].quantity).toBe(1500)
+    expect(saved!.items[0].amount).toBe(375)
   })
 
   // ------------------------------------------------------------------
@@ -782,7 +825,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Small item',
             unitPrice: 4000,
-            quantity: 1,
+            quantity: 1000,
             amount: 4000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -851,7 +894,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Big shop',
             unitPrice: 8591,
-            quantity: 1,
+            quantity: 1000,
             amount: 8591,
             splitMode: 'EVENLY',
             paidFor: [{ participant: participants['Admin'], shares: 1 }],
@@ -859,7 +902,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Small item',
             unitPrice: 500,
-            quantity: 1,
+            quantity: 1000,
             amount: 500,
             splitMode: 'EVENLY',
             paidFor: [{ participant: participants['Alice'], shares: 1 }],
@@ -919,7 +962,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Big shop',
             unitPrice: 8591,
-            quantity: 1,
+            quantity: 1000,
             amount: 8591,
             splitMode: 'EVENLY',
             paidFor: [{ participant: participants['Admin'], shares: 1 }],
@@ -927,7 +970,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Small item',
             unitPrice: 500,
-            quantity: 1,
+            quantity: 1000,
             amount: 500,
             splitMode: 'EVENLY',
             paidFor: [{ participant: participants['Alice'], shares: 1 }],
@@ -987,7 +1030,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Percentage item',
             unitPrice: 10000,
-            quantity: 1,
+            quantity: 1000,
             amount: 10000,
             splitMode: 'BY_PERCENTAGE',
             // 7000 = 70%, 3000 = 30%
@@ -1049,7 +1092,7 @@ describe('Expense items — real DB', () => {
           {
             title: 'Item with participants',
             unitPrice: 6000,
-            quantity: 1,
+            quantity: 1000,
             amount: 6000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -1120,7 +1163,7 @@ describe('Expense items — real DB', () => {
             {
               title: 'Zero-share item',
               unitPrice: 1000,
-              quantity: 1,
+              quantity: 1000,
               amount: 1000,
               splitMode: 'EVENLY',
               paidFor: [
@@ -1164,7 +1207,7 @@ describe('Expense items — real DB', () => {
             {
               title: 'Duplicate item',
               unitPrice: 1000,
-              quantity: 1,
+              quantity: 1000,
               amount: 1000,
               splitMode: 'EVENLY',
               paidFor: [

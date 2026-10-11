@@ -3,7 +3,7 @@ import { Cause, Clock, Effect, Exit, Fiber } from 'effect'
 import { TestClock } from 'effect/testing'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { buildNamespace } from './contract'
+import { OFFLINE_CONTRACT_VERSION, buildNamespace } from './contract'
 import { OfflineStorageError } from './errors'
 import { OfflineRepository } from './repository'
 import {
@@ -84,7 +84,7 @@ function makeCatalog(
   revisions?: Record<string, string>,
 ) {
   return {
-    schemaVersion: 2 as const,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     accountId,
     capturedAt: new Date(),
     groups: groupIds.map((id) =>
@@ -178,7 +178,7 @@ function makeSnapshot(
   const capturedAt = new Date()
   const stamp = new Date(capturedAt)
   return {
-    schemaVersion: 2 as const,
+    schemaVersion: OFFLINE_CONTRACT_VERSION,
     accountId,
     groupId,
     capturedAt,

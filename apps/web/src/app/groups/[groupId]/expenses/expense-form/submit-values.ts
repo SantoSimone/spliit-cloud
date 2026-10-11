@@ -2,11 +2,18 @@ import type { Currency, Expense, ExpenseFormInputValues } from '@spliit/domain'
 import {
   amountAsMinorUnits,
   getCurrency,
+  lineAmountMinorFromMajor,
   parseTimeMinutes,
+  quantityToStored,
   serializePaidBy,
   serializePaidFor,
   wallTimeToUtc,
 } from '@spliit/domain'
+
+// Convert user-facing form values (decimal major units in the selected
+// expense currency, display percentages, major-unit quantities) to the
+// storage units the API expects (integer minor units, basis points,
+// milli-unit quantities).
 
 // Convert user-facing form values (decimal major units in the selected
 // expense currency, display percentages) to the storage units the API
@@ -122,9 +129,15 @@ export function buildSubmitValues(
   }
 
   const items: Expense['items'] = (values.items ?? []).map((item) => {
-    const quantity = Math.max(1, Math.round(item.quantity))
+    // Major-unit quantity (fractional allowed) → stored milli-units;
+    // the line amount rounds once via the shared helper.
+    const quantityMajor = Number(item.quantity) || 0
+    const quantity = quantityToStored(quantityMajor)
     const unitPriceMinor = amountAsMinorUnits(item.unitPrice, inputCurrency)
-    const lineAmountMinor = unitPriceMinor * quantity
+    const lineAmountMinor = lineAmountMinorFromMajor(
+      unitPriceMinor,
+      quantityMajor,
+    )
     const paidFor = serializePaidFor({
       splitMode: item.splitMode,
       amount: lineAmountMinor,
