@@ -1485,8 +1485,8 @@
   },
   "CreateFromReceipt": {
     "Dialog": {
-      "description": "영수증 사진으로 지출 내역을 자동으로 불러와요.",
-      "body": "영수증 사진을 업로드하면, 가능하면 지출 정보를 스캔해서 추출해 드려요.",
+      "description": "영수증 사진이나 문서에서 지출 정보를 추출해요.",
+      "body": "영수증 사진이나 문서(PDF, TXT, CSV, DOCX, ODT)를 업로드하면, 가능하면 지출 정보를 스캔해서 추출해 드려요.",
       "selectImage": "사진 선택하기…",
       "titleLabel": "제목:",
       "categoryLabel": "카테고리:",
@@ -1505,10 +1505,12 @@
       "scanningHint": "스캔에 시간이 조금 걸릴 수 있습니다 — 잠시만 기다려 주세요.",
       "fillBody": "첨부된 영수증을 선택하거나 새 영수증을 업로드하세요 — 스캔하여 이 지출의 세부 정보를 제안합니다.",
       "translateToLocale": "제목과 항목을 {language}(으)로 번역",
-      "dropTitle": "영수증 이미지를 여기에 놓으세요",
-      "dropDescription": "AI로 스캔할 이미지 한 장을 여기에 놓으세요",
+      "dropTitle": "영수증 파일을 놓으세요",
+      "dropDescription": "AI로 스캔할 파일 하나를 여기에 놓으세요",
       "takePhoto": "사진 촬영",
-      "scanReceipt": "영수증 스캔"
+      "scanReceipt": "영수증 스캔",
+      "emptyNotice": "이 파일에서는 지출 내역을 읽을 수 없었어요. 계속해서 지출을 직접 입력해 주세요 — 파일은 첨부된 채로 남아 있어요.",
+      "scannedDocumentFallback": "스캔된 문서"
     },
     "TooBigToast": {
       "title": "파일이 너무 커요",
@@ -1521,8 +1523,8 @@
     },
     "unknown": "알 수 없음",
     "UnsupportedToast": {
-      "title": "이미지가 필요해요",
-      "aiDescription": "AI 영수증 스캔은 이미지 파일만 지원해요."
+      "title": "지원하지 않는 파일",
+      "aiDescription": "AI 영수증 스캔은 이미지, PDF, 텍스트 문서(TXT, CSV, DOCX, ODT)를 지원해요."
     },
     "TimeoutToast": {
       "title": "영수증 스캔 시간이 초과됐어요",
@@ -3622,7 +3624,12 @@
       "invalidDate": "지출 전체 양식에서 올바른 날짜를 선택하세요.",
       "unsupportedCurrency": "음성으로 입력한 통화는 지원되지 않습니다. 지출 전체 양식에서 선택하세요."
     },
-    "addExpenseAction": "지출 추가"
+    "addExpenseAction": "지출 추가",
+    "itemsGapMismatch": "항목 합계는 {items}이지만 영수증 합계는 {total}입니다 (차이: {gap}).",
+    "addRoundingAsItem": "{amount} 반올림 추가",
+    "roundingItemTitle": "반올림",
+    "roundingRequiredError": "항목 합계는 총액과 일치해야 합니다. 반올림 항목을 유지하거나, 지출을 직접 수정하세요.",
+    "subtractRoundingAsItem": "{amount} 반올림 차감"
   },
   "Feedback": {
     "navigationLabel": "피드백",

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isExpenseDocumentSizeWithinLimit,
   isExpenseDocumentImage,
+  isScannableReceiptDocument,
   isSupportedExpenseDocumentUpload,
   MAX_EXPENSE_DOCUMENT_SIZE,
   mimeTypeForExpenseDocumentFileName,
@@ -89,5 +90,43 @@ describe('expense document types', () => {
     expect(mimeTypeForExpenseDocumentFileName('receipt.DOCX')).toBe(
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     )
+  })
+
+  it('identifies documents the receipt scan accepts', () => {
+    for (const [fileName, contentType] of [
+      ['receipt.jpg', 'image/jpeg'],
+      ['receipt.png', 'image/png'],
+      ['photo.HEIC', 'image/heic'],
+      ['invoice.pdf', 'application/pdf'],
+      ['notes.txt', 'text/plain'],
+      ['export.csv', 'text/csv'],
+      [
+        'invoice.docx',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ],
+      ['letter.odt', 'application/vnd.oasis.opendocument.text'],
+    ]) {
+      expect(isScannableReceiptDocument({ fileName, contentType })).toBe(true)
+    }
+    // Extension fallback for generic content types.
+    expect(
+      isScannableReceiptDocument({
+        fileName: 'invoice.pdf',
+        contentType: 'application/octet-stream',
+      }),
+    ).toBe(true)
+    // Attachable but not scannable: legacy and spreadsheet formats.
+    for (const [fileName, contentType] of [
+      ['legacy.doc', 'application/msword'],
+      ['sheet.xls', 'application/vnd.ms-excel'],
+      [
+        'sheet.xlsx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ],
+      ['sheet.ods', 'application/vnd.oasis.opendocument.spreadsheet'],
+      ['page.html', 'text/html'],
+    ]) {
+      expect(isScannableReceiptDocument({ fileName, contentType })).toBe(false)
+    }
   })
 })

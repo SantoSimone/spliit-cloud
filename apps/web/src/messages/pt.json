@@ -1307,8 +1307,8 @@
     "Dialog": {
       "triggerTitle": "Digitalização de recibo com IA",
       "title": "Criar a partir de recibo",
-      "description": "Extrair as informações da despesa a partir de uma foto de recibo.",
-      "body": "Envia a foto de um recibo, e vamos digitalizá-la para extrair as informações da despesa se for possível.",
+      "description": "Extrair as informações da despesa a partir da foto de um recibo ou de um documento.",
+      "body": "Envia a foto de um recibo ou um documento (PDF, TXT, CSV, DOCX, ODT), e vamos digitalizá-lo para extrair as informações da despesa se for possível.",
       "selectImage": "Selecionar imagem…",
       "titleLabel": "Título:",
       "categoryLabel": "Categoria:",
@@ -1325,10 +1325,12 @@
       "scanningHint": "A digitalização pode demorar um pouco — aguarde.",
       "fillBody": "Escolha um recibo anexado ou carregue um novo — vamos digitalizá-lo para sugerir os detalhes desta despesa.",
       "translateToLocale": "Traduzir título e itens para {language}",
-      "dropTitle": "Solte uma imagem do recibo",
-      "dropDescription": "Solte uma imagem aqui para a digitalizar com IA",
+      "dropTitle": "Solte um ficheiro do recibo",
+      "dropDescription": "Solte um ficheiro aqui para o digitalizar com IA",
       "takePhoto": "Tirar fotografia",
-      "scanReceipt": "Digitalizar recibo"
+      "scanReceipt": "Digitalizar recibo",
+      "emptyNotice": "Não foi possível ler nenhum detalhe da despesa deste ficheiro. Continua para preencher a despesa manualmente — o ficheiro permanece anexado.",
+      "scannedDocumentFallback": "Documento digitalizado"
     },
     "unknown": "Desconhecido",
     "TooBigToast": {
@@ -1341,8 +1343,8 @@
       "retry": "Tentar novamente"
     },
     "UnsupportedToast": {
-      "title": "É necessária uma imagem",
-      "aiDescription": "A digitalização de recibos com IA suporta apenas ficheiros de imagem."
+      "title": "Ficheiro não suportado",
+      "aiDescription": "A digitalização de recibos com IA suporta imagens, PDF e documentos de texto (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Tempo esgotado para a digitalização do recibo",
@@ -3577,7 +3579,12 @@
       "invalidDate": "Escolha uma data válida no formulário completo da despesa.",
       "unsupportedCurrency": "A moeda indicada não é suportada; escolha uma no formulário completo da despesa."
     },
-    "addExpenseAction": "Adicionar despesa"
+    "addExpenseAction": "Adicionar despesa",
+    "itemsGapMismatch": "Os itens somam {items}, mas o total do recibo é {total} (diferença: {gap}).",
+    "addRoundingAsItem": "Adicionar {amount} de arredondamento",
+    "roundingItemTitle": "Arredondamento",
+    "roundingRequiredError": "Os itens têm de somar o total. Mantém a linha de arredondamento ou edita a despesa manualmente.",
+    "subtractRoundingAsItem": "Subtrair {amount} de arredondamento"
   },
   "Feedback": {
     "navigationLabel": "Comentários",

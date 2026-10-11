@@ -13,6 +13,7 @@ import {
   type BreakdownRow,
 } from './expense-item-breakdown'
 import { ExpenseItemsOverflowToggle } from './expense-items-overflow-toggle'
+import { ReceiptItemRow, ReceiptItemsShell } from './receipt-items-shell'
 
 /**
  * Resolve the currency used for stored item amounts. Items are always persisted
@@ -49,6 +50,13 @@ type Item = {
   /** Stored split (minor-unit shares). Absent for legacy callers. */
   splitMode?: string
   paidFor?: Array<{ ledgerParticipantId: string; shares: number }>
+  /**
+   * Minor-unit unit price and quantity persisted on the item. Optional so
+   * legacy callers (tests, cached shapes without the fields) keep working —
+   * rows without both simply omit the qty sub-line.
+   */
+  unitPrice?: number
+  quantity?: number
 }
 
 type ItemizedRemainder = {
@@ -133,74 +141,84 @@ export function ExpenseItemsSummary({
     expanded || remaining <= 0 ? items : items.slice(0, maxPreview)
 
   return (
-    <section className="space-y-2">
-      <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {t('items.title')}
-      </h3>
-      <div className="space-y-1 text-sm">
-        {visibleItems.map((item) => {
-          const paidFor = showAssignees ? item.paidFor : undefined
-          const names =
-            paidFor && item.splitMode
-              ? getBreakdownNames(
-                  paidFor.map((row) => ({
+    <ReceiptItemsShell
+      heading={t('items.title')}
+      footer={
+        remaining > 0 ? (
+          <ExpenseItemsOverflowToggle
+            expanded={expanded}
+            remaining={remaining}
+            onToggle={() => setExpanded((open) => !open)}
+          />
+        ) : undefined
+      }
+    >
+      {visibleItems.map((item) => {
+        const paidFor = showAssignees ? item.paidFor : undefined
+        const names =
+          paidFor && item.splitMode
+            ? getBreakdownNames(
+                paidFor.map((row) => ({
+                  participant: row.ledgerParticipantId,
+                  shares: row.shares,
+                })),
+                participantMap,
+              )
+            : []
+        const rows =
+          paidFor && item.splitMode && names.length > 0
+            ? toBreakdownRows(
+                paidFor,
+                getStoredItemBreakdown({
+                  amount: item.amount,
+                  splitMode: item.splitMode as SplitMode,
+                  paidFor: paidFor.map((row) => ({
                     participant: row.ledgerParticipantId,
                     shares: row.shares,
                   })),
-                  participantMap,
-                )
-              : []
-          const rows =
-            paidFor && item.splitMode && names.length > 0
-              ? toBreakdownRows(
-                  paidFor,
-                  getStoredItemBreakdown({
-                    amount: item.amount,
-                    splitMode: item.splitMode as SplitMode,
-                    paidFor: paidFor.map((row) => ({
-                      participant: row.ledgerParticipantId,
-                      shares: row.shares,
-                    })),
-                  }),
-                  participantMap,
-                )
-              : []
-          return (
-            <div key={item.id}>
-              <div className="flex items-center gap-3">
-                <span className="min-w-0 flex-1 truncate">{item.title}</span>
-                <span className="shrink-0 text-muted-foreground tabular-nums">
-                  {formatCurrency(currency, item.amount, locale)}
-                </span>
-              </div>
-              {names.length > 0 && (
-                <ItemAssignees
-                  namesText={names.join(', ')}
-                  rows={rows}
-                  currency={currency}
-                  locale={locale}
-                />
-              )}
-            </div>
-          )
-        })}
-        {showFiller && (
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="min-w-0 flex-1 truncate">
-                {otherLabel ?? t('items.title')}
-              </span>
-              <span className="shrink-0 text-muted-foreground tabular-nums">
-                {formatCurrency(currency, fillerAmount, locale)}
-              </span>
-            </div>
-            {showAssignees &&
-              (isProportionalRemainder ? (
+                }),
+                participantMap,
+              )
+            : []
+        return (
+          <ReceiptItemRow
+            key={item.id}
+            title={item.title}
+            amount={formatCurrency(currency, item.amount, locale)}
+            detail={
+              <>
+                {item.unitPrice != null &&
+                item.quantity != null &&
+                item.quantity !== 1 ? (
+                  <div className="min-w-0 truncate text-xs leading-5 text-muted-foreground tabular-nums">
+                    {`${item.quantity} × ${formatCurrency(currency, item.unitPrice, locale)}`}
+                  </div>
+                ) : null}
+                {names.length > 0 ? (
+                  <ItemAssignees
+                    namesText={names.join(', ')}
+                    rows={rows}
+                    currency={currency}
+                    locale={locale}
+                  />
+                ) : null}
+              </>
+            }
+          />
+        )
+      })}
+      {showFiller && (
+        <ReceiptItemRow
+          title={otherLabel ?? t('items.title')}
+          amount={formatCurrency(currency, fillerAmount, locale)}
+          detail={
+            showAssignees ? (
+              isProportionalRemainder ? (
                 proportionalText ? (
                   <div className="min-w-0 truncate text-xs leading-5 text-muted-foreground">
                     {proportionalText}
                   </div>
-                ) : null
+                ) : undefined
               ) : (
                 (() => {
                   const remainderPaidFor = itemizedRemainder!.paidFor
@@ -232,17 +250,11 @@ export function ExpenseItemsSummary({
                     />
                   )
                 })()
-              ))}
-          </div>
-        )}
-        {remaining > 0 && (
-          <ExpenseItemsOverflowToggle
-            expanded={expanded}
-            remaining={remaining}
-            onToggle={() => setExpanded((open) => !open)}
-          />
-        )}
-      </div>
-    </section>
+              )
+            ) : undefined
+          }
+        />
+      )}
+    </ReceiptItemsShell>
   )
 }

@@ -1488,8 +1488,8 @@
     "Dialog": {
       "triggerTitle": "Pindai struk AI",
       "title": "Buat dari tanda terima",
-      "description": "Ekstrak informasi pengeluaran dari foto tanda terima.",
-      "body": "Unggah foto struk, dan kami akan memindainya untuk mengekstrak informasi pengeluaran jika memungkinkan.",
+      "description": "Ekstrak informasi pengeluaran dari foto struk atau dokumen.",
+      "body": "Unggah foto struk atau dokumen (PDF, TXT, CSV, DOCX, ODT), dan kami akan memindainya untuk mengekstrak informasi pengeluaran jika memungkinkan.",
       "selectImage": "Pilih gambar…",
       "titleLabel": "Judul:",
       "categoryLabel": "Kategori:",
@@ -1506,10 +1506,12 @@
       "scanningHint": "Pemindaian mungkin memerlukan waktu — harap bersabar.",
       "fillBody": "Pilih struk terlampir atau unggah yang baru — kami akan memindainya untuk menyarankan detail pengeluaran ini.",
       "translateToLocale": "Terjemahkan judul dan item ke {language}",
-      "dropTitle": "Jatuhkan gambar tanda terima",
-      "dropDescription": "Seret satu gambar ke sini untuk dipindai dengan AI",
+      "dropTitle": "Jatuhkan file struk",
+      "dropDescription": "Seret satu file ke sini untuk dipindai dengan AI",
       "takePhoto": "Ambil foto",
-      "scanReceipt": "Pindai struk"
+      "scanReceipt": "Pindai struk",
+      "emptyNotice": "Tidak ada detail pengeluaran yang terbaca dari file ini. Lanjutkan untuk mengisi pengeluaran secara manual — file tetap terlampir.",
+      "scannedDocumentFallback": "Dokumen terpindai"
     },
     "unknown": "Tidak diketahui",
     "TooBigToast": {
@@ -1522,8 +1524,8 @@
       "retry": "Ulangi"
     },
     "UnsupportedToast": {
-      "title": "Gambar diperlukan",
-      "aiDescription": "Pemindaian tanda terima dengan AI hanya mendukung file gambar."
+      "title": "File tidak didukung",
+      "aiDescription": "Pemindaian struk dengan AI mendukung gambar, PDF, dan dokumen teks (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Waktu pemindaian struk habis",
@@ -3537,7 +3539,12 @@
       "invalidDate": "Pilih tanggal yang valid di formulir pengeluaran lengkap.",
       "unsupportedCurrency": "Mata uang yang disebutkan tidak didukung; pilih satu di formulir pengeluaran lengkap."
     },
-    "addExpenseAction": "Tambah pengeluaran"
+    "addExpenseAction": "Tambah pengeluaran",
+    "itemsGapMismatch": "Item berjumlah {items}, tetapi total struk adalah {total} (selisih: {gap}).",
+    "addRoundingAsItem": "Tambahkan pembulatan {amount}",
+    "roundingItemTitle": "Pembulatan",
+    "roundingRequiredError": "Item harus berjumlah sama dengan total. Pertahankan baris pembulatan, atau edit pengeluaran secara manual.",
+    "subtractRoundingAsItem": "Kurangi pembulatan {amount}"
   },
   "Feedback": {
     "navigationLabel": "Masukan",

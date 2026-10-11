@@ -1186,8 +1186,8 @@
     "Dialog": {
       "triggerTitle": "Yapay zekâ makbuz taraması",
       "title": "Makbuzdan oluştur",
-      "description": "Bir makbuz fotoğrafındaki masraf bilgilerini çekin.",
-      "body": "Bir makbuz fotoğrafı yükleyin, mümkünse masraf bilgilerini otomatik olarak çıkaracağız.",
+      "description": "Bir makbuz fotoğrafından veya belgeden masraf bilgilerini çıkarın.",
+      "body": "Bir makbuz fotoğrafı veya belge (PDF, TXT, CSV, DOCX, ODT) yükleyin, mümkünse masraf bilgilerini çıkarmak için tarayacağız.",
       "selectImage": "Resim seç…",
       "titleLabel": "Başlık:",
       "categoryLabel": "Kategori:",
@@ -1204,10 +1204,12 @@
       "scanningHint": "Tarama biraz sürebilir — lütfen bekleyin.",
       "fillBody": "Ekli bir fiş seçin veya yeni bir fiş yükleyin — bu harcamanın ayrıntılarını önermek için tarayacağız.",
       "translateToLocale": "Başlığı ve öğeleri {language} diline çevir",
-      "dropTitle": "Makbuz resmini bırakın",
-      "dropDescription": "Yapay zekâ ile taramak için bir resmi buraya bırakın",
+      "dropTitle": "Makbuz dosyasını bırakın",
+      "dropDescription": "Yapay zekâ ile taramak için bir dosyayı buraya bırakın",
       "takePhoto": "Fotoğraf çek",
-      "scanReceipt": "Makbuzu tara"
+      "scanReceipt": "Makbuzu tara",
+      "emptyNotice": "Bu dosyadan masraf detayı okunamadı. Masrafı manuel olarak girmek için devam edin — dosya ekli kalacak.",
+      "scannedDocumentFallback": "Taranmış belge"
     },
     "unknown": "Bilinmiyor",
     "TooBigToast": {
@@ -1220,8 +1222,8 @@
       "retry": "Tekrar dene"
     },
     "UnsupportedToast": {
-      "title": "Resim gerekli",
-      "aiDescription": "Yapay zekâ ile makbuz taraması yalnızca resim dosyalarını destekler."
+      "title": "Desteklenmeyen dosya",
+      "aiDescription": "Yapay zekâ ile makbuz tarama; resimleri, PDF'leri ve metin belgelerini (TXT, CSV, DOCX, ODT) destekler."
     },
     "TimeoutToast": {
       "title": "Makbuz taraması zaman aşımına uğradı",
@@ -3560,7 +3562,12 @@
       "invalidDate": "Tam harcama formunda geçerli bir tarih seçin.",
       "unsupportedCurrency": "Söylenen para birimi desteklenmiyor; tam harcama formundan bir para birimi seçin."
     },
-    "addExpenseAction": "Gider ekle"
+    "addExpenseAction": "Gider ekle",
+    "itemsGapMismatch": "Kalemler toplamı {items}, ancak fiş toplamı {total} (fark: {gap}).",
+    "addRoundingAsItem": "{amount} yuvarlama ekle",
+    "roundingItemTitle": "Yuvarlama",
+    "roundingRequiredError": "Kalemlerin toplamı genel toplama eşit olmalı. Yuvarlama satırını koruyun veya gideri elle düzenleyin.",
+    "subtractRoundingAsItem": "{amount} yuvarlama çıkar"
   },
   "Feedback": {
     "navigationLabel": "Geri bildirim",

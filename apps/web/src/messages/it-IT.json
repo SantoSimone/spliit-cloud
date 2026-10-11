@@ -1193,8 +1193,8 @@
     "Dialog": {
       "triggerTitle": "Scansione ricevuta con IA",
       "title": "Crea dalla ricevuta",
-      "description": "Estrai le informazioni sulla spesa da una foto della ricevuta.",
-      "body": "Carica la foto di una ricevuta e, se possibile, la scannerizzeremo per estrarre le informazioni sulle spese.",
+      "description": "Estrai le informazioni sulla spesa dalla foto di una ricevuta o da un documento.",
+      "body": "Carica la foto di una ricevuta o un documento (PDF, TXT, CSV, DOCX, ODT) e, se possibile, lo scannerizzeremo per estrarre le informazioni sulla spesa.",
       "selectImage": "Seleziona immagine…",
       "titleLabel": "Titolo:",
       "categoryLabel": "Categoria:",
@@ -1211,10 +1211,12 @@
       "scanningHint": "La scansione potrebbe richiedere un po’ di tempo — attendi.",
       "fillBody": "Scegli una ricevuta allegata o caricane una nuova — la scansioneremo per suggerire i dettagli di questa spesa.",
       "translateToLocale": "Traduci titolo e articoli in {language}",
-      "dropTitle": "Trascina un’immagine della ricevuta",
-      "dropDescription": "Trascina qui un’immagine per scansionarla con l’IA",
+      "dropTitle": "Trascina un file della ricevuta",
+      "dropDescription": "Trascina qui un file per scansionarlo con l'IA",
       "takePhoto": "Scatta una foto",
-      "scanReceipt": "Scansiona la ricevuta"
+      "scanReceipt": "Scansiona la ricevuta",
+      "emptyNotice": "Non è stato possibile leggere alcun dettaglio della spesa da questo file. Continua per compilare la spesa manualmente — il file resterà allegato.",
+      "scannedDocumentFallback": "Documento scansionato"
     },
     "unknown": "Sconosciuto",
     "TooBigToast": {
@@ -1227,8 +1229,8 @@
       "retry": "Riprova"
     },
     "UnsupportedToast": {
-      "title": "Immagine necessaria",
-      "aiDescription": "La scansione delle ricevute con l’IA supporta solo i file immagine."
+      "title": "File non supportato",
+      "aiDescription": "La scansione delle ricevute con l'IA supporta immagini, PDF e documenti di testo (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Scansione della ricevuta: tempo scaduto",
@@ -3577,7 +3579,12 @@
       "invalidDate": "Scegli una data valida nel modulo completo della spesa.",
       "unsupportedCurrency": "La valuta indicata non è supportata; scegline una nel modulo completo della spesa."
     },
-    "addExpenseAction": "Aggiungi spesa"
+    "addExpenseAction": "Aggiungi spesa",
+    "itemsGapMismatch": "Gli elementi ammontano a {items}, ma il totale dello scontrino è {total} (differenza: {gap}).",
+    "addRoundingAsItem": "Aggiungi {amount} di arrotondamento",
+    "roundingItemTitle": "Arrotondamento",
+    "roundingRequiredError": "Gli elementi devono corrispondere al totale. Mantieni la riga di arrotondamento o modifica la spesa manualmente.",
+    "subtractRoundingAsItem": "Sottrai {amount} di arrotondamento"
   },
   "Feedback": {
     "navigationLabel": "Segnalazioni",

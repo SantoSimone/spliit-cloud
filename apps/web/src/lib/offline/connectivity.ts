@@ -209,12 +209,14 @@ export function createConnectivityStore(options?: ConnectivityStoreOptions) {
   }
 
   /**
-   * HTTP 5xx is a server response, not proof of offline. Records a distinct
-   * server failure and keeps transport reachable (the server answered). HTTP
-   * 4xx is a normal client/auth response (401 for anonymous, 403/404 on
-   * guards): the server answered, so mark reachable and clear any stale failure
-   * instead of showing outage UI. Snapshots are retained; status UI renders
-   * distinct copy.
+   * HTTP 5xx from the health probe is a server response, not proof of offline.
+   * Records a distinct server failure and keeps transport reachable (the server
+   * answered). Probe-only: data-plane fetches (tRPC, auth) must never call this
+   * — any response they receive proves reachability, and a per-request 5xx is
+   * an application error, not downtime. HTTP 4xx is a normal client/auth
+   * response (401 for anonymous, 403/404 on guards): the server answered, so
+   * mark reachable and clear any stale failure instead of showing outage UI.
+   * Snapshots are retained; status UI renders distinct copy.
    */
   function reportServerResponse(status: number): void {
     if (!Number.isInteger(status) || status < 400 || status > 599) return

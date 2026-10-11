@@ -752,8 +752,14 @@ export function buildExpenseFormDefaults(args: {
           {
             id: randomId(),
             url: searchParams.imageUrl,
-            width: Number(searchParams.imageWidth),
-            height: Number(searchParams.imageHeight),
+            width: searchParams.imageWidth
+              ? Number(searchParams.imageWidth)
+              : null,
+            height: searchParams.imageHeight
+              ? Number(searchParams.imageHeight)
+              : null,
+            fileName: searchParams.fileName,
+            contentType: searchParams.contentType,
           },
         ]
       : [],

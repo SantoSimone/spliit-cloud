@@ -93,6 +93,36 @@ describe('ExpenseItemsSummary', () => {
     expect(screen.getByText('Alice, Bob')).toBeInTheDocument()
   })
 
+  it('shows the stored quantity and unit price below items that carry them', () => {
+    render(
+      <ExpenseItemsSummary
+        items={[
+          {
+            id: 'item-1',
+            title: 'Milk',
+            amount: 4700,
+            unitPrice: 4700,
+            quantity: 1,
+          },
+          {
+            id: 'item-2',
+            title: 'Bread',
+            amount: 3900,
+            unitPrice: 1950,
+            quantity: 2,
+          },
+          { id: 'item-3', title: 'Legacy', amount: 1000 },
+        ]}
+        currency={USD}
+        locale="en-US"
+      />,
+    )
+
+    // Minor-unit stored prices: only the qty-2 row shows its quantity.
+    expect(screen.queryByText('1 × $47.00')).not.toBeInTheDocument()
+    expect(screen.getByText('2 × $19.50')).toBeInTheDocument()
+  })
+
   it('expands an item to reveal per-person amounts that sum to the total', async () => {
     const { user } = render(
       <ExpenseItemsSummary

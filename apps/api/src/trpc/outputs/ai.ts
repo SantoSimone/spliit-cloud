@@ -18,6 +18,12 @@ export const extractExpenseInformationOutputSchema = z.object({
       quantity: z.number().int().positive(),
     }),
   ),
+  /**
+   * True when nothing usable came out of the receipt photo. Defaults to false
+   * so older in-flight results still parse; the client shows an explicit
+   * "nothing extracted" notice and keeps the photo attached for manual entry.
+   */
+  empty: z.boolean().default(false),
 })
 
 export const extractExpenseInformationFromAudioOutputSchema = z.object({

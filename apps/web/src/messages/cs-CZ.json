@@ -1200,8 +1200,8 @@
     "Dialog": {
       "triggerTitle": "Sken účtenky pomocí AI",
       "title": "Vytvořit z účtenky",
-      "description": "Získat informace o výdaji z fotografie účtenky.",
-      "body": "Nahrajte fotografii účtenky a my se pokusíme z ní získat informace o výdaji.",
+      "description": "Získat informace o výdaji z fotografie účtenky nebo z dokumentu.",
+      "body": "Nahrajte fotografii účtenky nebo dokument (PDF, TXT, CSV, DOCX, ODT) a my se pokusíme z nich získat informace o výdaji.",
       "selectImage": "Vybrat obrázek…",
       "titleLabel": "Název:",
       "categoryLabel": "Kategorie:",
@@ -1218,10 +1218,12 @@
       "scanningHint": "Skenování může chvíli trvat — buďte prosím trpěliví.",
       "fillBody": "Vyberte přiloženou účtenku nebo nahrajte novou — naskenujeme ji a navrhneme údaje pro tento výdaj.",
       "translateToLocale": "Přeložit název a položky do {language}",
-      "dropTitle": "Přetáhněte obrázek účtenky",
-      "dropDescription": "Přetáhněte sem jeden obrázek a naskenujte ho pomocí AI",
+      "dropTitle": "Přetáhněte soubor účtenky",
+      "dropDescription": "Přetáhněte sem jeden soubor a naskenujte ho pomocí AI",
       "takePhoto": "Pořídit fotografii",
-      "scanReceipt": "Naskenovat účtenku"
+      "scanReceipt": "Naskenovat účtenku",
+      "emptyNotice": "Z tohoto souboru se nepodařilo přečíst žádné podrobnosti o výdaji. Pokračujte a vyplňte výdaj ručně — soubor zůstane přiložený.",
+      "scannedDocumentFallback": "Naskenovaný dokument"
     },
     "unknown": "Neznámé",
     "TooBigToast": {
@@ -1234,8 +1236,8 @@
       "retry": "Zkusit znovu"
     },
     "UnsupportedToast": {
-      "title": "Je vyžadován obrázek",
-      "aiDescription": "Sken účtenky pomocí AI podporuje pouze obrázkové soubory."
+      "title": "Nepodporovaný soubor",
+      "aiDescription": "Sken účtenek pomocí AI podporuje obrázky, PDF a textové dokumenty (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Časový limit skenování účtenky vypršel",
@@ -3596,7 +3598,12 @@
       "invalidDate": "Vyberte platné datum v úplném formuláři výdaje.",
       "unsupportedCurrency": "Mluvená měna není podporována; vyberte jinou v úplném formuláři výdaje."
     },
-    "addExpenseAction": "Přidat výdaj"
+    "addExpenseAction": "Přidat výdaj",
+    "itemsGapMismatch": "Součet položek je {items}, ale celkem na účtence je {total} (rozdíl: {gap}).",
+    "addRoundingAsItem": "Přidat zaokrouhlení {amount}",
+    "roundingItemTitle": "Zaokrouhlení",
+    "roundingRequiredError": "Položky musí dát dohromady celkovou částku. Ponechte řádek zaokrouhlení, nebo výdaj upravte ručně.",
+    "subtractRoundingAsItem": "Odečíst zaokrouhlení {amount}"
   },
   "Feedback": {
     "navigationLabel": "Zpětná vazba",

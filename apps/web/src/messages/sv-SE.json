@@ -1049,8 +1049,8 @@
     "Dialog": {
       "triggerTitle": "AI-kvittoskanning",
       "title": "Skapa från kvitto",
-      "description": "Hämta utgiftsinformation från ett kvittofoto.",
-      "body": "Ladda upp ett foto på ett kvitto så försöker vi skanna det för att hämta utgiftsinformationen.",
+      "description": "Hämta utgiftsinformation från ett kvittofoto eller ett dokument.",
+      "body": "Ladda upp ett foto på ett kvitto eller ett dokument (PDF, TXT, CSV, DOCX, ODT) så försöker vi skanna det för att hämta utgiftsinformationen.",
       "selectImage": "Välj bild…",
       "titleLabel": "Titel:",
       "categoryLabel": "Kategori:",
@@ -1067,10 +1067,12 @@
       "scanningHint": "Skanningen kan ta en stund — ha tålamod.",
       "fillBody": "Välj ett bifogat kvitto eller ladda upp ett nytt — vi skannar det och föreslår detaljer för utgiften.",
       "translateToLocale": "Översätt titel och artiklar till {language}",
-      "dropTitle": "Släpp en kvittobild",
-      "dropDescription": "Släpp en bild här för att skanna den med AI",
+      "dropTitle": "Släpp en kvittofil",
+      "dropDescription": "Släpp en fil här för att skanna den med AI",
       "takePhoto": "Ta foto",
-      "scanReceipt": "Skanna kvitto"
+      "scanReceipt": "Skanna kvitto",
+      "emptyNotice": "Inga utgiftsdetaljer kunde läsas från den här filen. Fortsätt för att fylla i utgiften manuellt — filen förblir bifogad.",
+      "scannedDocumentFallback": "Skannat dokument"
     },
     "ErrorToast": {
       "title": "Fel vid uppladdning av dokument",
@@ -1083,8 +1085,8 @@
       "description": "Den maximala filstorleken är {maxSize}. Din fil är {size}."
     },
     "UnsupportedToast": {
-      "title": "Bild krävs",
-      "aiDescription": "AI-kvittoskanning stöder endast bildfiler."
+      "title": "Filformat som inte stöds",
+      "aiDescription": "AI-kvittoskanning stöder bilder, PDF-filer och textdokument (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Tidsgränsen för kvittoskanningen överskreds",
@@ -3548,7 +3550,12 @@
       "invalidDate": "Välj ett giltigt datum i det fullständiga utgiftsformuläret.",
       "unsupportedCurrency": "Den talade valutan stöds inte; välj en i det fullständiga utgiftsformuläret."
     },
-    "addExpenseAction": "Lägg till utgift"
+    "addExpenseAction": "Lägg till utgift",
+    "itemsGapMismatch": "Artiklarna uppgår till {items}, men totalsumman på kvittot är {total} (differens: {gap}).",
+    "addRoundingAsItem": "Lägg till avrundning på {amount}",
+    "roundingItemTitle": "Avrundning",
+    "roundingRequiredError": "Artiklarna måste uppgå till totalsumman. Behåll avrundningsraden eller redigera utgiften manuellt.",
+    "subtractRoundingAsItem": "Dra av avrundning på {amount}"
   },
   "Feedback": {
     "navigationLabel": "Återkoppling",

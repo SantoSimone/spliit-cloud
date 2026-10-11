@@ -76,12 +76,12 @@ export function reportFetchOutcomeToLegacyStore(event: FetchReportEvent): void {
   const store = getDefaultConnectivityStore()
   switch (event.kind) {
     case 'response':
-      if (event.status >= 500) {
-        store.reportServerResponse(event.status)
-      } else {
-        store.reportNetworkSuccess()
-        store.clearServerFailure()
-      }
+      // Any HTTP response proves the server is reachable — including 5xx,
+      // which is a per-request application error (e.g. a failing tRPC
+      // mutation), not downtime. Outage state latches only from transport
+      // failures and the health probe (`reportServerResponse` is probe-only).
+      store.reportNetworkSuccess()
+      store.clearServerFailure()
       return
     case 'network-failure':
       store.reportNetworkFailure(event.error)
@@ -97,9 +97,9 @@ export function probeOutcomeForFetchEvent(
 ): ProbeOutcome | null {
   switch (event.kind) {
     case 'response':
-      return event.status >= 500 && event.status <= 599
-        ? { outcome: 'server-failure', status: event.status }
-        : { outcome: 'reachable' }
+      // Data-plane responses never signal outage, even 5xx: the server
+      // answered. The health probe builds its own `server-failure` outcomes.
+      return { outcome: 'reachable' }
     case 'network-failure':
       return { outcome: 'unreachable' }
     case 'aborted':

@@ -42,7 +42,12 @@
       "invalidDate": "pick a real date in the full expense form, bestie.",
       "unsupportedCurrency": "that spoken currency is not supported; choose one in the full expense form, fr."
     },
-    "addExpenseAction": "add expense, bestie"
+    "addExpenseAction": "add expense, bestie",
+    "itemsGapMismatch": "items add up to {items}, but the receipt total is {total} (difference: {gap}).",
+    "addRoundingAsItem": "add {amount} rounding",
+    "roundingItemTitle": "rounding",
+    "roundingRequiredError": "the items have to add up to the total. keep the rounding line, or just edit the expense manually.",
+    "subtractRoundingAsItem": "subtract {amount} rounding"
   },
   "AccountSettings": {
     "nameLabel": "display name",
@@ -1216,8 +1221,8 @@
     "Dialog": {
       "triggerTitle": "AI receipt scan era",
       "title": "create from receipt",
-      "description": "pull expense lore from a receipt pic.",
-      "body": "upload a receipt pic and we’ll scan it for expense lore if the AI is feeling it.",
+      "description": "pull expense deets from a receipt pic or doc.",
+      "body": "upload a receipt pic or doc (PDF, TXT, CSV, DOCX, ODT) and we'll scan it for the expense deets if we can.",
       "selectImage": "select image…",
       "titleLabel": "title:",
       "categoryLabel": "category:",
@@ -1234,10 +1239,12 @@
       "scanningHint": "scanning can take a bit — patience, bestie.",
       "fillBody": "choose an attached receipt or upload a new one — we’ll scan it and suggest details for this expense.",
       "translateToLocale": "translate title and items to {language}",
-      "dropTitle": "drop a receipt pic",
-      "dropDescription": "drop one image here for an AI scan",
+      "dropTitle": "drop a receipt file",
+      "dropDescription": "drop one file here for an AI scan",
       "takePhoto": "snap a photo",
-      "scanReceipt": "scan receipt"
+      "scanReceipt": "scan receipt",
+      "emptyNotice": "couldn't pull any expense deets from this file. hit continue to fill it in manually — the file stays attached.",
+      "scannedDocumentFallback": "scanned doc"
     },
     "ErrorToast": {
       "title": "document upload flopped",
@@ -1250,8 +1257,8 @@
       "description": "the max upload size is {maxSize}. yours is {size}, whoops."
     },
     "UnsupportedToast": {
-      "title": "image needed",
-      "aiDescription": "AI receipt scanning is image-only."
+      "title": "unsupported file",
+      "aiDescription": "AI receipt scan takes images, PDFs, and text docs (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "receipt scan timed out",

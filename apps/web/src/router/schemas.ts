@@ -250,6 +250,8 @@ export const createExpenseSearchSchema = groupAccessSearchSchema.extend({
   imageUrl: optionalString,
   imageWidth: integerString,
   imageHeight: integerString,
+  fileName: optionalString,
+  contentType: optionalString,
   items: optionalString,
   payer: optionalString,
   participants: optionalString,

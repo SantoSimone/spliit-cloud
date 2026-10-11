@@ -364,6 +364,9 @@ describe('envSchema — AI', () => {
     expect(env.AI_RECEIPT_MODEL).toBe('gpt-5-nano')
     expect(env.AI_CATEGORY_MODEL).toBe('gpt-5-nano')
     expect(env.AI_VOICE_MODEL).toBeUndefined()
+    expect(env.AI_OCR_PROVIDER).toBe('none')
+    expect(env.AI_OCRSPACE_TIMEOUT_SECONDS).toBe(30)
+    expect(env.AI_OCR_REQUIRED).toBe(false)
   })
 
   it('parses custom provider and models', () => {
@@ -447,6 +450,35 @@ describe('envSchema — AI', () => {
     // defaults still apply
     expect(env.AI_RECEIPT_MODEL).toBe('gpt-5-nano')
     expect(env.AI_CATEGORY_MODEL).toBe('gpt-5-nano')
+  })
+
+  it('requires an OCR key when receipt extraction uses the ocrspace provider', () => {
+    expect(() =>
+      parseTestEnv({
+        PUBLIC_ENABLE_RECEIPT_EXTRACT: 'true',
+        AI_API_KEY: 'sk-test-key',
+        AI_OCR_PROVIDER: 'ocrspace',
+      }),
+    ).toThrow(/AI_OCRSPACE_API_KEY must be specified/)
+  })
+
+  it('parses successfully when the ocrspace provider is fully configured', () => {
+    const env = parseTestEnv({
+      PUBLIC_ENABLE_RECEIPT_EXTRACT: 'true',
+      AI_API_KEY: 'sk-test-key',
+      AI_OCR_PROVIDER: 'ocrspace',
+      AI_OCRSPACE_API_KEY: 'ocr-test-key',
+      AI_OCRSPACE_TIMEOUT_SECONDS: '45',
+      AI_OCR_REQUIRED: 'true',
+    })
+    expect(env.AI_OCR_PROVIDER).toBe('ocrspace')
+    expect(env.AI_OCRSPACE_API_KEY).toBe('ocr-test-key')
+    expect(env.AI_OCRSPACE_TIMEOUT_SECONDS).toBe(45)
+    expect(env.AI_OCR_REQUIRED).toBe(true)
+  })
+
+  it('rejects an unknown OCR provider', () => {
+    expect(() => parseTestEnv({ AI_OCR_PROVIDER: 'tesseract' })).toThrow()
   })
 
   it('requires an AI key when voice extraction is enabled', () => {

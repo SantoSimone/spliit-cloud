@@ -1193,8 +1193,8 @@
     "Dialog": {
       "triggerTitle": "Scanare bon cu IA",
       "title": "Adaugă din bon",
-      "description": "Extrage informații despre cheltuială dintr-o poză cu bonul.",
-      "body": "Adaugă o poză cu bonul și vom încerca să o scanăm pentru a extrage informații despre cheltuială.",
+      "description": "Extrage informații despre cheltuială dintr-o poză cu bonul sau dintr-un document.",
+      "body": "Adaugă o poză cu bonul sau un document (PDF, TXT, CSV, DOCX, ODT) și vom încerca să-l scanăm pentru a extrage informații despre cheltuială.",
       "selectImage": "Selectează o imagine…",
       "titleLabel": "Titlu:",
       "categoryLabel": "Categorie:",
@@ -1211,10 +1211,12 @@
       "scanningHint": "Scanarea poate dura puțin — te rugăm să ai răbdare.",
       "fillBody": "Alege o chitanță atașată sau încarcă una nouă — o vom scana pentru a sugera detaliile acestei cheltuieli.",
       "translateToLocale": "Traduceți titlul și articolele în {language}",
-      "dropTitle": "Trage o imagine a bonului",
-      "dropDescription": "Trage o imagine aici pentru a o scana cu IA",
+      "dropTitle": "Trage un fișier al bonului",
+      "dropDescription": "Trage un fișier aici pentru a-l scana cu IA",
       "takePhoto": "Fă o fotografie",
-      "scanReceipt": "Scanează bonul"
+      "scanReceipt": "Scanează bonul",
+      "emptyNotice": "Nu s-a putut citi niciun detaliu al cheltuielii din acest fișier. Continuă pentru a completa cheltuiala manual — fișierul rămâne atașat.",
+      "scannedDocumentFallback": "Document scanat"
     },
     "unknown": "Necunoscut",
     "TooBigToast": {
@@ -1227,8 +1229,8 @@
       "retry": "Reîncearcă"
     },
     "UnsupportedToast": {
-      "title": "Imagine necesară",
-      "aiDescription": "Scanarea bonurilor cu IA acceptă doar fișiere imagine."
+      "title": "Fișier neacceptat",
+      "aiDescription": "Scanarea bonurilor cu IA acceptă imagini, PDF-uri și documente text (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Timpul de scanare a bonului a expirat",
@@ -3577,7 +3579,12 @@
       "invalidDate": "Alege o dată validă în formularul complet al cheltuielii.",
       "unsupportedCurrency": "Moneda rostită nu este acceptată; alege una în formularul complet al cheltuielii."
     },
-    "addExpenseAction": "Adaugă cheltuială"
+    "addExpenseAction": "Adaugă cheltuială",
+    "itemsGapMismatch": "Elementele însumează {items}, dar totalul bonului este {total} (diferența: {gap}).",
+    "addRoundingAsItem": "Adaugă {amount} ca rotunjire",
+    "roundingItemTitle": "Rotunjire",
+    "roundingRequiredError": "Elementele trebuie să însumeze totalul. Păstrează linia de rotunjire sau editează cheltuiala manual.",
+    "subtractRoundingAsItem": "Scade {amount} ca rotunjire"
   },
   "Feedback": {
     "navigationLabel": "Opinii",

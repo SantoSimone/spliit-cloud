@@ -1,12 +1,22 @@
 import { Link } from '@tanstack/react-router'
-import { AlertTriangle, Check, FileAudio, Pencil, Receipt } from 'lucide-react'
-import { useMemo } from 'react'
+import {
+  AlertTriangle,
+  Check,
+  FileAudio,
+  FileText,
+  Pencil,
+  Receipt,
+} from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { AiReceiptItems } from '@/app/groups/[groupId]/expenses/ai-receipt-items'
 import { CategoryIcon } from '@/app/groups/[groupId]/expenses/category-icon'
 import Image from '@/components/app-image'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
@@ -29,7 +39,9 @@ import type { CreateExpenseSearch } from '@/router/schemas'
 import {
   amountAsDecimal,
   amountAsMinorUnits,
+  gapMinorAsMajor,
   getCategoryById,
+  getItemizedFormMinorTotals,
   type CategoryId,
   type ExpenseFormInputValues,
 } from '@spliit/domain'
@@ -57,8 +69,10 @@ export type AiExpenseDraft = {
   document?: {
     id: string
     url: string
-    width: number
-    height: number
+    width: number | null
+    height: number | null
+    fileName?: string | null
+    contentType?: string | null
   }
   issues: Array<
     'missingTitle' | 'missingAmount' | 'invalidDate' | 'unsupportedCurrency'
@@ -134,6 +148,58 @@ export function AiExpensePreview({
     normalizedCurrencyCode && !getCurrency(normalizedCurrencyCode),
   )
 
+  // Scanned line items rarely cover the receipt total exactly: the scan
+  // prompt excludes taxes and service charges by design, and each line is
+  // rounded to minor units independently at save time. Surface that minor-unit
+  // gap (same helper as save serialization) and let the user absorb it with
+  // an explicit "Rounding" row. The row stays hidden from the item list —
+  // the checkbox below is its only UI — but it flows into the edit-form
+  // handoff and quick-create values when checked.
+  const baseItems = useMemo(() => draft.items ?? [], [draft.items])
+  const baseTotals = useMemo(
+    () =>
+      baseItems.length > 0 && amountMajor != null
+        ? getItemizedFormMinorTotals(baseItems, amountMajor, inputCurrency)
+        : null,
+    [amountMajor, baseItems, inputCurrency],
+  )
+  const gapMinor = baseTotals?.gapMinor ?? 0
+  const hasItemsGap = baseTotals != null && gapMinor !== 0
+  const roundingItemMajor =
+    hasItemsGap && baseTotals != null
+      ? gapMinorAsMajor(gapMinor, inputCurrency)
+      : null
+  // Rounding is pre-checked: most scans need it, and the balanced handoff is
+  // the safer default. Unchecking surfaces an error instead of silently
+  // creating an unbalanced expense.
+  const [addRounding, setAddRounding] = useState(true)
+  const [roundingDraft, setRoundingDraft] = useState(draft)
+  if (roundingDraft !== draft) {
+    // A new scan result must never inherit the previous choice: the
+    // "Rounding" row is derived per draft, so reset during render
+    // (React-endorsed previous-render comparison, not an effect) to avoid
+    // cascading renders.
+    setRoundingDraft(draft)
+    setAddRounding(true)
+  }
+  const effectiveItems = useMemo(
+    () =>
+      hasItemsGap &&
+      addRounding &&
+      roundingItemMajor != null &&
+      baseTotals != null
+        ? [
+            ...baseItems,
+            {
+              title: t('roundingItemTitle'),
+              unitPrice: roundingItemMajor,
+              quantity: 1,
+            },
+          ]
+        : baseItems,
+    [addRounding, baseItems, baseTotals, hasItemsGap, roundingItemMajor, t],
+  )
+
   const searchParams = useMemo<CreateExpenseSearch>(() => {
     const params: CreateExpenseSearch = {}
     if (amountMinor != null) params.amount = String(amountMinor)
@@ -145,14 +211,30 @@ export function AiExpensePreview({
     if (selectedParticipantIds.size > 0) {
       params.participants = [...selectedParticipantIds].join(',')
     }
-    if (draft.items?.length) params.items = JSON.stringify(draft.items)
+    if (effectiveItems.length) params.items = JSON.stringify(effectiveItems)
     if (draft.document) {
       params.imageUrl = draft.document.url
-      params.imageWidth = String(draft.document.width)
-      params.imageHeight = String(draft.document.height)
+      if (draft.document.width != null) {
+        params.imageWidth = String(draft.document.width)
+      }
+      if (draft.document.height != null) {
+        params.imageHeight = String(draft.document.height)
+      }
+      if (draft.document.fileName) {
+        params.fileName = draft.document.fileName
+      }
+      if (draft.document.contentType) {
+        params.contentType = draft.document.contentType
+      }
     }
     return params
-  }, [amountMinor, draft, normalizedCurrencyCode, selectedParticipantIds])
+  }, [
+    amountMinor,
+    draft,
+    effectiveItems,
+    normalizedCurrencyCode,
+    selectedParticipantIds,
+  ])
 
   const formValues = useMemo<ExpenseFormInputValues>(() => {
     const defaults = buildExpenseFormDefaults({
@@ -196,7 +278,11 @@ export function AiExpensePreview({
     amountMinor != null &&
     amountMinor > 0 &&
     !hasUnresolvedCurrency &&
-    draft.issues.length === 0,
+    draft.issues.length === 0 &&
+    // An unchecked rounding gap would fail itemized validation on save:
+    // force the manual-edit path instead of one-click creating a broken
+    // expense.
+    !(hasItemsGap && !addRounding),
   )
 
   const navigateToForm = () => {
@@ -326,16 +412,84 @@ export function AiExpensePreview({
                 </div>
               </div>
             )}
-            {draft.items?.length ? (
+            {baseItems.length ? (
               <div className="col-span-2 border-t pt-3">
-                <div className="text-xs font-medium text-muted-foreground">
-                  {t('items')}
-                </div>
-                <div>
-                  {draft.items
-                    .map((item) => `${item.title} × ${item.quantity}`)
-                    .join(', ')}
-                </div>
+                <AiReceiptItems
+                  items={baseItems}
+                  currency={displayCurrency}
+                  locale={locale}
+                  heading={t('items')}
+                />
+                {hasItemsGap &&
+                baseTotals != null &&
+                roundingItemMajor != null ? (
+                  <div
+                    className={
+                      addRounding
+                        ? 'mt-2 rounded-lg border border-amber-300/60 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/20'
+                        : 'mt-2 rounded-lg border border-destructive/60 bg-destructive/10 p-3'
+                    }
+                  >
+                    <p
+                      className={
+                        addRounding
+                          ? 'text-sm text-amber-900 dark:text-amber-200'
+                          : 'text-sm text-destructive'
+                      }
+                    >
+                      {t('itemsGapMismatch', {
+                        items: formatCurrency(
+                          displayCurrency,
+                          baseTotals.itemsMinor,
+                          locale,
+                        ),
+                        total: formatCurrency(
+                          displayCurrency,
+                          baseTotals.amountMinor,
+                          locale,
+                        ),
+                        gap: formatCurrency(displayCurrency, gapMinor, locale),
+                      })}
+                    </p>
+                    {!addRounding ? (
+                      <p role="alert" className="mt-1 text-sm text-destructive">
+                        {t('roundingRequiredError')}
+                      </p>
+                    ) : null}
+                    <div className="mt-2 flex items-center gap-2">
+                      <Checkbox
+                        id="ai-expense-add-rounding"
+                        checked={addRounding}
+                        onCheckedChange={(checked) =>
+                          setAddRounding(checked === true)
+                        }
+                      />
+                      <Label
+                        htmlFor="ai-expense-add-rounding"
+                        className={
+                          addRounding
+                            ? 'cursor-pointer font-normal text-amber-900 dark:text-amber-200'
+                            : 'cursor-pointer font-normal text-destructive'
+                        }
+                      >
+                        {t(
+                          gapMinor < 0
+                            ? 'subtractRoundingAsItem'
+                            : 'addRoundingAsItem',
+                          {
+                            // The credit case (items exceed the total) reads
+                            // as "Subtract $0.50 rounding", not "Add -$0.50…".
+                            amount: formatCurrency(
+                              displayCurrency,
+                              Math.abs(gapMinor),
+                              locale,
+                            ),
+                          },
+                        )}
+                      </Label>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             ) : null}
             {draft.document && (
@@ -343,13 +497,24 @@ export function AiExpensePreview({
                 <div className="mb-2 text-xs font-medium text-muted-foreground">
                   {tPreview('attachments', { count: 1 })}
                 </div>
-                <Image
-                  src={draft.document.url}
-                  alt={tPreview('attachments', { count: 1 })}
-                  width={draft.document.width}
-                  height={draft.document.height}
-                  className="max-h-56 w-full rounded-md border object-contain"
-                />
+                {draft.document.width != null &&
+                draft.document.height != null ? (
+                  <Image
+                    src={draft.document.url}
+                    alt={tPreview('attachments', { count: 1 })}
+                    width={draft.document.width}
+                    height={draft.document.height}
+                    className="max-h-56 w-full rounded-md border object-contain"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 rounded-md border p-3 text-sm">
+                    <FileText className="h-8 w-8 shrink-0 text-muted-foreground" />
+                    <span className="truncate font-medium">
+                      {draft.document.fileName ??
+                        tPreview('attachments', { count: 1 })}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>

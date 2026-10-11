@@ -36,12 +36,12 @@ describe('OfflineBanner honest copy', () => {
     )
   })
 
-  it('defers to the server banner when the server answers with failure', async () => {
+  it('shows no banner for a data-plane 5xx but defers to the server banner on probe failure', async () => {
     // Split-banner architecture: OfflineBanner covers browser-offline only.
-    // A 5xx while online is the API's outage, so ApiStatusBanner takes over
-    // and OfflineBanner stays hidden instead of wrongly blaming the user's
-    // connection. A 5xx also mirrors into the offline store distinctly
-    // (serverFailure, not unreachable transport).
+    // A 5xx on a data-plane fetch is a per-request application error, not an
+    // outage, so neither banner appears. Only the health-probe path latches
+    // serverFailure, and then ApiStatusBanner takes over while OfflineBanner
+    // stays hidden instead of wrongly blaming the user's connection.
     Object.defineProperty(navigator, 'onLine', {
       configurable: true,
       value: true,
@@ -60,7 +60,17 @@ describe('OfflineBanner honest copy', () => {
         </>,
       )
       await act(async () => {
-        await trackedFetch('https://api.example.test/health/liveness')
+        await trackedFetch('https://api.example.test/trpc')
+      })
+      expect(
+        getDefaultConnectivityStore().getSnapshot().serverFailure,
+      ).toBeNull()
+      expect(screen.queryByTestId('offline-banner')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('api-status-banner')).not.toBeInTheDocument()
+
+      // A failing health probe still latches the server banner.
+      act(() => {
+        getDefaultConnectivityStore().reportServerResponse(503)
       })
       expect(
         getDefaultConnectivityStore().getSnapshot().serverFailure,

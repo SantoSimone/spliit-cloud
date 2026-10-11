@@ -1193,8 +1193,8 @@
     "Dialog": {
       "triggerTitle": "Escaneig de tiquet amb IA",
       "title": "Crear des del tiquet",
-      "description": "Extreure la informació de despeses de la foto d'un tiquet.",
-      "body": "Puja la foto d'un tiquet i l'escanejarem per extreure'n, si podem, la informaició de la despesa.",
+      "description": "Extreu la informació de la despesa de la foto d'un tiquet o d'un document.",
+      "body": "Puja la foto d'un tiquet o un document (PDF, TXT, CSV, DOCX, ODT) i l'escanejarem per extreure'n, si podem, la informació de la despesa.",
       "selectImage": "Seleccionar la imatge…",
       "titleLabel": "Títol:",
       "categoryLabel": "Categoria:",
@@ -1211,10 +1211,12 @@
       "scanningHint": "L’escaneig pot trigar una mica — tingues paciència.",
       "fillBody": "Tria un rebut adjunt o puja’n un de nou — l’escanejarem per suggerir detalls per a aquesta despesa.",
       "translateToLocale": "Traduir títol i articles a {language}",
-      "dropTitle": "Deixa una imatge del tiquet",
-      "dropDescription": "Deixa aquí una imatge per escanejar-la amb IA",
+      "dropTitle": "Deixa anar un fitxer del tiquet",
+      "dropDescription": "Deixa anar un fitxer aquí per escanejar-lo amb IA",
       "takePhoto": "Fes una foto",
-      "scanReceipt": "Escaneja el tiquet"
+      "scanReceipt": "Escaneja el tiquet",
+      "emptyNotice": "No s'ha pogut llegir cap detall de la despesa d'aquest fitxer. Continua per omplir la despesa manualment: el fitxer es mantindrà adjunt.",
+      "scannedDocumentFallback": "Document escanejat"
     },
     "unknown": "Desconegut",
     "TooBigToast": {
@@ -1227,8 +1229,8 @@
       "retry": "Tornar-ho a intentar"
     },
     "UnsupportedToast": {
-      "title": "Cal una imatge",
-      "aiDescription": "L’escaneig de tiquets amb IA només admet fitxers d’imatge."
+      "title": "Fitxer no compatible",
+      "aiDescription": "L'escaneig de tiquets amb IA admet imatges, PDF i documents de text (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "S'ha esgotat el temps d'escaneig del tiquet",
@@ -3577,7 +3579,12 @@
       "invalidDate": "Tria una data vàlida al formulari complet de despeses.",
       "unsupportedCurrency": "La moneda indicada no és compatible; tria'n una al formulari complet de despeses."
     },
-    "addExpenseAction": "Afegeix una despesa"
+    "addExpenseAction": "Afegeix una despesa",
+    "itemsGapMismatch": "Els elements sumen {items}, però el total del rebut és {total} (diferència: {gap}).",
+    "addRoundingAsItem": "Afegeix {amount} d'arrodoniment",
+    "roundingItemTitle": "Arrodoniment",
+    "roundingRequiredError": "Els elements han de sumar el total. Mantén la línia d'arrodoniment o edita la despesa manualment.",
+    "subtractRoundingAsItem": "Resta {amount} d'arrodoniment"
   },
   "Feedback": {
     "navigationLabel": "Comentaris",

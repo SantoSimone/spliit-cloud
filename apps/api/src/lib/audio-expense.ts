@@ -1,4 +1,5 @@
 import { generateText, Output } from 'ai'
+import { Effect } from 'effect'
 import { z } from 'zod'
 
 import {
@@ -8,6 +9,7 @@ import {
 } from '@spliit/domain'
 
 import { getVoiceModel } from './ai'
+import { liftAiCall } from './ai-effects/ai'
 import { buildLocaleHint } from './ai/prompt'
 import { timeoutSecondsToMs } from './ai/timeout'
 import { env } from './env'
@@ -186,36 +188,49 @@ export async function extractExpenseInformationFromAudio(
   )
     .toISOString()
     .slice(0, 10)
-  const { output } = await generateText({
-    // The Responses API rejects audio file parts, so voice extraction goes
-    // through the chat-completions client (see getVoiceModel).
-    model: await getVoiceModel(env.AI_VOICE_MODEL),
-    // Bound slow self-hosted models so the tRPC handler cannot hang, and
-    // fail fast instead of retrying an already-timed-out request.
-    maxRetries: 0,
-    timeout: timeoutSecondsToMs(env.AI_VOICE_TIMEOUT_SECONDS),
-    instructions: buildPrompt(context, today),
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'file',
-            data: context.audioDataUrl,
-            mediaType: 'audio/wav',
-          },
-          {
-            type: 'text',
-            text: 'Extract the expense from this recording.',
-          },
-        ],
-      },
-    ],
-    // Keep JSON mode for audio-capable OpenAI-compatible models that do not
-    // consistently support provider-specific structured output.
-    output: Output.json(),
-    maxOutputTokens: 700,
-  })
+  // Shared AI budget helper (see `ai-effects/ai.ts`): the SDK `timeout` stays
+  // as the abort mechanism, the Effect side adds a typed timeout failure so a
+  // hung provider maps to TIMEOUT at the procedure boundary either way.
+  // The Responses API rejects audio file parts, so voice extraction goes
+  // through the chat-completions client (see getVoiceModel).
+  const model = await getVoiceModel(env.AI_VOICE_MODEL)
+  const { output } = await Effect.runPromise(
+    liftAiCall(
+      () =>
+        generateText({
+          model,
+          // Bound slow self-hosted models so the tRPC handler cannot hang,
+          // and fail fast instead of retrying an already-timed-out request.
+          maxRetries: 0,
+          timeout: timeoutSecondsToMs(env.AI_VOICE_TIMEOUT_SECONDS),
+          // No reasoning: extraction is a direct transcription task, same as
+          // the category verdict call.
+          reasoning: 'none',
+          instructions: buildPrompt(context, today),
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'file',
+                  data: context.audioDataUrl,
+                  mediaType: 'audio/wav',
+                },
+                {
+                  type: 'text',
+                  text: 'Extract the expense from this recording.',
+                },
+              ],
+            },
+          ],
+          // Keep JSON mode for audio-capable OpenAI-compatible models that do
+          // not consistently support provider-specific structured output.
+          output: Output.json(),
+          maxOutputTokens: 700,
+        }),
+      { timeoutSeconds: env.AI_VOICE_TIMEOUT_SECONDS },
+    ),
+  )
   const parsed = audioModelOutputSchema.safeParse(output)
   return normalizeOutput(parsed.success ? parsed.data : {}, context)
 }

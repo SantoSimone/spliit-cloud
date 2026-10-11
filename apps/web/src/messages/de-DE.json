@@ -1210,8 +1210,8 @@
     "Dialog": {
       "triggerTitle": "KI-Belegscan",
       "title": "Von Rechnungsbeleg erstellen",
-      "description": "Ausgabeninformationen von einem Foto einer Rechnung lesen.",
-      "body": "Lade ein Foto der Rechnung hoch und wir versuchen die Ausgabeinformationen zu extrahieren.",
+      "description": "Ausgabeninformationen aus dem Foto einer Rechnung oder einem Dokument lesen.",
+      "body": "Lade ein Foto einer Rechnung oder ein Dokument (PDF, TXT, CSV, DOCX, ODT) hoch, und wir versuchen, die Ausgabeninformationen daraus zu extrahieren.",
       "selectImage": "Bild wählen…",
       "titleLabel": "Titel:",
       "categoryLabel": "Kategorie:",
@@ -1228,10 +1228,12 @@
       "scanningHint": "Das Scannen kann etwas dauern — bitte hab Geduld.",
       "fillBody": "Wähle einen angehängten Beleg oder lade einen neuen hoch — wir scannen ihn und schlagen Details für diese Ausgabe vor.",
       "translateToLocale": "Titel und Artikel in {language} übersetzen",
-      "dropTitle": "Belegbild ablegen",
-      "dropDescription": "Hier ein Bild ablegen, um es mit KI zu scannen",
+      "dropTitle": "Belegdatei ablegen",
+      "dropDescription": "Hier eine Datei ablegen, um sie mit KI zu scannen",
       "takePhoto": "Foto aufnehmen",
-      "scanReceipt": "Beleg scannen"
+      "scanReceipt": "Beleg scannen",
+      "emptyNotice": "Aus dieser Datei konnten keine Ausgabendetails gelesen werden. Fahre fort, um die Ausgabe manuell einzutragen — die Datei bleibt angehängt.",
+      "scannedDocumentFallback": "Gescanntes Dokument"
     },
     "unknown": "Unbekannt",
     "TooBigToast": {
@@ -1244,8 +1246,8 @@
       "retry": "Wiederholen"
     },
     "UnsupportedToast": {
-      "title": "Bild erforderlich",
-      "aiDescription": "Der KI-Belegscan unterstützt nur Bilddateien."
+      "title": "Nicht unterstützte Datei",
+      "aiDescription": "Der KI-Belegscan unterstützt Bilder, PDFs und Textdokumente (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Zeitüberschreitung beim KI-Belegscan",
@@ -3624,7 +3626,12 @@
       "invalidDate": "Wähle im vollständigen Ausgabenformular ein gültiges Datum.",
       "unsupportedCurrency": "Die gesprochene Währung wird nicht unterstützt; wähle im vollständigen Ausgabenformular eine aus."
     },
-    "addExpenseAction": "Ausgabe hinzufügen"
+    "addExpenseAction": "Ausgabe hinzufügen",
+    "itemsGapMismatch": "Die Artikel ergeben {items}, aber die Gesamtsumme auf dem Beleg beträgt {total} (Differenz: {gap}).",
+    "addRoundingAsItem": "{amount} Rundung hinzufügen",
+    "roundingItemTitle": "Rundung",
+    "roundingRequiredError": "Die Artikel müssen die Gesamtsumme ergeben. Behalte die Rundungszeile bei oder bearbeite die Ausgabe manuell.",
+    "subtractRoundingAsItem": "{amount} Rundung abziehen"
   },
   "Feedback": {
     "navigationLabel": "Rückmeldung",

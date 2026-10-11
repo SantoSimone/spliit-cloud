@@ -1210,8 +1210,8 @@
     "Dialog": {
       "triggerTitle": "AI-bonscan",
       "title": "Maak uitgave van foto",
-      "description": "Uitgave-informatie van een foto van een bon lezen.",
-      "body": "Upload de foto van een bon, en we lezen de uitgave-informatie eruit.",
+      "description": "Uitgave-informatie van een foto van een bon of een document lezen.",
+      "body": "Upload de foto van een bon of een document (PDF, TXT, CSV, DOCX, ODT), en we lezen de uitgave-informatie eruit als dat lukt.",
       "selectImage": "Selecteer foto…",
       "titleLabel": "Titel:",
       "categoryLabel": "Categorie:",
@@ -1228,10 +1228,12 @@
       "scanningHint": "Het scannen kan even duren — heb geduld.",
       "fillBody": "Kies een bijgevoegde bon of upload een nieuwe — we scannen die en stellen gegevens voor deze uitgave voor.",
       "translateToLocale": "Vertaal titel en artikelen naar {language}",
-      "dropTitle": "Sleep een bonafbeelding hierheen",
-      "dropDescription": "Sleep één afbeelding hierheen om die met AI te scannen",
+      "dropTitle": "Sleep een bonbestand hierheen",
+      "dropDescription": "Sleep één bestand hierheen om het met AI te scannen",
       "takePhoto": "Foto maken",
-      "scanReceipt": "Bon scannen"
+      "scanReceipt": "Bon scannen",
+      "emptyNotice": "Er konden geen uitgavedetails uit dit bestand worden gelezen. Ga verder om de uitgave handmatig in te vullen — het bestand blijft bijgevoegd.",
+      "scannedDocumentFallback": "Gescand document"
     },
     "unknown": "Onbekend",
     "TooBigToast": {
@@ -1244,8 +1246,8 @@
       "retry": "Probeer opnieuw"
     },
     "UnsupportedToast": {
-      "title": "Afbeelding vereist",
-      "aiDescription": "AI-bonscan ondersteunt alleen afbeeldingsbestanden."
+      "title": "Niet-ondersteund bestand",
+      "aiDescription": "AI-bonscan ondersteunt afbeeldingen, pdf's en tekstdocumenten (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Time-out bij het scannen van de bon",
@@ -3624,7 +3626,12 @@
       "invalidDate": "Kies een geldige datum in het volledige uitgavenformulier.",
       "unsupportedCurrency": "De gesproken valuta wordt niet ondersteund; kies er een in het volledige uitgavenformulier."
     },
-    "addExpenseAction": "Uitgave toevoegen"
+    "addExpenseAction": "Uitgave toevoegen",
+    "itemsGapMismatch": "De artikelen tellen op tot {items}, maar het totaal op de bon is {total} (verschil: {gap}).",
+    "addRoundingAsItem": "Afronding van {amount} toevoegen",
+    "roundingItemTitle": "Afronding",
+    "roundingRequiredError": "De artikelen moeten optellen tot het totaal. Behoud de afrondingsregel of bewerk de uitgave handmatig.",
+    "subtractRoundingAsItem": "Afronding van {amount} aftrekken"
   },
   "Feedback": {
     "navigationLabel": "Terugkoppeling",

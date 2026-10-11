@@ -6,10 +6,12 @@ import { useConnectivityStatus } from '@/lib/use-online-status'
 
 /**
  * Error banner shown when the browser is online but the API cannot be reached
- * (connection failures or 5xx). Unlike {@link OfflineBanner}, it blames the
- * server — never the user's connection — and links to the deployment's status
- * page when one is configured (`VITE_STATUS_PAGE_URL`). Self-hosters without a
- * status page get the warning with no external link.
+ * (connection failures or a failing health probe). A per-request 5xx never
+ * shows this — the server answered, so the error renders inline at the request
+ * site instead. Unlike {@link OfflineBanner}, it blames the server — never the
+ * user's connection — and links to the deployment's status page when one is
+ * configured (`VITE_STATUS_PAGE_URL`). Self-hosters without a status page get
+ * the warning with no external link.
  */
 export function ApiStatusBanner() {
   const status = useConnectivityStatus()

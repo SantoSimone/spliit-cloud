@@ -36,6 +36,22 @@ export const EXPENSE_DOCUMENT_IMAGE_ACCEPT =
 
 export const EXPENSE_DOCUMENT_ACCEPT = EXPENSE_DOCUMENT_MIME_TYPES.join(',')
 
+/**
+ * MIME types the AI receipt scan can process: images (vision/OCR flow) plus
+ * documents with a natively extractable text layer (PDF text layer, txt/csv,
+ * docx, odt). Legacy and spreadsheet formats stay attachable but unscanned.
+ */
+export const RECEIPT_SCAN_MIME_TYPES = [
+  ...EXPENSE_DOCUMENT_IMAGE_MIME_TYPES,
+  'application/pdf',
+  'text/plain',
+  'text/csv',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.oasis.opendocument.text',
+] as const
+
+export const RECEIPT_SCAN_ACCEPT = RECEIPT_SCAN_MIME_TYPES.join(',')
+
 export function isExpenseDocumentSizeWithinLimit(
   fileSize: number,
   maxSize: number = MAX_EXPENSE_DOCUMENT_SIZE,
@@ -68,6 +84,30 @@ const MIME_BY_EXTENSION: Record<
 export function isExpenseDocumentImage(contentType?: string | null): boolean {
   return EXPENSE_DOCUMENT_IMAGE_MIME_TYPES.includes(
     contentType as (typeof EXPENSE_DOCUMENT_IMAGE_MIME_TYPES)[number],
+  )
+}
+
+/**
+ * True for uploads the AI receipt scan accepts: images plus documents with a
+ * natively extractable text layer (PDF, txt/csv, docx, odt). Extension fallback
+ * mirrors `isSupportedExpenseDocumentUpload` for generic content types.
+ */
+export function isScannableReceiptDocument(input: {
+  fileName: string
+  contentType?: string | null
+}): boolean {
+  const contentType = input.contentType?.toLowerCase().split(';', 1)[0].trim()
+  if (
+    contentType &&
+    contentType !== 'application/octet-stream' &&
+    (RECEIPT_SCAN_MIME_TYPES as readonly string[]).includes(contentType)
+  ) {
+    return true
+  }
+  const extensionType = mimeTypeForExpenseDocumentFileName(input.fileName)
+  return (
+    extensionType !== undefined &&
+    (RECEIPT_SCAN_MIME_TYPES as readonly string[]).includes(extensionType)
   )
 }
 

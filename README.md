@@ -311,6 +311,15 @@ optional browser-readable base URL stored on expense documents and must serve
 objects by key, for example `https://uploads.example.com/document-...jpg`. If it
 is not configured, documents use the default AWS S3 public URL format.
 
+Browser uploads go directly to S3 via presigned URLs, so the bucket must allow
+cross-origin requests from the web app origin. Without a CORS rule the browser
+blocks the upload preflight (`CORS Missing Allow Origin`) and document uploads
+— including AI receipt scans — fail. Allow the `APP_URL` / `WEB_ORIGINS`
+origins with methods `GET, PUT, POST, DELETE, HEAD`, headers `*`, exposed
+headers `ETag`, and `MaxAgeSeconds` of `3600`. Local MaxIO dev storage ships
+this config in `storage/maxio/buckets/spliit-local/.bucket.json`; restart the
+`maxio` service after changing it.
+
 Configure an object lifecycle rule for the `tmp/imports/` prefix with a
 one-day expiration. The import flow deletes its temporary copies after a
 successful database commit, while the lifecycle rule cleans up abandoned or
@@ -322,7 +331,7 @@ You can offer users to create expense by uploading a receipt. This feature relie
 
 To enable the feature:
 
-- You must enable expense documents feature as well (see section above). That might change in the future, but for now we need to store images to make receipt scanning work.
+- You must enable expense documents feature as well (see section above). That might change in the future, but for now we need to store the uploaded files to make receipt scanning work.
 - Subscribe to an AI provider and get an API key.
 - Update your environment variables with appropriate values:
 
@@ -333,7 +342,20 @@ AI_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 The model used for receipt extraction defaults to `gpt-5-nano`. Override it with `AI_RECEIPT_MODEL`.
 
+Receipts can be photos or documents: PDF invoices plus TXT, CSV, DOCX, and ODT files. Digital documents extract their embedded text directly (first 3 pages, truncated past 15,000 characters) and structure it with a fast text-only call; scanned-image PDFs go through the OCR backend below, or the vision LLM when none is configured. Documents without usable text keep the file attached and say so explicitly, so the expense can be filled in manually.
+
 Receipt scans time out after `AI_RECEIPT_TIMEOUT_SECONDS` (default `120`). A timeout surfaces as an explicit error in the app instead of hanging silently — if you self-host a slow model, raise the value so scans can finish.
+
+#### Dedicated OCR backend (optional)
+
+By default the receipt goes straight to the vision LLM (PDFs are sent as documents). To scan faster and cheaper, set `AI_OCR_PROVIDER=ocrspace` so raw text is extracted by OCR.space (Engine 2 with language autodetect, so traveling receipts work regardless of app language) and structured by a fast text-only call to `AI_RECEIPT_MODEL`:
+
+```.env
+AI_OCR_PROVIDER=ocrspace
+AI_OCRSPACE_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+Optional tuning: `AI_OCRSPACE_TIMEOUT_SECONDS` (default `30`) bounds the OCR request, and `AI_OCR_REQUIRED=true` fails the scan when OCR fails instead of falling back to the vision LLM (the default `false` falls back, so a free-tier quota error never breaks scanning). The OCR abstraction is provider-agnostic — adding another backend only needs a new adapter, no procedure changes. Note the free OCR.space tier caps files at 1 MB with rate limits and reads at most 3 PDF pages; receipt files are sent to OCR.space when this is enabled.
 
 ### Deduce category from title
 

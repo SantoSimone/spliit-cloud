@@ -26,12 +26,13 @@ export function useConnectivityStatus(): ConnectivityStatus {
 
 /**
  * Whether the app can currently reach the API (browser online and no recent
- * fetch/server failure). Use for enabling queries and mutations — not for
- * choosing offline copy, where {@link useConnectivityStatus} distinguishes "you
- * are offline" from "the server is down".
+ * transport failure or probe-detected outage). Use for enabling queries and
+ * mutations — not for choosing offline copy, where {@link useConnectivityStatus}
+ * distinguishes "you are offline" from "the server is down".
  *
  * Combines `navigator.onLine` with a latch set when auth/tRPC `fetch` throws a
- * connectivity error or returns a 5xx.
+ * connectivity error or the health probe reports failure. Per-request HTTP
+ * errors (including 5xx) never latch: the server answered.
  */
 export function useOnlineStatus(): boolean {
   return useConnectivityStatus() === 'online'
@@ -48,8 +49,9 @@ export function useOfflineWithoutData(hasData: boolean): boolean {
 
 /**
  * True when the browser is online but the API cannot be reached (connection
- * failures or 5xx) and this view has no in-session data. Pair with
- * {@link useOfflineWithoutData}: one of them is true at most, never both.
+ * failures or a failing health probe) and this view has no in-session data.
+ * Pair with {@link useOfflineWithoutData}: one of them is true at most, never
+ * both.
  */
 export function useServerUnreachableWithoutData(hasData: boolean): boolean {
   return useConnectivityStatus() === 'server-unreachable' && !hasData

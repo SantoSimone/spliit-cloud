@@ -605,8 +605,8 @@
   "CreateFromReceipt": {
     "Dialog": {
       "triggerTitle": "Escaneamento de recibo com IA",
-      "description": "Extraia as informações da despesa a partir de uma foto de recibo.",
-      "body": "Faça upload da foto de um recibo, e vamos escaneá-la para extrair as informações da despesa, se possível.",
+      "description": "Extraia as informações da despesa a partir da foto de um recibo ou de um documento.",
+      "body": "Envie a foto de um recibo ou um documento (PDF, TXT, CSV, DOCX, ODT), e vamos escaneá-lo para extrair as informações da despesa, se possível.",
       "amountLabel": "Valor:",
       "editNext": "Você poderá editar as informações da despesa a seguir.",
       "existingDocuments": "Escolha um recibo anexado",
@@ -614,9 +614,12 @@
       "scannedReceiptAlt": "Recibo escaneado",
       "fillNext": "Revise os detalhes sugeridos e aplique-os a esta despesa.",
       "fillBody": "Escolha um recibo anexado ou envie um novo — vamos digitalizá-lo para sugerir os detalhes desta despesa.",
-      "dropDescription": "Solte uma imagem aqui para escanear com IA",
+      "dropTitle": "Solte um arquivo do recibo",
+      "dropDescription": "Solte um arquivo aqui para escanear com IA",
       "takePhoto": "Tirar foto",
-      "scanReceipt": "Escanear recibo"
+      "scanReceipt": "Escanear recibo",
+      "emptyNotice": "Não foi possível ler nenhum detalhe da despesa deste arquivo. Continue para preencher a despesa manualmente — o arquivo permanece anexado.",
+      "scannedDocumentFallback": "Documento escaneado"
     },
     "TooBigToast": {
       "title": "O arquivo é muito grande",
@@ -626,8 +629,8 @@
       "description": "Algo deu errado ao enviar o documento. Por favor, tente novamente mais tarde ou selecione um arquivo diferente."
     },
     "UnsupportedToast": {
-      "title": "Imagem obrigatória",
-      "aiDescription": "O escaneamento de recibos com IA aceita apenas arquivos de imagem."
+      "title": "Arquivo não suportado",
+      "aiDescription": "O escaneamento de recibos com IA aceita imagens, PDFs e documentos de texto (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Tempo esgotado para o escaneamento do recibo",
@@ -1873,7 +1876,8 @@
     "openActions": "Abrir ações de despesas",
     "issues": {
       "unsupportedCurrency": "A moeda informada não é compatível; escolha uma no formulário completo da despesa."
-    }
+    },
+    "roundingRequiredError": "Os itens devem somar o total. Mantenha a linha de arredondamento ou edite a despesa manualmente."
   },
   "Feedback": {
     "description": "Relate um problema, sugira uma melhoria ou conte-nos sobre sua experiência. Escolha uma categoria para continuar no GitHub.",

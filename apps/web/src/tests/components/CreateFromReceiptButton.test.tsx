@@ -13,6 +13,8 @@ import { act, fireEvent, render, screen, waitFor } from '@/test/test-utils'
 
 const mockMutateAsync = vi.fn()
 const mockToast = vi.fn()
+const mockUploadToS3 = vi.fn()
+const mockResizeImage = vi.fn()
 
 vi.mock('@/app/groups/[groupId]/current-group-context', () => ({
   useCurrentGroup: vi.fn(),
@@ -31,9 +33,9 @@ vi.mock('@/trpc/client', () => ({
 }))
 
 vi.mock('@/lib/upload', () => ({
-  resizeImage: vi.fn(),
+  resizeImage: (...args: unknown[]) => mockResizeImage(...args),
   useExpenseDocumentUpload: () => ({
-    uploadToS3: vi.fn(),
+    uploadToS3: (...args: unknown[]) => mockUploadToS3(...args),
   }),
 }))
 
@@ -70,6 +72,17 @@ const scanResult = {
   date: '2025-01-01',
   title: 'Test Store',
   items: [],
+  empty: false,
+}
+
+const emptyScanResult = {
+  amount: Number.NaN,
+  categoryId: null,
+  currencyCode: null,
+  date: null,
+  title: null,
+  items: [],
+  empty: true,
 }
 
 function renderTrigger(
@@ -93,6 +106,8 @@ beforeEach(() => {
   mockMutateAsync.mockReset()
   mockMutateAsync.mockResolvedValue(scanResult)
   mockToast.mockReset()
+  mockUploadToS3.mockReset()
+  mockResizeImage.mockReset()
   localStorage.clear()
 })
 
@@ -218,7 +233,7 @@ describe('ReceiptScanTrigger translate checkbox', () => {
     })
 
     expect(mockMutateAsync.mock.calls[1][0].translateToLocale).toBe(true)
-    expect(mockMutateAsync.mock.calls[1][0].imageUrl).toBe(documents[0].url)
+    expect(mockMutateAsync.mock.calls[1][0].documentUrl).toBe(documents[0].url)
   })
 
   it('is disabled while a scan is pending', async () => {
@@ -347,7 +362,7 @@ describe('ReceiptScanTrigger translate checkbox', () => {
     })
 
     expect(mockMutateAsync.mock.calls[1][0].translateToLocale).toBe(true)
-    expect(mockMutateAsync.mock.calls[1][0].imageUrl).toBe(documents[0].url)
+    expect(mockMutateAsync.mock.calls[1][0].documentUrl).toBe(documents[0].url)
   })
 
   it('shows the timeout toast when the scan fails with a TIMEOUT error', async () => {
@@ -417,6 +432,93 @@ describe('ReceiptScanTrigger translate checkbox', () => {
   })
 })
 
+describe('ReceiptScanTrigger document uploads', () => {
+  function fileInput() {
+    return document.querySelector<HTMLInputElement>(
+      'input[type="file"]:not([capture])',
+    )!
+  }
+
+  it('uploads PDFs as-is and scans them by document reference', async () => {
+    mockUploadToS3.mockResolvedValue({
+      url: 'https://example.com/invoice.pdf',
+    })
+    const { user } = renderTrigger({ documents: [], autoScan: false })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    const pdf = new File(['%PDF-1.4'], 'invoice.pdf', {
+      type: 'application/pdf',
+    })
+    fireEvent.change(fileInput(), { target: { files: [pdf] } })
+
+    await waitFor(() => {
+      expect(mockUploadToS3).toHaveBeenCalledTimes(1)
+    })
+    // Documents skip the image resize path entirely.
+    expect(mockResizeImage).not.toHaveBeenCalled()
+    expect(mockUploadToS3.mock.calls[0][0]).toBe(pdf)
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1)
+    })
+    expect(mockMutateAsync.mock.calls[0][0]).toMatchObject({
+      documentUrl: 'https://example.com/invoice.pdf',
+      contentType: 'application/pdf',
+      fileName: 'invoice.pdf',
+    })
+    // A file card (not an <img>) previews the selected document.
+    expect(await screen.findByText('invoice.pdf')).toBeInTheDocument()
+  })
+
+  it('rejects attachable-but-unscannable files with the AI toast', async () => {
+    const { user } = renderTrigger({ documents: [], autoScan: false })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    fireEvent.change(fileInput(), {
+      target: {
+        files: [
+          new File(['legacy'], 'legacy.doc', { type: 'application/msword' }),
+        ],
+      },
+    })
+
+    await waitFor(() => expect(mockToast).toHaveBeenCalled())
+    expect(mockMutateAsync).not.toHaveBeenCalled()
+    expect(mockUploadToS3).not.toHaveBeenCalled()
+  })
+
+  it('lists attached PDFs for scanning and sends their reference on click', async () => {
+    const pdfDocuments = [
+      {
+        id: 'doc-pdf',
+        url: 'https://example.com/invoice.pdf',
+        width: null,
+        height: null,
+        fileName: 'invoice.pdf',
+        contentType: 'application/pdf',
+      },
+    ]
+    const { user } = renderTrigger({
+      documents: pdfDocuments,
+      autoScan: false,
+    })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    await user.click(
+      await screen.findByRole('button', { name: /invoice\.pdf/i }),
+    )
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1)
+    })
+    expect(mockMutateAsync.mock.calls[0][0]).toMatchObject({
+      documentUrl: 'https://example.com/invoice.pdf',
+      contentType: 'application/pdf',
+      fileName: 'invoice.pdf',
+    })
+  })
+})
+
 describe('ReceiptScanTrigger update protection', () => {
   beforeEach(() => {
     resetPwaUpdateBlockersForTests()
@@ -435,5 +537,66 @@ describe('ReceiptScanTrigger update protection', () => {
     expect(hasPwaUpdateBlockers()).toBe(true)
 
     resetPwaUpdateBlockersForTests()
+  })
+})
+
+describe('ReceiptScanTrigger empty results', () => {
+  it('shows the empty notice instead of auto-accepting with directAccept', async () => {
+    mockMutateAsync.mockResolvedValue(emptyScanResult)
+    const onAccept = vi.fn()
+    const { user } = renderTrigger({
+      mode: 'create',
+      directAccept: true,
+      onAccept,
+    })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1)
+    })
+
+    // The notice is explicit, and the preview handoff does not fire: the
+    // user stays in the dialog with the photo attached.
+    expect(
+      await screen.findByText(/no expense details could be read/i),
+    ).toBeInTheDocument()
+    await waitForSettledCheckbox()
+    expect(onAccept).not.toHaveBeenCalled()
+  })
+
+  it('still offers Continue for manual entry after an empty scan', async () => {
+    mockMutateAsync.mockResolvedValue(emptyScanResult)
+    const onAccept = vi.fn()
+    const { user } = renderTrigger({ onAccept })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1)
+    })
+    expect(
+      await screen.findByText(/no expense details could be read/i),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(onAccept).toHaveBeenCalledTimes(1)
+    expect(onAccept.mock.calls[0][0].info.empty).toBe(true)
+    expect(onAccept.mock.calls[0][0].document.url).toBe(documents[0].url)
+  })
+
+  it('auto-accepts non-empty scans with directAccept', async () => {
+    const onAccept = vi.fn()
+    const { user } = renderTrigger({
+      mode: 'create',
+      directAccept: true,
+      onAccept,
+    })
+    await user.click(screen.getByRole('button', { name: /ai receipt scan/i }))
+
+    await waitFor(() => {
+      expect(onAccept).toHaveBeenCalledTimes(1)
+    })
+    expect(
+      screen.queryByText(/no expense details could be read/i),
+    ).not.toBeInTheDocument()
   })
 })

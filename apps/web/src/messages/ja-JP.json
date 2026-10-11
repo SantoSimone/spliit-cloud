@@ -1179,8 +1179,8 @@
     "Dialog": {
       "triggerTitle": "AIレシートスキャン",
       "title": "領収書から作成",
-      "description": "領収書の写真から支出情報を抽出します。",
-      "body": "領収書の写真をアップロードすると、可能であれば支出情報を抽出してスキャンします。",
+      "description": "領収書の写真またはドキュメントから支出情報を抽出します。",
+      "body": "領収書の写真またはドキュメント（PDF、TXT、CSV、DOCX、ODT）をアップロードすると、可能であれば支出情報を抽出してスキャンします。",
       "selectImage": "画像を選択…",
       "titleLabel": "タイトル:",
       "categoryLabel": "カテゴリー:",
@@ -1197,10 +1197,12 @@
       "scanningHint": "スキャンには少し時間がかかる場合があります — しばらくお待ちください。",
       "fillBody": "添付済みのレシートを選ぶか新しくアップロードしてください — スキャンしてこの支出の詳細を提案します。",
       "translateToLocale": "タイトルと項目を{language}に翻訳する",
-      "dropTitle": "領収書の画像をドロップ",
-      "dropDescription": "AIでスキャンする画像を1枚ここにドロップ",
+      "dropTitle": "領収書のファイルをドロップ",
+      "dropDescription": "AIでスキャンするファイルを1つここにドロップ",
       "takePhoto": "写真を撮る",
-      "scanReceipt": "領収書をスキャン"
+      "scanReceipt": "領収書をスキャン",
+      "emptyNotice": "このファイルからは支出の詳細を読み取れませんでした。手動で支出を入力してください — ファイルは添付されたままになります。",
+      "scannedDocumentFallback": "スキャンされたドキュメント"
     },
     "unknown": "不明",
     "TooBigToast": {
@@ -1213,8 +1215,8 @@
       "retry": "再試行"
     },
     "UnsupportedToast": {
-      "title": "画像が必要です",
-      "aiDescription": "AIレシートスキャンは画像ファイルのみ対応しています。"
+      "title": "サポートされていないファイル",
+      "aiDescription": "AIレシートスキャンは画像、PDF、テキストドキュメント（TXT、CSV、DOCX、ODT）に対応しています。"
     },
     "TimeoutToast": {
       "title": "領収書のスキャンがタイムアウトしました",
@@ -3538,7 +3540,12 @@
       "invalidDate": "支出の完全なフォームで有効な日付を選択してください。",
       "unsupportedCurrency": "音声で指定された通貨は対応していません。完全な支出フォームで選択してください。"
     },
-    "addExpenseAction": "支出を追加"
+    "addExpenseAction": "支出を追加",
+    "itemsGapMismatch": "品目の合計は {items} ですが、レシートの合計は {total} です（差額：{gap}）。",
+    "addRoundingAsItem": "{amount} の端数調整を追加",
+    "roundingItemTitle": "端数調整",
+    "roundingRequiredError": "品目の合計は合計金額と一致する必要があります。端数調整の行を残すか、手動で支出を編集してください。",
+    "subtractRoundingAsItem": "{amount} の端数調整を差し引く"
   },
   "Feedback": {
     "navigationLabel": "フィードバック",

@@ -1192,8 +1192,8 @@
     "Dialog": {
       "triggerTitle": "IArekin ordainagiri-eskaneatzea",
       "title": "Sortu ordainagiritik",
-      "description": "Erauzi gastuaren informazioa ordainagiriren argazkitik.",
-      "body": "Igo ordainagiri baten argazkia eta eskaneatuko dugu gastuaren informazioa erauzteko, ahal badugu.",
+      "description": "Erauzi gastuaren informazioa ordainagiri baten argazkitik edo dokumentu batetik.",
+      "body": "Igo ordainagiri baten argazkia edo dokumentu bat (PDF, TXT, CSV, DOCX, ODT), eta eskaneatuko dugu gastuaren informazioa erauzteko, ahal badugu.",
       "selectImage": "Hautatu irudia…",
       "titleLabel": "Titulua:",
       "categoryLabel": "Kategoria:",
@@ -1210,10 +1210,12 @@
       "scanningHint": "Eskaneatzeak pixka bat iraun dezake — izan pazientzia.",
       "fillBody": "Aukeratu erantsitako ordainagiri bat edo igo berri bat — eskaneatu eta gastu honetarako xehetasunak proposatuko ditugu.",
       "translateToLocale": "Itzuldu izenburua eta elementuak {language}(e)ra",
-      "dropTitle": "Utzi ordainagiriaren irudi bat",
-      "dropDescription": "Utzi irudi bat hemen IA bidez eskaneatzeko",
+      "dropTitle": "Utzi ordainagiriaren fitxategi bat",
+      "dropDescription": "Utzi fitxategi bat hemen IA bidez eskaneatzeko",
       "takePhoto": "Atera argazkia",
-      "scanReceipt": "Eskaneatu ordainagiria"
+      "scanReceipt": "Eskaneatu ordainagiria",
+      "emptyNotice": "Ezin izan da fitxategi honetatik gastuaren xehetasunik irakurri. Jarraitu gastua eskuz betetzeko — fitxategia erantsita geratuko da.",
+      "scannedDocumentFallback": "Eskaneatutako dokumentua"
     },
     "unknown": "Ezezaguna",
     "TooBigToast": {
@@ -1226,8 +1228,8 @@
       "retry": "Saiatu berriro"
     },
     "UnsupportedToast": {
-      "title": "Irudia behar da",
-      "aiDescription": "IA bidezko ordainagiri-eskaneatzeak irudi-fitxategiak soilik onartzen ditu."
+      "title": "Fitxategi onartezina",
+      "aiDescription": "IA bidezko ordainagiri-eskaneatzeak irudiak, PDFak eta testu-dokumentuak onartzen ditu (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Ordainagiria eskaneatzean denbora agortu da",
@@ -3575,7 +3577,12 @@
       "invalidDate": "Aukeratu baliozko data gastuen formulario osoan.",
       "unsupportedCurrency": "Ahoz adierazitako moneta ez da onartzen; aukeratu bat gastuen formulario osoan."
     },
-    "addExpenseAction": "Gehitu gastua"
+    "addExpenseAction": "Gehitu gastua",
+    "itemsGapMismatch": "Elementuek {items} batzen dute, baina ordainagiriaren guztizkoa {total} da (aldea: {gap}).",
+    "addRoundingAsItem": "Gehitu {amount} biribiltze gisa",
+    "roundingItemTitle": "Biribiltze",
+    "roundingRequiredError": "Elementuek guztizkoa batu behar dute. Mantendu biribiltze-lerroa edo editatu gastua eskuz.",
+    "subtractRoundingAsItem": "Kendu {amount} biribiltze gisa"
   },
   "Feedback": {
     "navigationLabel": "Iritzia",

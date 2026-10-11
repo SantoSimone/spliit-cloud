@@ -5,7 +5,12 @@
   "public_read": true,
   "cors_rules": [
     {
-      "allowed_origins": ["http://localhost:3000"],
+      "allowed_origins": [
+        "https://spliit.localhost",
+        "https://preview.spliit.localhost",
+        "http://localhost:3000",
+        "http://localhost:4173"
+      ],
       "allowed_methods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
       "allowed_headers": ["*"],
       "expose_headers": ["ETag", "x-amz-version-id", "x-amz-request-id"],

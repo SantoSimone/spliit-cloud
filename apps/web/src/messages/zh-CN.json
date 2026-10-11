@@ -1179,8 +1179,8 @@
     "Dialog": {
       "triggerTitle": "AI 扫描收据",
       "title": "从收据中创建",
-      "description": "从收据照片上提取消费信息。",
-      "body": "上传收据的图片，我们会尽可能地从中扫描出消费信息。",
+      "description": "从收据照片或文档中提取消费信息。",
+      "body": "上传收据照片或文档（PDF、TXT、CSV、DOCX、ODT），我们会尽可能从中扫描提取消费信息。",
       "selectImage": "选择图片……",
       "titleLabel": "标题：",
       "categoryLabel": "类别：",
@@ -1197,10 +1197,12 @@
       "scanningHint": "扫描可能需要一点时间 — 请耐心等待。",
       "fillBody": "选择已附加的收据或上传新的收据 — 我们会扫描它，为这笔支出建议详细信息。",
       "translateToLocale": "将标题和项目翻译为{language}",
-      "dropTitle": "拖放收据图片",
-      "dropDescription": "将一张图片拖放到此处，用 AI 扫描",
+      "dropTitle": "拖放收据文件",
+      "dropDescription": "将一个文件拖放到此处，用 AI 扫描",
       "takePhoto": "拍照",
-      "scanReceipt": "扫描收据"
+      "scanReceipt": "扫描收据",
+      "emptyNotice": "无法从此文件中读取任何消费明细。请继续手动填写这笔消费——文件将保持为附件。",
+      "scannedDocumentFallback": "已扫描的文档"
     },
     "unknown": "未知",
     "TooBigToast": {
@@ -1213,8 +1215,8 @@
       "retry": "重试"
     },
     "UnsupportedToast": {
-      "title": "需要图片",
-      "aiDescription": "AI 收据扫描仅支持图片文件。"
+      "title": "不支持的文件",
+      "aiDescription": "AI 收据扫描支持图片、PDF 和文本文档（TXT、CSV、DOCX、ODT）。"
     },
     "TimeoutToast": {
       "title": "收据扫描超时",
@@ -3538,7 +3540,12 @@
       "invalidDate": "请在完整的费用表单中选择有效日期。",
       "unsupportedCurrency": "语音中说出的货币不受支持，请在完整费用表单中选择。"
     },
-    "addExpenseAction": "添加支出"
+    "addExpenseAction": "添加支出",
+    "itemsGapMismatch": "项目合计为 {items}，但收据总额为 {total}（差额：{gap}）。",
+    "addRoundingAsItem": "添加 {amount} 舍入",
+    "roundingItemTitle": "舍入",
+    "roundingRequiredError": "各项目金额之和必须等于总金额。请保留舍入行，或手动编辑支出。",
+    "subtractRoundingAsItem": "减去 {amount} 舍入"
   },
   "Feedback": {
     "navigationLabel": "反馈",

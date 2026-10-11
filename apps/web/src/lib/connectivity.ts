@@ -27,12 +27,11 @@ export async function trackedFetch(
 ): Promise<Response> {
   try {
     const response = await fetch(input, init)
-    if (response.status >= 500) {
-      getDefaultConnectivityStore().reportServerResponse(response.status)
-    } else {
-      reportNetworkSuccess()
-      getDefaultConnectivityStore().clearServerFailure()
-    }
+    // Any HTTP response proves the server is reachable — including 5xx,
+    // which is a per-request application error, not downtime. Outage state
+    // latches only from transport failures and the health probe.
+    reportNetworkSuccess()
+    getDefaultConnectivityStore().clearServerFailure()
     return response
   } catch (error) {
     reportNetworkFailure(error)

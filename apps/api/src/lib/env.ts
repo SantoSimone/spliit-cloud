@@ -161,6 +161,24 @@ const envSchema = z
     ),
     AI_VOICE_MODEL: z.preprocess(emptyStringAsUndefined, z.string().optional()),
     AI_RECEIPT_TIMEOUT_SECONDS: z.coerce.number().int().positive().default(120),
+    /**
+     * Dedicated OCR backend for receipt scans. `none` (default) keeps the
+     * single vision-LLM call; `ocrspace` extracts raw text via OCR.space
+     * (Engine 2, language autodetect) and structures it with a fast text-only
+     * LLM call. Selection is explicit and never inferred.
+     */
+    AI_OCR_PROVIDER: z.enum(['none', 'ocrspace']).default('none'),
+    AI_OCRSPACE_API_KEY: optionalString,
+    AI_OCRSPACE_TIMEOUT_SECONDS: z.coerce.number().int().positive().default(30),
+    /**
+     * When true, an OCR-stage failure fails the scan instead of falling back to
+     * the vision LLM. Defaults to false so a free-tier quota error or slow OCR
+     * endpoint degrades to the current behavior instead of an error.
+     */
+    AI_OCR_REQUIRED: z.preprocess(
+      interpretEnvVarAsBool,
+      z.boolean().default(false),
+    ),
     AI_VOICE_TIMEOUT_SECONDS: z.coerce.number().int().positive().default(120),
     AI_CATEGORY_TIMEOUT_SECONDS: z.coerce.number().int().positive().default(30),
     AI_CATEGORY_RECENT_EXPENSES_LIMIT: z.coerce
@@ -585,6 +603,18 @@ const envSchema = z
         code: 'custom',
         message:
           'If PUBLIC_ENABLE_RECEIPT_EXTRACT, PUBLIC_ENABLE_VOICE_EXPENSE, or PUBLIC_ENABLE_CATEGORY_EXTRACT with AI_CATEGORY_ENGINE=llm is specified, then AI_API_KEY must be specified too',
+      })
+    }
+    if (
+      env.AI_OCR_PROVIDER === 'ocrspace' &&
+      env.PUBLIC_ENABLE_RECEIPT_EXTRACT &&
+      !env.AI_OCRSPACE_API_KEY
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AI_OCRSPACE_API_KEY'],
+        message:
+          'AI_OCRSPACE_API_KEY must be specified when PUBLIC_ENABLE_RECEIPT_EXTRACT is enabled with AI_OCR_PROVIDER=ocrspace',
       })
     }
     if (

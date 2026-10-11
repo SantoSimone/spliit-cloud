@@ -1891,8 +1891,8 @@
     "Dialog": {
       "triggerTitle": "Quét biên lai",
       "title": "Tạo từ biên lai",
-      "description": "Trích xuất thông tin chi phí từ ảnh biên lai.",
-      "body": "Quét biên lai để tạo chi phí.",
+      "description": "Trích xuất thông tin chi phí từ ảnh biên lai hoặc tài liệu.",
+      "body": "Tải lên ảnh biên lai hoặc tài liệu (PDF, TXT, CSV, DOCX, ODT), chúng tôi sẽ quét để trích xuất thông tin chi phí nếu có thể.",
       "selectImage": "Chọn ảnh",
       "titleLabel": "Tiêu đề",
       "categoryLabel": "Danh mục",
@@ -1909,10 +1909,12 @@
       "scanningHint": "Đang quét…",
       "fillBody": "Chọn một biên lai đính kèm hoặc tải lên ảnh mới — chúng tôi sẽ quét để gợi ý thông tin cho chi phí này.",
       "translateToLocale": "Dịch tiêu đề và mục sang {language}",
-      "dropTitle": "Thả ảnh biên lai vào đây",
-      "dropDescription": "Thả một hình ảnh vào đây để quét bằng AI",
+      "dropTitle": "Thả tệp biên lai vào đây",
+      "dropDescription": "Thả một tệp vào đây để quét bằng AI",
       "takePhoto": "Chụp ảnh",
-      "scanReceipt": "Quét biên lai"
+      "scanReceipt": "Quét biên lai",
+      "emptyNotice": "Không đọc được chi tiết chi phí nào từ tệp này. Hãy tiếp tục để tự nhập chi phí — tệp vẫn được đính kèm.",
+      "scannedDocumentFallback": "Tài liệu đã quét"
     },
     "unknown": "Không xác định",
     "TooBigToast": {
@@ -1925,8 +1927,8 @@
       "retry": "Thử lại"
     },
     "UnsupportedToast": {
-      "title": "Cần có hình ảnh",
-      "aiDescription": "Tính năng quét biên lai bằng AI chỉ hỗ trợ tệp hình ảnh."
+      "title": "Tệp không được hỗ trợ",
+      "aiDescription": "Tính năng quét biên lai bằng AI hỗ trợ hình ảnh, PDF và tài liệu văn bản (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Quét biên lai đã hết thời gian",
@@ -3620,7 +3622,12 @@
       "invalidDate": "Hãy chọn ngày hợp lệ trong biểu mẫu chi phí đầy đủ.",
       "unsupportedCurrency": "Loại tiền được nói không được hỗ trợ; hãy chọn trong biểu mẫu chi phí đầy đủ."
     },
-    "addExpenseAction": "Thêm khoản chi"
+    "addExpenseAction": "Thêm khoản chi",
+    "itemsGapMismatch": "Các mục cộng lại là {items}, nhưng tổng biên lai là {total} (chênh lệch: {gap}).",
+    "addRoundingAsItem": "Thêm làm tròn {amount}",
+    "roundingItemTitle": "Làm tròn",
+    "roundingRequiredError": "Các mục phải cộng lại bằng tổng. Giữ dòng làm tròn, hoặc chỉnh sửa khoản chi thủ công.",
+    "subtractRoundingAsItem": "Trừ làm tròn {amount}"
   },
   "Feedback": {
     "navigationLabel": "Phản hồi",

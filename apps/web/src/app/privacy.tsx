@@ -50,12 +50,14 @@ export default function PrivacyPage() {
           and PostgreSQL database, Cloudflare R2 backups and uploads, and a
           configured SMTP provider). These providers process data only to
           operate the service. If you choose receipt extraction or expense
-          categorisation, relevant receipt images, voice recordings,
-          transcripts, expense text, currency context, and recent expense
-          context may be sent to the configured AI provider. Voice recordings
-          are processed transiently and are not stored by Spliit Cloud. Do not
-          use those features for material you are not comfortable sharing with
-          that provider.
+          categorisation, relevant receipt files (photos or documents), voice
+          recordings, transcripts, expense text, currency context, and recent
+          expense context may be sent to the configured AI provider. When a
+          dedicated OCR backend is configured, receipt files are additionally
+          sent to that OCR provider for text extraction. Voice recordings are
+          processed transiently and are not stored by Spliit Cloud. Do not use
+          those features for material you are not comfortable sharing with that
+          provider.
         </p>
       </section>
 

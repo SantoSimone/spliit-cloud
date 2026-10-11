@@ -1,3 +1,4 @@
+import { Duration, Effect } from 'effect'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import '../../../test/mocks'
@@ -8,9 +9,11 @@ const envState = vi.hoisted(() => ({
   PUBLIC_ENABLE_CATEGORY_EXTRACT: false,
   AI_CATEGORY_ENGINE: 'llm' as 'llm' | 'system-one',
   AI_RECEIPT_TIMEOUT_SECONDS: 120,
+  AI_OCR_PROVIDER: 'none' as 'none' | 'ocrspace',
+  AI_OCRSPACE_TIMEOUT_SECONDS: 30,
 }))
 
-const extractExpenseInformationFromImage = vi.hoisted(() => vi.fn())
+const scanReceiptDocument = vi.hoisted(() => vi.fn())
 const suggestExpenseCategory = vi.hoisted(() => vi.fn())
 
 vi.mock(import('../../../lib/env'), async (importOriginal) => {
@@ -26,11 +29,11 @@ vi.mock(import('../../../lib/env'), async (importOriginal) => {
   return { ...actual, env: mockedEnv }
 })
 
-vi.mock(import('../../../lib/receipt-actions'), async (importOriginal) => {
+vi.mock(import('../../../lib/scan/pipeline'), async (importOriginal) => {
   const actual = await importOriginal()
   return {
     ...actual,
-    extractExpenseInformationFromImage,
+    scanReceiptDocument,
   }
 })
 
@@ -62,7 +65,9 @@ function authenticatedCaller() {
 }
 
 const scanInput = {
-  imageUrl: 'https://example.test/receipt.jpg',
+  documentUrl: 'https://example.test/receipt.jpg',
+  contentType: 'image/jpeg',
+  fileName: 'receipt.jpg',
   currency: '$',
   currencyCode: 'USD',
   groupId: 'group-1',
@@ -72,7 +77,8 @@ beforeEach(() => {
   envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = false
   envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = false
   envState.AI_CATEGORY_ENGINE = 'llm'
-  extractExpenseInformationFromImage.mockReset()
+  envState.AI_OCR_PROVIDER = 'none'
+  scanReceiptDocument.mockReset()
   suggestExpenseCategory.mockReset()
   suggestExpenseCategory.mockResolvedValue({
     categoryId: null,
@@ -94,7 +100,7 @@ describe('receipt extraction authorization', () => {
 
     await expect(
       caller.extractExpenseInformationFromImage({
-        imageUrl: 'https://example.test/receipt.jpg',
+        documentUrl: 'https://example.test/receipt.jpg',
         currency: '$',
         currencyCode: 'USD',
         groupId: 'group-1',
@@ -107,7 +113,7 @@ describe('receipt extraction authorization', () => {
 
     await expect(
       caller.extractExpenseInformationFromImage({
-        imageUrl: 'https://example.test/receipt.jpg',
+        documentUrl: 'https://example.test/receipt.jpg',
         currency: '$',
         currencyCode: 'USD',
         groupId: 'group-1',
@@ -117,8 +123,27 @@ describe('receipt extraction authorization', () => {
 
   it('maps provider timeouts to a TIMEOUT error instead of hanging silently', async () => {
     envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
-    extractExpenseInformationFromImage.mockRejectedValueOnce(
-      new DOMException('total timeout of 120000ms exceeded', 'TimeoutError'),
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.fail(
+        new DOMException('total timeout of 120000ms exceeded', 'TimeoutError'),
+      ),
+    )
+    const caller = authenticatedCaller()
+
+    await expect(
+      caller.extractExpenseInformationFromImage(scanInput),
+    ).rejects.toMatchObject({
+      code: 'TIMEOUT',
+      message: 'Receipt scanning failed due to timeout after 120s',
+    })
+  })
+
+  it('maps real Effect timeout failures to TIMEOUT with the receipt budget', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    // A genuine `Effect.timeout` failure (not a mocked DOMException) traveling
+    // through `Effect.runPromise` must still map to TIMEOUT at the boundary.
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.timeout(Effect.never, Duration.millis(10)),
     )
     const caller = authenticatedCaller()
 
@@ -132,8 +157,8 @@ describe('receipt extraction authorization', () => {
 
   it('lets non-timeout provider errors propagate unchanged', async () => {
     envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
-    extractExpenseInformationFromImage.mockRejectedValueOnce(
-      new Error('AI service unavailable'),
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.fail(new Error('AI service unavailable')),
     )
     const caller = authenticatedCaller()
 
@@ -157,20 +182,27 @@ describe('receipt extraction categorization', () => {
     envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
     envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
     envState.AI_CATEGORY_ENGINE = 'llm'
-    extractExpenseInformationFromImage.mockResolvedValueOnce({
-      ...ocrResult,
-      categoryId: 'groceries',
-    })
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.succeed({
+        ...ocrResult,
+        categoryId: 'groceries',
+      }),
+    )
     const caller = authenticatedCaller()
 
     const result = await caller.extractExpenseInformationFromImage(scanInput)
 
     expect(result.categoryId).toBe('groceries')
-    const [, , context] = extractExpenseInformationFromImage.mock.calls[0] as [
-      unknown,
+    const [source, , context] = scanReceiptDocument.mock.calls[0] as [
+      { url: string; contentType: string; fileName: string },
       unknown,
       { ocrOnly?: boolean; recentExpenses?: unknown[] },
     ]
+    expect(source).toMatchObject({
+      url: 'https://example.test/receipt.jpg',
+      contentType: 'image/jpeg',
+      fileName: 'receipt.jpg',
+    })
     expect(context.ocrOnly).not.toBe(true)
     expect(context.recentExpenses).toBeDefined()
     expect(suggestExpenseCategory).not.toHaveBeenCalled()
@@ -180,7 +212,7 @@ describe('receipt extraction categorization', () => {
     envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
     envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
     envState.AI_CATEGORY_ENGINE = 'system-one'
-    extractExpenseInformationFromImage.mockResolvedValueOnce(ocrResult)
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(ocrResult))
     suggestExpenseCategory.mockResolvedValueOnce({
       categoryId: 'groceries',
       candidates: [],
@@ -190,7 +222,7 @@ describe('receipt extraction categorization', () => {
     const result = await caller.extractExpenseInformationFromImage(scanInput)
 
     expect(result).toMatchObject({ ...ocrResult, categoryId: 'groceries' })
-    const [, , context] = extractExpenseInformationFromImage.mock.calls[0] as [
+    const [, , context] = scanReceiptDocument.mock.calls[0] as [
       unknown,
       unknown,
       { ocrOnly?: boolean; recentExpenses?: unknown },
@@ -213,7 +245,7 @@ describe('receipt extraction categorization', () => {
     envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
     envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
     envState.AI_CATEGORY_ENGINE = 'system-one'
-    extractExpenseInformationFromImage.mockResolvedValueOnce(ocrResult)
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(ocrResult))
     suggestExpenseCategory.mockRejectedValueOnce(new Error('model down'))
     const caller = authenticatedCaller()
 
@@ -226,15 +258,184 @@ describe('receipt extraction categorization', () => {
     envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
     envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
     envState.AI_CATEGORY_ENGINE = 'system-one'
-    extractExpenseInformationFromImage.mockResolvedValueOnce({
-      ...ocrResult,
-      title: null,
-    })
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.succeed({
+        ...ocrResult,
+        title: null,
+      }),
+    )
     const caller = authenticatedCaller()
 
     const result = await caller.extractExpenseInformationFromImage(scanInput)
 
     expect(result.categoryId).toBeNull()
     expect(suggestExpenseCategory).not.toHaveBeenCalled()
+  })
+})
+
+describe('receipt extraction with a dedicated OCR provider', () => {
+  const ocrResult = {
+    amount: 1850,
+    categoryId: null,
+    currencyCode: 'USD',
+    date: '2025-01-02',
+    title: 'Corner Market',
+    items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+    empty: false,
+    ocrUsed: true,
+  }
+
+  it('runs the separate suggestion step with the llm engine on OCR results', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    envState.AI_CATEGORY_ENGINE = 'llm'
+    envState.AI_OCR_PROVIDER = 'ocrspace'
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(ocrResult))
+    suggestExpenseCategory.mockResolvedValueOnce({
+      categoryId: 'groceries',
+      candidates: [],
+    })
+    const caller = authenticatedCaller()
+
+    const result = await caller.extractExpenseInformationFromImage(scanInput)
+
+    // `ocrUsed` is an internal routing flag and is stripped from the output.
+    const { ocrUsed: _ocrUsed, ...expectedOutput } = ocrResult
+    expect(result).toMatchObject({ ...expectedOutput, categoryId: 'groceries' })
+    expect(result).not.toHaveProperty('ocrUsed')
+    expect(suggestExpenseCategory).toHaveBeenCalledWith({
+      groupId: 'group-1',
+      title: 'Corner Market',
+      locale: undefined,
+      allowAi: true,
+      receiptItems: ['Apples'],
+      receiptCurrencyCode: 'USD',
+    })
+    // No history fetch for the OCR path; the suggestion loads its own.
+    expect(prismaMock.expense.findMany).not.toHaveBeenCalled()
+  })
+
+  it('passes the empty flag through to the client', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    envState.AI_OCR_PROVIDER = 'ocrspace'
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.succeed({
+        amount: Number.NaN,
+        categoryId: null,
+        currencyCode: 'USD',
+        date: null,
+        title: null,
+        items: [],
+        empty: true,
+        ocrUsed: true,
+      }),
+    )
+    const caller = authenticatedCaller()
+
+    const result = await caller.extractExpenseInformationFromImage(scanInput)
+
+    expect(result.empty).toBe(true)
+    expect(suggestExpenseCategory).not.toHaveBeenCalled()
+  })
+
+  it('keeps the joint vision path when OCR fell back without ocrUsed', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    envState.AI_CATEGORY_ENGINE = 'llm'
+    envState.AI_OCR_PROVIDER = 'ocrspace'
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.succeed({
+        ...ocrResult,
+        categoryId: 'groceries',
+        ocrUsed: false,
+      }),
+    )
+    const caller = authenticatedCaller()
+
+    const result = await caller.extractExpenseInformationFromImage(scanInput)
+
+    expect(result.categoryId).toBe('groceries')
+    expect(suggestExpenseCategory).not.toHaveBeenCalled()
+  })
+
+  it('names the OCR timeout budget when the OCR stage times out', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.AI_OCR_PROVIDER = 'ocrspace'
+    const { OcrError } = await import('../../../lib/ocr')
+    // Mirrors the adapter's timeout shape: fetch aborts with a TimeoutError
+    // DOMException, wrapped in an OcrError whose cause still matches the
+    // duck-typed timeout check while the stage flag selects the OCR budget.
+    scanReceiptDocument.mockReturnValueOnce(
+      Effect.fail(
+        new OcrError('OCR.space request failed', {
+          retryable: true,
+          cause: new DOMException('Timeout', 'TimeoutError'),
+        }),
+      ),
+    )
+    const caller = authenticatedCaller()
+
+    await expect(
+      caller.extractExpenseInformationFromImage(scanInput),
+    ).rejects.toMatchObject({
+      code: 'TIMEOUT',
+      message: 'Receipt scanning failed due to timeout after 30s',
+    })
+  })
+
+  it('accepts PDF documents with content type and file name', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.AI_OCR_PROVIDER = 'ocrspace'
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(ocrResult))
+    const caller = authenticatedCaller()
+
+    const result = await caller.extractExpenseInformationFromImage({
+      documentUrl: 'https://example.test/invoice.pdf',
+      contentType: 'application/pdf',
+      fileName: 'invoice.pdf',
+      currency: '$',
+      currencyCode: 'USD',
+      groupId: 'group-1',
+    })
+
+    const [source] = scanReceiptDocument.mock.calls[0] as [
+      { url: string; contentType: string; fileName: string },
+    ]
+    expect(source).toMatchObject({
+      url: 'https://example.test/invoice.pdf',
+      contentType: 'application/pdf',
+      fileName: 'invoice.pdf',
+    })
+    expect(result.title).toBe('Corner Market')
+  })
+
+  it('suggests a category for native document text without an OCR provider', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    envState.AI_CATEGORY_ENGINE = 'llm'
+    envState.AI_OCR_PROVIDER = 'none'
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(ocrResult))
+    suggestExpenseCategory.mockResolvedValueOnce({
+      categoryId: 'groceries',
+      candidates: [],
+    })
+    const caller = authenticatedCaller()
+
+    const result = await caller.extractExpenseInformationFromImage(scanInput)
+
+    // Structured-text results (native PDF/office text) carry ocrUsed even
+    // when no OCR provider is configured; the suggestion must still run
+    // (ocrUsed is stripped from the output like on the OCR path).
+    const { ocrUsed: _ocrUsed, ...expectedOutput } = ocrResult
+    expect(result).toMatchObject({ ...expectedOutput, categoryId: 'groceries' })
+    expect(suggestExpenseCategory).toHaveBeenCalledWith({
+      groupId: 'group-1',
+      title: 'Corner Market',
+      locale: undefined,
+      allowAi: true,
+      receiptItems: ['Apples'],
+      receiptCurrencyCode: 'USD',
+    })
   })
 })

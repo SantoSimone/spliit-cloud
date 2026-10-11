@@ -1193,8 +1193,8 @@
     "Dialog": {
       "triggerTitle": "Analyse de reçu par IA",
       "title": "Créer à partir du reçu",
-      "description": "Extraire les informations de la dépense à partir d'une photo de reçu.",
-      "body": "Téléchargez la photo d'un reçu, et nous l'analyserons pour extraire les informations de la dépense si possible.",
+      "description": "Extraire les informations de la dépense à partir d'une photo de reçu ou d'un document.",
+      "body": "Téléchargez la photo d'un reçu ou un document (PDF, TXT, CSV, DOCX, ODT), et nous l'analyserons pour extraire les informations de la dépense si possible.",
       "selectImage": "Sélectionner une image…",
       "titleLabel": "Titre :",
       "categoryLabel": "Catégorie :",
@@ -1211,10 +1211,12 @@
       "scanningHint": "L’analyse peut prendre un moment — merci de patienter.",
       "fillBody": "Choisissez un reçu joint ou importez-en un nouveau — nous l’analyserons pour suggérer les détails de cette dépense.",
       "translateToLocale": "Traduire le titre et les articles en {language}",
-      "dropTitle": "Déposez une image du reçu",
-      "dropDescription": "Déposez une image ici pour l’analyser avec l’IA",
+      "dropTitle": "Déposez un fichier de reçu",
+      "dropDescription": "Déposez un fichier ici pour l'analyser avec l'IA",
       "takePhoto": "Prendre une photo",
-      "scanReceipt": "Scanner le reçu"
+      "scanReceipt": "Scanner le reçu",
+      "emptyNotice": "Aucune information de dépense n'a pu être lue dans ce fichier. Continuez pour remplir la dépense manuellement — le fichier reste joint.",
+      "scannedDocumentFallback": "Document analysé"
     },
     "unknown": "Inconnu",
     "TooBigToast": {
@@ -1227,8 +1229,8 @@
       "retry": "Réessayer"
     },
     "UnsupportedToast": {
-      "title": "Image requise",
-      "aiDescription": "L’analyse des reçus par IA accepte uniquement les fichiers image."
+      "title": "Fichier non pris en charge",
+      "aiDescription": "L'analyse des reçus par IA accepte les images, les PDF et les documents texte (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Délai d’analyse du reçu dépassé",
@@ -3577,7 +3579,12 @@
       "invalidDate": "Choisissez une date valide dans le formulaire complet de dépense.",
       "unsupportedCurrency": "La devise indiquée n’est pas prise en charge ; choisissez-en une dans le formulaire complet."
     },
-    "addExpenseAction": "Ajouter une dépense"
+    "addExpenseAction": "Ajouter une dépense",
+    "itemsGapMismatch": "Les éléments totalisent {items}, mais le total du reçu est de {total} (différence : {gap}).",
+    "addRoundingAsItem": "Ajouter {amount} d'arrondi",
+    "roundingItemTitle": "Arrondi",
+    "roundingRequiredError": "Les éléments doivent correspondre au total. Conservez la ligne d'arrondi ou modifiez la dépense manuellement.",
+    "subtractRoundingAsItem": "Soustraire {amount} d'arrondi"
   },
   "Feedback": {
     "navigationLabel": "Commentaires",

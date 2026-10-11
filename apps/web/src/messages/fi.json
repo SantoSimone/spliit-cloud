@@ -1186,8 +1186,8 @@
     "Dialog": {
       "triggerTitle": "Tekoälykuittiskannaus",
       "title": "Luo kuitista",
-      "description": "Lue kuitin valokuvasta kulun tiedot.",
-      "body": "Lataa kuitista valokuva. Siitä skannataan tiedot kulua varten.",
+      "description": "Lue kulun tiedot kuitin valokuvasta tai asiakirjasta.",
+      "body": "Lataa kuitista valokuva tai asiakirja (PDF, TXT, CSV, DOCX, ODT), niin skannaamme siitä kulun tiedot, jos mahdollista.",
       "selectImage": "Valitse kuva…",
       "titleLabel": "Otsikko:",
       "categoryLabel": "Kategoria:",
@@ -1204,10 +1204,12 @@
       "scanningHint": "Skannaus voi kestää hetken — ole kärsivällinen.",
       "fillBody": "Valitse liitetty kuitti tai lataa uusi — skannaamme sen ja ehdotamme tämän kulun tietoja.",
       "translateToLocale": "Käännä otsikko ja kohteet kielelle {language}",
-      "dropTitle": "Pudota kuittikuva tähän",
-      "dropDescription": "Pudota yksi kuva tähän skannattavaksi tekoälyllä",
+      "dropTitle": "Pudota kuittitiedosto",
+      "dropDescription": "Pudota yksi tiedosto tähän skannattavaksi tekoälyllä",
       "takePhoto": "Ota kuva",
-      "scanReceipt": "Skannaa kuitti"
+      "scanReceipt": "Skannaa kuitti",
+      "emptyNotice": "Tästä tiedostosta ei voitu lukea kulun tietoja. Jatka täyttääksesi kulun manuaalisesti — tiedosto pysyy liitteenä.",
+      "scannedDocumentFallback": "Skannattu asiakirja"
     },
     "unknown": "Tuntematon",
     "TooBigToast": {
@@ -1220,8 +1222,8 @@
       "retry": "Yritä uudelleen"
     },
     "UnsupportedToast": {
-      "title": "Kuva vaaditaan",
-      "aiDescription": "Tekoälykuittiskannaus tukee vain kuvatiedostoja."
+      "title": "Tiedostoa ei tueta",
+      "aiDescription": "Tekoälykuittiskannaus tukee kuvia, PDF-tiedostoja ja tekstiasiakirjoja (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Kuittiskannauksen aikaraja ylittyi",
@@ -3552,7 +3554,12 @@
       "invalidDate": "Valitse kelvollinen päivämäärä kulujen täydellisessä lomakkeessa.",
       "unsupportedCurrency": "Puhuttua valuuttaa ei tueta; valitse valuutta kulujen täydellisessä lomakkeessa."
     },
-    "addExpenseAction": "Lisää kulu"
+    "addExpenseAction": "Lisää kulu",
+    "itemsGapMismatch": "Tuotteiden summa on {items}, mutta kuitin loppusumma on {total} (erotus: {gap}).",
+    "addRoundingAsItem": "Lisää {amount} pyöristys",
+    "roundingItemTitle": "Pyöristys",
+    "roundingRequiredError": "Tuotteiden on täsmättävä loppusummaan. Pidä pyöristysrivi mukana tai muokkaa kulua manuaalisesti.",
+    "subtractRoundingAsItem": "Vähennä {amount} pyöristys"
   },
   "Feedback": {
     "navigationLabel": "Palaute",

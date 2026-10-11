@@ -1200,8 +1200,8 @@
     "Dialog": {
       "triggerTitle": "Skan paragonu z AI",
       "title": "Utwórz z paragonu",
-      "description": "Wyodrębnij informacje o wydatkach ze zdjęcia paragonu.",
-      "body": "Prześlij zdjęcie paragonu, a my zeskanujemy je, aby wyodrębnić informacje o wydatkach, jeśli to możliwe.",
+      "description": "Wyodrębnij informacje o wydatku ze zdjęcia paragonu lub dokumentu.",
+      "body": "Prześlij zdjęcie paragonu lub dokument (PDF, TXT, CSV, DOCX, ODT), a my zeskanujemy je, aby wyodrębnić informacje o wydatku, jeśli to możliwe.",
       "selectImage": "Wybierz obraz…",
       "titleLabel": "Tytuł:",
       "categoryLabel": "Kategoria:",
@@ -1218,10 +1218,12 @@
       "scanningHint": "Skanowanie może chwilę potrwać — prosimy o cierpliwość.",
       "fillBody": "Wybierz dołączony paragon lub prześlij nowy — zeskanujemy go, aby zasugerować dane tego wydatku.",
       "translateToLocale": "Przetłumacz tytuł i elementy na {language}",
-      "dropTitle": "Upuść obraz paragonu",
-      "dropDescription": "Upuść tutaj jeden obraz, aby zeskanować go za pomocą AI",
+      "dropTitle": "Upuść plik paragonu",
+      "dropDescription": "Upuść tutaj jeden plik, aby zeskanować go za pomocą AI",
       "takePhoto": "Zrób zdjęcie",
-      "scanReceipt": "Skanuj paragon"
+      "scanReceipt": "Skanuj paragon",
+      "emptyNotice": "Nie udało się odczytać żadnych szczegółów wydatku z tego pliku. Kontynuuj, aby wypełnić wydatek ręcznie — plik pozostanie załączony.",
+      "scannedDocumentFallback": "Zeskanowany dokument"
     },
     "unknown": "Nieznany",
     "TooBigToast": {
@@ -1234,8 +1236,8 @@
       "retry": "Ponów"
     },
     "UnsupportedToast": {
-      "title": "Wymagany obraz",
-      "aiDescription": "Skanowanie paragonów za pomocą AI obsługuje tylko pliki graficzne."
+      "title": "Nieobsługiwany plik",
+      "aiDescription": "Skanowanie paragonów za pomocą AI obsługuje obrazy, pliki PDF i dokumenty tekstowe (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Limit czasu skanowania paragonu upłynął",
@@ -3596,7 +3598,12 @@
       "invalidDate": "Wybierz prawidłową datę w pełnym formularzu wydatku.",
       "unsupportedCurrency": "Podana waluta nie jest obsługiwana; wybierz inną w pełnym formularzu wydatku."
     },
-    "addExpenseAction": "Dodaj wydatek"
+    "addExpenseAction": "Dodaj wydatek",
+    "itemsGapMismatch": "Suma pozycji to {items}, ale łączna kwota paragonu to {total} (różnica: {gap}).",
+    "addRoundingAsItem": "Dodaj zaokrąglenie {amount}",
+    "roundingItemTitle": "Zaokrąglenie",
+    "roundingRequiredError": "Pozycje muszą sumować się do kwoty całkowitej. Zachowaj pozycję zaokrąglenia albo edytuj wydatek ręcznie.",
+    "subtractRoundingAsItem": "Odejmij zaokrąglenie {amount}"
   },
   "Feedback": {
     "navigationLabel": "Opinie",

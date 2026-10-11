@@ -2,6 +2,7 @@ import {
   Camera,
   Check,
   FileQuestion,
+  FileText,
   ScanLine,
   Sparkles,
   Upload,
@@ -19,6 +20,7 @@ import {
   AiExpensePreview,
   type AiExpenseDraft,
 } from '@/app/groups/[groupId]/expenses/ai-expense-preview'
+import { AiReceiptItems } from '@/app/groups/[groupId]/expenses/ai-receipt-items'
 import { CategoryIcon } from '@/app/groups/[groupId]/expenses/category-icon'
 import Image from '@/components/app-image'
 import { FilePickerInput } from '@/components/file-picker-input'
@@ -43,12 +45,13 @@ import {
 import { trpc } from '@/trpc/client'
 import {
   categoryIdSchema,
-  EXPENSE_DOCUMENT_IMAGE_ACCEPT,
-  isExpenseDocumentImage,
-  isSupportedExpenseDocumentUpload,
   getCategoryById,
+  isExpenseDocumentImage,
+  isScannableReceiptDocument,
+  isSupportedExpenseDocumentUpload,
   localeLabels,
   MAX_EXPENSE_DOCUMENT_SIZE,
+  RECEIPT_SCAN_ACCEPT,
   isExpenseDocumentSizeWithinLimit,
   type CategoryId,
   type Locale,
@@ -65,9 +68,19 @@ const FALLBACK_MAX_FILE_SIZE = MAX_EXPENSE_DOCUMENT_SIZE
 const TRANSLATE_STORAGE_KEY = 'spliit-receipt-translate-to-locale'
 
 function isReceiptImageFile(file: File): boolean {
+  return file.type.startsWith('image/') || hasReceiptImageExtension(file.name)
+}
+
+function isReceiptScannableFile(file: File): boolean {
   return (
-    file.type.startsWith('image/') ||
-    /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)
+    isSupportedExpenseDocumentUpload({
+      fileName: file.name,
+      contentType: file.type,
+    }) &&
+    isScannableReceiptDocument({
+      fileName: file.name,
+      contentType: file.type,
+    })
   )
 }
 
@@ -116,15 +129,43 @@ export type ReceiptExtractedInfo = {
   date: string | null
   title: string | null
   items: Array<{ title: string; unitPrice: number; quantity: number }>
+  empty: boolean
 }
 
 export type ReceiptDocument = {
   id: string
   url: string
-  width: number
-  height: number
+  /** Null for non-image documents (PDF, text, office files). */
+  width: number | null
+  /** Null for non-image documents (PDF, text, office files). */
+  height: number | null
   fileName?: string | null
   contentType?: string | null
+}
+
+function hasReceiptImageExtension(name: string): boolean {
+  return /\.(jpe?g|png|webp|heic|heif)$/i.test(name)
+}
+
+/**
+ * True for image files, which take the resize-and-preview path. Documents (PDF,
+ * txt/csv, docx/odt) upload as-is and render as a file card.
+ */
+function isReceiptImageDocument(document: {
+  width?: number | null
+  height?: number | null
+  fileName?: string | null
+  contentType?: string | null
+}): boolean {
+  if (document.width == null || document.height == null) return false
+  // Attachments from before content-type metadata existed carry dimensions
+  // only for images.
+  if (!document.contentType) return true
+  return (
+    isExpenseDocumentImage(document.contentType) ||
+    document.contentType.startsWith('image/') ||
+    hasReceiptImageExtension(document.fileName ?? '')
+  )
 }
 
 export type ReceiptScanContext = {
@@ -411,7 +452,9 @@ function ReceiptDialogContent({
     try {
       setPending(true)
       const result = await extractReceiptMutation.mutateAsync({
-        imageUrl: document.url,
+        documentUrl: document.url,
+        contentType: document.contentType,
+        fileName: document.fileName,
         currency: group.currency,
         currencyCode: group.currencyCode,
         groupId: group.id,
@@ -422,7 +465,10 @@ function ReceiptDialogContent({
       if (requestId !== requestIdRef.current) return
       setReceiptInfo(result)
       mascot.react('idle')
-      if (mode === 'create' && directAccept) {
+      // Empty results stay in the dialog with an explicit notice instead of
+      // jumping to the preview: the user fills the expense in manually, with
+      // the photo already attached, via Continue below.
+      if (mode === 'create' && directAccept && !result.empty) {
         onAccept?.({ info: result, document })
       }
     } catch (err) {
@@ -468,13 +514,7 @@ function ReceiptDialogContent({
   }, [autoScan, documents, open, selectedDocument])
 
   const handleFileChange = async (file: File) => {
-    if (
-      !isSupportedExpenseDocumentUpload({
-        fileName: file.name,
-        contentType: file.type,
-      }) ||
-      !isReceiptImageFile(file)
-    ) {
+    if (!isReceiptScannableFile(file)) {
       mascot.react('failure')
       toast({
         title: t('UnsupportedToast.title'),
@@ -484,33 +524,42 @@ function ReceiptDialogContent({
       return
     }
     const requestId = ++requestIdRef.current
-    // Flip before `resizeImage`: the resize runs async and a reload in that
-    // window would lose the selected file.
+    // Flip before the async prep below: the resize/upload runs async and a
+    // reload in that window would lose the selected file.
     setPending(true)
     try {
       mascot.react('thinking')
-      const { file: resizedFile, width, height } = await resizeImage(file)
+      // Images go through the resize path (HEIC decode, downscale, JPEG
+      // re-encode with dimensions for preview). Documents upload as-is:
+      // there is nothing to render at pixel size.
+      const prepared = isReceiptImageFile(file)
+        ? await resizeImage(file).then(({ file, width, height }) => ({
+            file,
+            width,
+            height,
+          }))
+        : { file, width: null as number | null, height: null as number | null }
       if (requestId !== requestIdRef.current) return
-      if (!isExpenseDocumentSizeWithinLimit(resizedFile.size, maxFileSize)) {
+      if (!isExpenseDocumentSizeWithinLimit(prepared.file.size, maxFileSize)) {
         mascot.react('failure')
         toast({
           title: t('TooBigToast.title'),
           description: t('TooBigToast.description', {
             maxSize: formatFileSize(maxFileSize, locale),
-            size: formatFileSize(resizedFile.size, locale),
+            size: formatFileSize(prepared.file.size, locale),
           }),
           variant: 'destructive',
         })
         return
       }
-      const { url } = await uploadToS3(resizedFile)
-      const document = {
+      const { url } = await uploadToS3(prepared.file)
+      const document: ReceiptDocument = {
         id: crypto.randomUUID(),
         url,
-        width,
-        height,
-        fileName: resizedFile.name,
-        contentType: resizedFile.type,
+        width: prepared.width,
+        height: prepared.height,
+        fileName: prepared.file.name,
+        contentType: prepared.file.type,
       }
       setSelectedDocument(document)
       setReceiptInfo(null)
@@ -544,7 +593,7 @@ function ReceiptDialogContent({
       return
     }
     const [file] = files
-    if (!isReceiptImageFile(file)) {
+    if (!isReceiptScannableFile(file)) {
       mascot.react('failure')
       toast({
         title: t('UnsupportedToast.title'),
@@ -597,13 +646,20 @@ function ReceiptDialogContent({
   const category = parsedCategory?.success
     ? getCategoryById(parsedCategory.data)
     : null
+  const receiptCurrency =
+    group != null
+      ? receiptInfo?.currencyCode
+        ? (getCurrency(receiptInfo.currencyCode) ?? getCurrencyFromGroup(group))
+        : getCurrencyFromGroup(group)
+      : null
 
-  const imageDocuments = documents.filter(
+  const scannableDocuments = documents.filter(
     (document) =>
-      isExpenseDocumentImage(document.contentType) ||
-      (!document.contentType &&
-        document.width != null &&
-        document.height != null),
+      isReceiptImageDocument(document) ||
+      isScannableReceiptDocument({
+        fileName: document.fileName ?? '',
+        contentType: document.contentType,
+      }),
   )
 
   return (
@@ -643,7 +699,7 @@ function ReceiptDialogContent({
       <FilePickerInput
         ref={fileInputRef}
         onFilesSelected={handleFiles}
-        accept={EXPENSE_DOCUMENT_IMAGE_ACCEPT}
+        accept={RECEIPT_SCAN_ACCEPT}
         className="hidden"
       />
       <FilePickerInput
@@ -653,28 +709,45 @@ function ReceiptDialogContent({
         capture="environment"
         className="hidden"
       />
-      {!selectedDocument && imageDocuments.length > 0 && (
+      {!selectedDocument && scannableDocuments.length > 0 && (
         <div className="not-prose mb-4 space-y-2">
           <p className="text-sm font-medium">{t('Dialog.existingDocuments')}</p>
           <div className="grid grid-cols-4 gap-2">
-            {imageDocuments.map((document) => (
-              <Button
-                key={document.id}
-                type="button"
-                variant="secondary"
-                className="h-20 overflow-hidden p-1"
-                onClick={() => scan(document)}
-                disabled={pending}
-              >
-                <Image
-                  src={document.url}
-                  width={document.width}
-                  height={document.height}
-                  className="h-full w-full object-contain"
-                  alt={t('Dialog.existingDocumentAlt')}
-                />
-              </Button>
-            ))}
+            {scannableDocuments.map((document) =>
+              isReceiptImageDocument(document) ? (
+                <Button
+                  key={document.id}
+                  type="button"
+                  variant="secondary"
+                  className="h-20 overflow-hidden p-1"
+                  onClick={() => scan(document)}
+                  disabled={pending}
+                >
+                  <Image
+                    src={document.url}
+                    width={document.width ?? undefined}
+                    height={document.height ?? undefined}
+                    className="h-full w-full object-contain"
+                    alt={t('Dialog.existingDocumentAlt')}
+                  />
+                </Button>
+              ) : (
+                <Button
+                  key={document.id}
+                  type="button"
+                  variant="secondary"
+                  className="h-20 flex-col gap-1 overflow-hidden p-1 text-xs"
+                  onClick={() => scan(document)}
+                  disabled={pending}
+                  title={document.fileName ?? document.url}
+                >
+                  <FileText className="h-6 w-6 shrink-0 text-muted-foreground" />
+                  <span className="w-full truncate">
+                    {document.fileName ?? t('Dialog.scannedDocumentFallback')}
+                  </span>
+                </Button>
+              ),
+            )}
           </div>
         </div>
       )}
@@ -706,13 +779,28 @@ function ReceiptDialogContent({
         <>
           <div className="not-prose mb-3 grid grid-cols-2 gap-x-4 gap-y-2 rounded-md border p-3 text-sm">
             <div className="relative col-span-2 flex min-h-48 justify-center overflow-hidden rounded border bg-muted/20">
-              <Image
-                src={selectedDocument.url}
-                width={selectedDocument.width}
-                height={selectedDocument.height}
-                className="max-h-72 w-auto max-w-full object-contain"
-                alt={t('Dialog.scannedReceiptAlt')}
-              />
+              {isReceiptImageDocument(selectedDocument) ? (
+                <Image
+                  src={selectedDocument.url}
+                  width={selectedDocument.width ?? undefined}
+                  height={selectedDocument.height ?? undefined}
+                  className="max-h-72 w-auto max-w-full object-contain"
+                  alt={t('Dialog.scannedReceiptAlt')}
+                />
+              ) : (
+                <div className="flex max-h-72 flex-col items-center justify-center gap-2 p-6 text-center">
+                  <FileText className="h-12 w-12 text-muted-foreground" />
+                  <span className="max-w-full truncate font-medium">
+                    {selectedDocument.fileName ??
+                      t('Dialog.scannedDocumentFallback')}
+                  </span>
+                  {selectedDocument.contentType && (
+                    <span className="text-xs text-muted-foreground">
+                      {selectedDocument.contentType}
+                    </span>
+                  )}
+                </div>
+              )}
               {pending && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/75 p-3 text-center text-xs font-medium text-foreground backdrop-blur-[1px]">
                   <span className="relative inline-flex h-12 w-12 items-center justify-center rounded-full bg-pink-500/15 text-pink-600 shadow-[0_0_24px_rgba(236,72,153,0.55)]">
@@ -725,6 +813,11 @@ function ReceiptDialogContent({
             </div>
             {receiptInfo ? (
               <>
+                {receiptInfo.empty && (
+                  <p className="col-span-2 font-medium text-amber-600 dark:text-amber-400">
+                    {t('Dialog.emptyNotice')}
+                  </p>
+                )}
                 <div>
                   <strong>{t('Dialog.titleLabel')}</strong>
                   <div>{receiptInfo.title ?? <Unknown />}</div>
@@ -745,12 +838,9 @@ function ReceiptDialogContent({
                 <div>
                   <strong>{t('Dialog.amountLabel')}</strong>
                   <div>
-                    {group
+                    {receiptCurrency
                       ? formatCurrency(
-                          receiptInfo.currencyCode
-                            ? (getCurrency(receiptInfo.currencyCode) ??
-                                getCurrencyFromGroup(group))
-                            : getCurrencyFromGroup(group),
+                          receiptCurrency,
                           receiptInfo.amount,
                           locale,
                         )
@@ -772,16 +862,23 @@ function ReceiptDialogContent({
                   </div>
                 </div>
                 <div className="col-span-2">
-                  <strong>{tExpenseForm('ExpenseForm.items.title')}</strong>
-                  <div>
-                    {receiptInfo.items.length ? (
-                      receiptInfo.items
-                        .map((item) => `${item.title} × ${item.quantity}`)
-                        .join(', ')
-                    ) : (
-                      <Unknown />
-                    )}
-                  </div>
+                  {receiptInfo.items.length && receiptCurrency ? (
+                    <AiReceiptItems
+                      items={receiptInfo.items}
+                      currency={receiptCurrency}
+                      locale={locale}
+                      heading={tExpenseForm('ExpenseForm.items.title')}
+                    />
+                  ) : receiptInfo.items.length ? (
+                    <div>
+                      <strong>{tExpenseForm('ExpenseForm.items.title')}</strong>
+                      <div>
+                        {receiptInfo.items.map((item) => item.title).join(', ')}
+                      </div>
+                    </div>
+                  ) : (
+                    <Unknown />
+                  )}
                 </div>
               </>
             ) : null}

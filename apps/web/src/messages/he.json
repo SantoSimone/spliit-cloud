@@ -1193,8 +1193,8 @@
     "Dialog": {
       "triggerTitle": "סריקת קבלה ב‑AI",
       "title": "צור מקבלה",
-      "description": "חלץ את מידע ההוצאה מתמונת קבלה.",
-      "body": "העלה תמונה של קבלה, ואנחנו נסרוק אותה כדי לחלץ את מידע ההוצאה אם נוכל.",
+      "description": "חלץ את מידע ההוצאה מתמונת קבלה או ממסמך.",
+      "body": "העלה תמונה של קבלה או מסמך (PDF, TXT, CSV, DOCX, ODT), ואנחנו נסרוק אותם כדי לחלץ את מידע ההוצאה אם נוכל.",
       "selectImage": "בחר תמונה…",
       "titleLabel": "כותרת:",
       "categoryLabel": "קטגוריה:",
@@ -1211,10 +1211,12 @@
       "scanningHint": "הסריקה עשויה להימשך מעט — נא להמתין בסבלנות.",
       "fillBody": "בחרו קבלה מצורפת או העלו חדשה — נסרוק אותה כדי להציע פרטים להוצאה הזו.",
       "translateToLocale": "תרגם כותרת ופריטים ל{language}",
-      "dropTitle": "גררו לכאן תמונת קבלה",
-      "dropDescription": "גררו לכאן תמונה אחת כדי לסרוק אותה באמצעות AI",
+      "dropTitle": "גררו לכאן קובץ קבלה",
+      "dropDescription": "גררו לכאן קובץ אחד כדי לסרוק אותו באמצעות AI",
       "takePhoto": "צילום תמונה",
-      "scanReceipt": "סריקת קבלה"
+      "scanReceipt": "סריקת קבלה",
+      "emptyNotice": "לא ניתן היה לקרוא פרטי הוצאה מהקובץ הזה. המשך כדי למלא את ההוצאה ידנית — הקובץ יישאר מצורף.",
+      "scannedDocumentFallback": "מסמך סרוק"
     },
     "unknown": "לא ידוע",
     "TooBigToast": {
@@ -1227,8 +1229,8 @@
       "retry": "נסה שוב"
     },
     "UnsupportedToast": {
-      "title": "נדרשת תמונה",
-      "aiDescription": "סריקת קבלות ב‑AI תומכת בקובצי תמונה בלבד."
+      "title": "קובץ לא נתמך",
+      "aiDescription": "סריקת קבלות ב‑AI תומכת בתמונות, בקובצי PDF ובמסמכי טקסט (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "תם הזמן לסריקת הקבלה",
@@ -3579,7 +3581,12 @@
       "invalidDate": "בחר תאריך תקין בטופס ההוצאה המלא.",
       "unsupportedCurrency": "המטבע שנאמר אינו נתמך; בחר מטבע בטופס ההוצאה המלא."
     },
-    "addExpenseAction": "הוספת הוצאה"
+    "addExpenseAction": "הוספת הוצאה",
+    "itemsGapMismatch": "סכום הפריטים הוא {items}, אבל הסכום הכולל בקבלה הוא {total} (הפרש: {gap}).",
+    "addRoundingAsItem": "הוסיפו עיגול של {amount}",
+    "roundingItemTitle": "עיגול",
+    "roundingRequiredError": "סכום הפריטים חייב להיות שווה לסכום הכולל. השאירו את שורת העיגול או ערכו את ההוצאה ידנית.",
+    "subtractRoundingAsItem": "החסירו עיגול של {amount}"
   },
   "Feedback": {
     "navigationLabel": "משוב",

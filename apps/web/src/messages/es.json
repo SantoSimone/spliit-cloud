@@ -1211,8 +1211,8 @@
     "Dialog": {
       "triggerTitle": "Escaneo de recibo con IA",
       "title": "Crear desde ticket",
-      "description": "Extraer la información de gastos de una foto de recibo.",
-      "body": "Sube la foto de un recibo y lo escanearemos para extraer la información del gasto si podemos.",
+      "description": "Extrae la información del gasto de la foto de un recibo o de un documento.",
+      "body": "Sube la foto de un recibo o un documento (PDF, TXT, CSV, DOCX, ODT) y lo escanearemos para extraer la información del gasto si podemos.",
       "selectImage": "Seleccionar imagen…",
       "titleLabel": "Título:",
       "categoryLabel": "Categoría:",
@@ -1229,10 +1229,12 @@
       "scanningHint": "El escaneo puede tardar un poco — ten paciencia.",
       "fillBody": "Elige un recibo adjunto o sube uno nuevo — lo escanearemos para sugerir datos para este gasto.",
       "translateToLocale": "Traducir título y artículos a {language}",
-      "dropTitle": "Suelta una imagen del recibo",
-      "dropDescription": "Suelta aquí una imagen para escanearla con IA",
+      "dropTitle": "Suelta un archivo del recibo",
+      "dropDescription": "Suelta un archivo aquí para escanearlo con IA",
       "takePhoto": "Hacer una foto",
-      "scanReceipt": "Escanear recibo"
+      "scanReceipt": "Escanear recibo",
+      "emptyNotice": "No se pudo leer ningún detalle del gasto de este archivo. Continúa para completar el gasto manualmente: el archivo seguirá adjunto.",
+      "scannedDocumentFallback": "Documento escaneado"
     },
     "unknown": "Desconocido",
     "TooBigToast": {
@@ -1245,8 +1247,8 @@
       "retry": "Reintentar"
     },
     "UnsupportedToast": {
-      "title": "Se necesita una imagen",
-      "aiDescription": "El escaneo de recibos con IA solo admite archivos de imagen."
+      "title": "Archivo no compatible",
+      "aiDescription": "El escaneo de recibos con IA admite imágenes, PDF y documentos de texto (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Se agotó el tiempo de escaneo del recibo",
@@ -3628,7 +3630,12 @@
       "invalidDate": "Elige una fecha válida en el formulario completo de gastos.",
       "unsupportedCurrency": "La moneda indicada no es compatible; elige una en el formulario completo de gastos."
     },
-    "addExpenseAction": "Añadir gasto"
+    "addExpenseAction": "Añadir gasto",
+    "itemsGapMismatch": "Los artículos suman {items}, pero el total del recibo es {total} (diferencia: {gap}).",
+    "addRoundingAsItem": "Añadir {amount} de redondeo",
+    "roundingItemTitle": "Redondeo",
+    "roundingRequiredError": "Los artículos deben sumar el total. Mantén la línea de redondeo o edita el gasto manualmente.",
+    "subtractRoundingAsItem": "Restar {amount} de redondeo"
   },
   "Feedback": {
     "navigationLabel": "Comentarios",

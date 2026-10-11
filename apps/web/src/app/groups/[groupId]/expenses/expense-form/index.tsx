@@ -35,6 +35,7 @@ import {
   INCOME_CATEGORY_ID,
   amountAsDecimal,
   isExpenseDocumentImage,
+  isScannableReceiptDocument,
   isSettlementCategory,
   type Currency,
 } from '@spliit/domain'
@@ -684,19 +685,29 @@ export function ExpenseForm(props: {
           suggestCategoryMutation={suggestCategoryMutation}
           runtimeFeatureFlags={props.runtimeFeatureFlags}
           receiptDocuments={form.getValues('documents').flatMap((document) => {
+            // Images with dimensions (including legacy attachments without
+            // content-type metadata) plus scannable documents (PDF, text,
+            // office files) can be AI-scanned from the fill dialog.
+            const imageWithDims =
+              (isExpenseDocumentImage(document.contentType) ||
+                !document.contentType) &&
+              document.width != null &&
+              document.height != null
             if (
-              !isExpenseDocumentImage(document.contentType) &&
-              document.contentType
+              !imageWithDims &&
+              !isScannableReceiptDocument({
+                fileName: document.fileName ?? '',
+                contentType: document.contentType,
+              })
             ) {
               return []
             }
-            if (document.width == null || document.height == null) return []
             return [
               {
                 id: document.id,
                 url: document.url,
-                width: document.width,
-                height: document.height,
+                width: document.width ?? null,
+                height: document.height ?? null,
                 fileName: document.fileName,
                 contentType: document.contentType,
               },

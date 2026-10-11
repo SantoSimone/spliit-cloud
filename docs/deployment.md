@@ -160,8 +160,15 @@ may remain empty.
   Configure the bucket with a lifecycle rule that expires objects under
   `tmp/imports/` after 24 hours. Import retries intentionally retain these
   temporary objects until the database transaction commits; the lifecycle rule
-  removes abandoned browser sessions and interrupted uploads. The per-file
-  attachment limit defaults to 2 MB and can be raised with
+  removes abandoned browser sessions and interrupted uploads. The bucket also
+  needs a CORS rule allowing the web origin (`APP_URL` / `WEB_ORIGINS`):
+  methods `GET, PUT, POST, DELETE, HEAD`, headers `*`, expose `ETag`.
+  Without it, browser presigned uploads (document attachments, AI receipt
+  scans) fail at the preflight with `CORS Missing Allow Origin`. Example for
+  AWS S3 (`aws s3api put-bucket-cors --bucket <name>` with this
+  `--cors-configuration`):
+  `{"CORSRules": [{"AllowedOrigins": ["https://app.example.com"], "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"], "AllowedHeaders": ["*"], "ExposeHeaders": ["ETag"], "MaxAgeSeconds": 3600}]}`.
+  The per-file attachment limit defaults to 2 MB and can be raised with
   `MAX_EXPENSE_DOCUMENT_SIZE_MB` (up to 50; uploads go directly to S3, so no
   proxy body-size change is needed, but larger values increase API memory use
   when exporting groups with documents).

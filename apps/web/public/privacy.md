@@ -22,7 +22,7 @@ We use this data to provide accounts, shared expense tracking, invitations, expo
 
 ## Recipients and service providers
 
-The service runs on hosting, database, backup, object-storage, and email infrastructure (currently Cloudflare Pages, a Hetzner-hosted API and PostgreSQL database, Cloudflare R2 backups and uploads, and a configured SMTP provider). These providers process data only to operate the service. If you choose receipt extraction or expense categorisation, relevant receipt images, voice recordings, transcripts, expense text, currency context, and recent expense context may be sent to the configured AI provider. Voice recordings are processed transiently and are not stored by Spliit Cloud. Do not use those features for material you are not comfortable sharing with that provider.
+The service runs on hosting, database, backup, object-storage, and email infrastructure (currently Cloudflare Pages, a Hetzner-hosted API and PostgreSQL database, Cloudflare R2 backups and uploads, and a configured SMTP provider). These providers process data only to operate the service. If you choose receipt extraction or expense categorisation, relevant receipt files (photos or documents), voice recordings, transcripts, expense text, currency context, and recent expense context may be sent to the configured AI provider. When a dedicated OCR backend is configured, receipt files are additionally sent to that OCR provider for text extraction. Voice recordings are processed transiently and are not stored by Spliit Cloud. Do not use those features for material you are not comfortable sharing with that provider.
 
 ## Connected applications
 

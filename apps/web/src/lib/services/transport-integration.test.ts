@@ -134,13 +134,16 @@ describe('effect fetch boundary', () => {
 })
 
 describe('fetch outcome projection', () => {
-  it('keeps server answers distinct from offline', () => {
+  it('treats every server answer as reachable, even 5xx', () => {
+    // A 5xx on a data-plane fetch is a per-request application error, not
+    // downtime: the server answered. Only transport loss and the health
+    // probe may latch outage UI.
     expect(
       probeOutcomeForFetchEvent({ kind: 'response', status: 200 }),
     ).toEqual({ outcome: 'reachable' })
     expect(
       probeOutcomeForFetchEvent({ kind: 'response', status: 503 }),
-    ).toEqual({ outcome: 'server-failure', status: 503 })
+    ).toEqual({ outcome: 'reachable' })
     expect(
       probeOutcomeForFetchEvent({ kind: 'network-failure', error: null }),
     ).toEqual({ outcome: 'unreachable' })
@@ -169,22 +172,21 @@ describe('fetch outcome projection', () => {
     })
   })
 
-  it('projects one classification to both the legacy store and AppStatus', () => {
+  it('never latches outage UI from a data-plane 5xx on either projection', () => {
     // Task 8 unification: a single classification fans out to both
     // projections — no inline copies at call sites, no doubled reporting.
+    // Regression: a failing tRPC mutation (HTTP 500 with a TRPCError body)
+    // must not paint the global "server can't be reached" banner. Outage UI
+    // latches only from transport failures and the health probe.
     getDefaultConnectivityStore().resetForTests()
     reportFetchOutcomeToServices({ kind: 'response', status: 503 })
-    expect(getDefaultConnectivityStore().getSnapshot().serverFailure).toEqual({
-      kind: 'http-error',
-      status: 503,
-      at: expect.any(Number),
-    })
-    expect(readAppStatus().serverFailure).toEqual({
-      kind: 'http-error',
-      status: 503,
-      at: expect.any(Number),
-    })
-    // Recovery clears both legs together.
+    expect(getDefaultConnectivityStore().getSnapshot().serverFailure).toBeNull()
+    expect(getDefaultConnectivityStore().getSnapshot().transport).toBe(
+      'reachable',
+    )
+    expect(readAppStatus().serverFailure).toBeNull()
+    expect(readAppStatus().transport).toBe('reachable')
+    // A subsequent success keeps both legs clear.
     reportFetchOutcomeToServices({ kind: 'response', status: 200 })
     expect(getDefaultConnectivityStore().getSnapshot().serverFailure).toBeNull()
     expect(readAppStatus().serverFailure).toBeNull()

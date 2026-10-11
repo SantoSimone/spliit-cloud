@@ -1919,8 +1919,8 @@
     "Dialog": {
       "triggerTitle": "AI receipt scan",
       "title": "Create from receipt",
-      "description": "Extract the expense information from a receipt photo.",
-      "body": "Upload the photo of a receipt, and we’ll scan it to extract the expense information if we can.",
+      "description": "Extract the expense information from a receipt photo or document.",
+      "body": "Upload a receipt photo or document (PDF, TXT, CSV, DOCX, ODT), and we’ll scan it to extract the expense information if we can.",
       "selectImage": "Select image…",
       "titleLabel": "Title:",
       "categoryLabel": "Category:",
@@ -1937,10 +1937,12 @@
       "scanningHint": "Scanning can take a little while — please be patient.",
       "fillBody": "Choose an attached receipt or upload a new one — we’ll scan it to suggest details for this expense.",
       "translateToLocale": "Translate title and items to {language}",
-      "dropTitle": "Drop a receipt image",
-      "dropDescription": "Drop one image here to scan it with AI",
+      "dropTitle": "Drop a receipt file",
+      "dropDescription": "Drop one file here to scan it with AI",
       "takePhoto": "Take photo",
-      "scanReceipt": "Scan receipt"
+      "scanReceipt": "Scan receipt",
+      "emptyNotice": "No expense details could be read from this file. Continue to fill in the expense manually — the file stays attached.",
+      "scannedDocumentFallback": "Scanned document"
     },
     "unknown": "Unknown",
     "TooBigToast": {
@@ -1953,8 +1955,8 @@
       "retry": "Retry"
     },
     "UnsupportedToast": {
-      "title": "Image required",
-      "aiDescription": "AI receipt scan supports image files only."
+      "title": "Unsupported file",
+      "aiDescription": "AI receipt scan supports images, PDFs, and text documents (TXT, CSV, DOCX, ODT)."
     },
     "TimeoutToast": {
       "title": "Receipt scanning timed out",
@@ -3658,7 +3660,12 @@
       "invalidDate": "Choose a valid date in the full expense form.",
       "unsupportedCurrency": "The spoken currency is not supported; choose one in the full expense form."
     },
-    "addExpenseAction": "Add expense"
+    "addExpenseAction": "Add expense",
+    "itemsGapMismatch": "Items add up to {items}, but the receipt total is {total} (difference: {gap}).",
+    "addRoundingAsItem": "Add {amount} rounding",
+    "roundingItemTitle": "Rounding",
+    "roundingRequiredError": "The items must add up to the total. Keep the rounding line, or edit the expense manually.",
+    "subtractRoundingAsItem": "Subtract {amount} rounding"
   },
   "Feedback": {
     "navigationLabel": "Feedback",
