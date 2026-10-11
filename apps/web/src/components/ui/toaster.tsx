@@ -28,7 +28,7 @@ function ToasterViewport() {
                   <Sparkles className="size-4" />
                 </span>
               )}
-              <div className="grid gap-1">
+              <div className="grid min-w-0 flex-1 gap-0.5 text-left">
                 {toastItem.title != null && toastItem.title !== '' && (
                   <ToastTitle>{toastItem.title}</ToastTitle>
                 )}
@@ -37,7 +37,9 @@ function ToasterViewport() {
                     <ToastDescription>{toastItem.description}</ToastDescription>
                   )}
               </div>
-              {toastItem.data?.action}
+              {toastItem.data?.action ? (
+                <div className="shrink-0">{toastItem.data.action}</div>
+              ) : null}
               <ToastClose />
             </Toast>
           )
