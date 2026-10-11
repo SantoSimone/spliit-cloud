@@ -158,7 +158,10 @@ async function generateVerdict(
       timeout: timeoutSecondsToMs(env.AI_CATEGORY_TIMEOUT_SECONDS),
       instructions,
       prompt: description.substring(0, limit),
-      reasoning: 'none',
+      // Minimal reasoning: the verdict is a direct classification. `'minimal'`
+      // is the floor every provider honors (Meta endpoints silently ignore
+      // `'none'` and run full reasoning instead).
+      reasoning: 'minimal',
       // Try to be highly deterministic so a title has a consistent category.
       temperature: 0.1,
       // Keep JSON mode for OpenAI-compatible models that do not consistently

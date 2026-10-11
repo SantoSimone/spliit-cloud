@@ -48,7 +48,26 @@ vi.mock(
   },
 )
 
+const tracingState = vi.hoisted(() => ({
+  current: null as null | {
+    spans: Array<{ name: string; attributes: Record<string, unknown> }>
+  },
+}))
+
+vi.mock(import('../../../lib/ai-effects/spans'), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    createRequestTracing: () => {
+      const tracing = actual.createRequestTracing()
+      tracingState.current = tracing
+      return tracing
+    },
+  }
+})
+
 import { aiRouter } from '.'
+import { buildScanRoute } from './receipt.procedure'
 
 function authenticatedCaller() {
   return aiRouter.createCaller({
@@ -80,6 +99,7 @@ beforeEach(() => {
   envState.AI_OCR_PROVIDER = 'none'
   scanReceiptDocument.mockReset()
   suggestExpenseCategory.mockReset()
+  tracingState.current = null
   suggestExpenseCategory.mockResolvedValue({
     categoryId: null,
     candidates: [],
@@ -236,6 +256,7 @@ describe('receipt extraction categorization', () => {
       allowAi: true,
       receiptItems: ['Apples'],
       receiptCurrencyCode: 'USD',
+      beforeAi: expect.any(Function),
     })
     // No history fetch for the OCR path; the decision model loads its own.
     expect(prismaMock.expense.findMany).not.toHaveBeenCalled()
@@ -310,6 +331,7 @@ describe('receipt extraction with a dedicated OCR provider', () => {
       allowAi: true,
       receiptItems: ['Apples'],
       receiptCurrencyCode: 'USD',
+      beforeAi: expect.any(Function),
     })
     // No history fetch for the OCR path; the suggestion loads its own.
     expect(prismaMock.expense.findMany).not.toHaveBeenCalled()
@@ -436,6 +458,99 @@ describe('receipt extraction with a dedicated OCR provider', () => {
       allowAi: true,
       receiptItems: ['Apples'],
       receiptCurrencyCode: 'USD',
+      beforeAi: expect.any(Function),
     })
+  })
+})
+
+describe('receipt extraction tracing', () => {
+  const tracedResult = {
+    amount: 1850,
+    categoryId: null,
+    currencyCode: 'USD',
+    date: '2025-01-02',
+    title: 'Corner Market',
+    items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+    ocrUsed: true,
+    empty: false,
+  }
+
+  it('profiles the separate categorization with engine and hit attributes', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    envState.AI_CATEGORY_ENGINE = 'system-one'
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(tracedResult))
+    suggestExpenseCategory.mockImplementationOnce(
+      async (args: { beforeAi?: () => void }) => {
+        args.beforeAi?.()
+        return { categoryId: 'groceries', candidates: [] }
+      },
+    )
+    const caller = authenticatedCaller()
+
+    await caller.extractExpenseInformationFromImage(scanInput)
+
+    const spans = tracingState.current?.spans ?? []
+    expect(spans.map((span) => span.name)).toContain('scan.categorize')
+    expect(
+      spans.find((span) => span.name === 'scan.categorize')?.attributes,
+    ).toMatchObject({
+      'scan.categorize.engine': 'system-one',
+      'scan.categorize.ai_ran': true,
+      'scan.categorize.hit': true,
+    })
+  })
+
+  it('records a local-dictionary hit when the AI engine never runs', async () => {
+    envState.PUBLIC_ENABLE_RECEIPT_EXTRACT = true
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    envState.AI_CATEGORY_ENGINE = 'system-one'
+    scanReceiptDocument.mockReturnValueOnce(Effect.succeed(tracedResult))
+    // Mock never invokes `beforeAi`: the local stages answered directly.
+    suggestExpenseCategory.mockResolvedValueOnce({
+      categoryId: 'groceries',
+      candidates: [],
+    })
+    const caller = authenticatedCaller()
+
+    await caller.extractExpenseInformationFromImage(scanInput)
+
+    expect(
+      tracingState.current?.spans.find(
+        (span) => span.name === 'scan.categorize',
+      )?.attributes,
+    ).toMatchObject({
+      'scan.categorize.ai_ran': false,
+      'scan.categorize.hit': true,
+    })
+  })
+})
+
+describe('buildScanRoute', () => {
+  const root = (extraction: string) => [
+    {
+      id: 'root',
+      parentId: null,
+      name: 'scan.receipt',
+      startMs: 0,
+      durationMs: 100,
+      attributes: { 'scan.extraction': extraction },
+      error: null,
+    },
+  ]
+
+  it('combines extraction and categorization branches', () => {
+    expect(buildScanRoute(root('ocr'), 'separate', 'system-one')).toBe(
+      'ocr+separate(system-one)',
+    )
+    expect(buildScanRoute(root('vision'), 'inline')).toBe('vision+inline')
+    expect(buildScanRoute(root('text'), 'none')).toBe('text+none')
+    expect(buildScanRoute(root('vision-fallback'), 'separate', 'llm')).toBe(
+      'vision-fallback+separate(llm)',
+    )
+  })
+
+  it('falls back to unknown without a receipt span', () => {
+    expect(buildScanRoute([], 'inline')).toBe('unknown+inline')
   })
 })

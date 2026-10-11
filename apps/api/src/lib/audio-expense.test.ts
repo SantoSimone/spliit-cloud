@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import type * as SpansModule from './ai-effects/spans'
+
 vi.mock('ai', () => ({
   Output: { json: vi.fn(() => ({ type: 'json' })) },
   generateText: vi.fn(),
@@ -7,6 +9,24 @@ vi.mock('ai', () => ({
 vi.mock('./ai', () => ({
   getVoiceModel: vi.fn(async () => ({ modelId: 'test' })),
 }))
+
+const tracingState = vi.hoisted(() => ({
+  current: null as null | {
+    spans: Array<{ name: string; attributes: Record<string, unknown> }>
+  },
+}))
+
+vi.mock('./ai-effects/spans', async (importOriginal) => {
+  const actual = await importOriginal<SpansModule>()
+  return {
+    ...actual,
+    createRequestTracing: () => {
+      const tracing = actual.createRequestTracing()
+      tracingState.current = tracing
+      return tracing
+    },
+  }
+})
 vi.stubEnv('AI_VOICE_MODEL', 'test-voice-model')
 
 const { generateText } = await import('ai')
@@ -142,5 +162,41 @@ describe('audio expense extraction', () => {
     }
     expect(request.maxRetries).toBe(0)
     expect(request.timeout).toBe(120_000)
+  })
+})
+
+describe('voice extraction tracing', () => {
+  it('profiles the transcription step with model and token attributes', async () => {
+    tracingState.current = null
+    generateTextMock.mockResolvedValue({
+      output: {
+        title: 'Apples',
+        amount: '2.5',
+        currencyCode: 'USD',
+        date: '2025-01-02',
+      },
+      usage: { inputTokens: 900, outputTokens: 120 },
+    } as never)
+
+    const result = await extractExpenseInformationFromAudio({
+      audioDataUrl: 'data:audio/wav;base64,AAAA',
+      group,
+      participants: [],
+    })
+
+    expect(result.title).toBe('Apples')
+    const spans = tracingState.current?.spans ?? []
+    expect(spans.map((span) => span.name)).toEqual([
+      'voice.transcribe-structure',
+      'voice.expense',
+    ])
+    expect(
+      spans.find((span) => span.name === 'voice.transcribe-structure')
+        ?.attributes,
+    ).toMatchObject({
+      'llm.model': 'test-voice-model',
+      'llm.usage.input_tokens': 900,
+      'llm.usage.output_tokens': 120,
+    })
   })
 })

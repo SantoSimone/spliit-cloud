@@ -367,6 +367,7 @@ describe('envSchema — AI', () => {
     expect(env.AI_OCR_PROVIDER).toBe('none')
     expect(env.AI_OCRSPACE_TIMEOUT_SECONDS).toBe(30)
     expect(env.AI_OCR_REQUIRED).toBe(false)
+    expect(env.TRACING_ENABLED).toBe(false)
   })
 
   it('parses custom provider and models', () => {
@@ -475,6 +476,11 @@ describe('envSchema — AI', () => {
     expect(env.AI_OCRSPACE_API_KEY).toBe('ocr-test-key')
     expect(env.AI_OCRSPACE_TIMEOUT_SECONDS).toBe(45)
     expect(env.AI_OCR_REQUIRED).toBe(true)
+  })
+
+  it('parses the tracing flag', () => {
+    expect(parseTestEnv({ TRACING_ENABLED: 'true' }).TRACING_ENABLED).toBe(true)
+    expect(parseTestEnv({ TRACING_ENABLED: '1' }).TRACING_ENABLED).toBe(true)
   })
 
   it('rejects an unknown OCR provider', () => {

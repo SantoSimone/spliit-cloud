@@ -346,6 +346,8 @@ Receipts can be photos or documents: PDF invoices plus TXT, CSV, DOCX, and ODT f
 
 Receipt scans time out after `AI_RECEIPT_TIMEOUT_SECONDS` (default `120`). A timeout surfaces as an explicit error in the app instead of hanging silently — if you self-host a slow model, raise the value so scans can finish.
 
+Set `TRACING_ENABLED=true` to log one human-readable timing tree per AI scan/voice request (step durations, routing branch like `ocr+separate(system-one)`, token usage) to the API console. Off by default; enable when debugging slow scans.
+
 #### Dedicated OCR backend (optional)
 
 By default the receipt goes straight to the vision LLM (PDFs are sent as documents). To scan faster and cheaper, set `AI_OCR_PROVIDER=ocrspace` so raw text is extracted by OCR.space (Engine 2 with language autodetect, so traveling receipts work regardless of app language) and structured by a fast text-only call to `AI_RECEIPT_MODEL`:

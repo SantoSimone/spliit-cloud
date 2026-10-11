@@ -179,6 +179,17 @@ const envSchema = z
       interpretEnvVarAsBool,
       z.boolean().default(false),
     ),
+    /**
+     * Request tracing for AI flows (receipt scan, voice extraction,
+     * categorization): each request logs one human-readable timing tree of its
+     * Effect spans (step durations, routing branch, token usage) to the
+     * console. Off by default; enable when debugging slow scans. Generic and
+     * app-wide — future traced flows reuse this flag.
+     */
+    TRACING_ENABLED: z.preprocess(
+      interpretEnvVarAsBool,
+      z.boolean().default(false),
+    ),
     AI_VOICE_TIMEOUT_SECONDS: z.coerce.number().int().positive().default(120),
     AI_CATEGORY_TIMEOUT_SECONDS: z.coerce.number().int().positive().default(30),
     AI_CATEGORY_RECENT_EXPENSES_LIMIT: z.coerce

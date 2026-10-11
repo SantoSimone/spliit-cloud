@@ -5,6 +5,11 @@ import { DEFAULT_CATEGORIES } from '@spliit/domain'
 
 import { getModel } from '../ai'
 import { liftAiCall } from '../ai-effects/ai'
+import {
+  annotateTokenUsage,
+  describeErrorValue,
+  withTraceSpan,
+} from '../ai-effects/spans'
 import { extractAllowedIdFromAIResponse } from '../ai-response'
 import { timeoutSecondsToMs } from '../ai/timeout'
 import { classifyDocument } from '../documents/classify'
@@ -102,7 +107,7 @@ export const structureDocumentText = Effect.fnUntraced(function* (
     // at the tRPC boundary instead of surfacing as a generic Effect error.
     catch: (cause) => cause,
   })
-  const { text: rawContent } = yield* liftAiCall(
+  const { text: rawContent, usage } = yield* liftAiCall(
     () =>
       generateText({
         model,
@@ -112,12 +117,23 @@ export const structureDocumentText = Effect.fnUntraced(function* (
         timeout: timeoutSecondsToMs(env.AI_RECEIPT_TIMEOUT_SECONDS),
         // Low temperature so the same text structures deterministically.
         temperature: 0.1,
-        // No reasoning: extraction is a direct structuring task, same as the
-        // category verdict call.
-        reasoning: 'none',
+        // Minimal reasoning: extraction is a direct structuring task, same as
+        // the category verdict call. `'minimal'` is the lowest value the
+        // endpoint accepts (`'none'` is rejected with a 400).
+        reasoning: 'minimal',
         prompt,
       }),
     { timeoutSeconds: env.AI_RECEIPT_TIMEOUT_SECONDS },
+  )
+  // Token counts land on the enclosing `scan.structure` step span; a no-op
+  // without an active tracer.
+  yield* annotateTokenUsage(usage)
+  // Raw output size distinguishes a verbose-but-legitimate receipt from a
+  // reasoning/verbosity runaway when comparing against `output_tokens`.
+  // Length only, never content: receipt text is PII and stays out of traces.
+  yield* Effect.annotateCurrentSpan(
+    'scan.structure.raw_chars',
+    rawContent?.length ?? 0,
   )
 
   const parsed = parseReceiptAIResponse(rawContent)
@@ -188,16 +204,20 @@ const extractWithVision = Effect.fnUntraced(function* (
   // not be checked"). The server-side fetch reuses the SSRF-guarded downloader
   // (allowlisted storage hosts, byte cap), so private/presigned URLs work and
   // a crafted documentUrl cannot turn the vision call into a fetch proxy.
-  const bytes = yield* fetchDocumentBytes(source.url, {
-    maxBytes: fetchOptions.maxBytes,
-    allowedHosts: fetchOptions.allowedHosts,
-  })
+  const bytes = yield* Effect.gen(function* () {
+    const data = yield* fetchDocumentBytes(source.url, {
+      maxBytes: fetchOptions.maxBytes,
+      allowedHosts: fetchOptions.allowedHosts,
+    })
+    yield* Effect.annotateCurrentSpan('scan.fetch.bytes', data.byteLength)
+    return data
+  }).pipe(withTraceSpan('scan.fetch'))
   const model = yield* Effect.tryPromise({
     try: () => getModel(env.AI_RECEIPT_MODEL),
     // Same passthrough as the structuring call above.
     catch: (cause) => cause,
   })
-  const { text: rawContent } = yield* liftAiCall(
+  const { text: rawContent, usage } = yield* liftAiCall(
     () =>
       generateText({
         model,
@@ -205,8 +225,10 @@ const extractWithVision = Effect.fnUntraced(function* (
         // fail fast instead of retrying an already-timed-out request.
         maxRetries: 0,
         timeout: timeoutSecondsToMs(env.AI_RECEIPT_TIMEOUT_SECONDS),
-        // No reasoning: extraction is a direct read-off-the-receipt task.
-        reasoning: 'none',
+        // Minimal reasoning: extraction is a direct read-off-the-receipt
+        // task. `'minimal'` is the floor every provider honors (see the
+        // structuring call above for why not `'none'`).
+        reasoning: 'minimal',
         messages: [
           {
             role: 'user',
@@ -227,6 +249,9 @@ const extractWithVision = Effect.fnUntraced(function* (
       }),
     { timeoutSeconds: env.AI_RECEIPT_TIMEOUT_SECONDS },
   )
+  // Token counts land on the enclosing `scan.vision` step span; a no-op
+  // without an active tracer.
+  yield* annotateTokenUsage(usage)
 
   const parsed = parseReceiptAIResponse(rawContent)
   if (ocrOnly) {
@@ -256,7 +281,9 @@ export const scanReceiptDocument = Effect.fnUntraced(function* (
   deps: ScanReceiptDocumentDeps = {},
 ): Effect.fn.Return<ReceiptExtractedResult, unknown> {
   const kind = classifyDocument(source)
+  yield* Effect.annotateCurrentSpan('scan.document.kind', kind)
   if (kind === 'unsupported') {
+    yield* Effect.annotateCurrentSpan('scan.extraction', 'unsupported')
     return emptyReceiptResult(groupCurrencyInput, false)
   }
 
@@ -268,21 +295,39 @@ export const scanReceiptDocument = Effect.fnUntraced(function* (
   }
 
   if (kind === 'pdf' || kind === 'text-document') {
-    const usable = yield* extractUsableDocumentText(
-      source,
-      deps.fetchOptions ?? {},
-    )
+    const usable = yield* Effect.gen(function* () {
+      const result = yield* extractUsableDocumentText(
+        source,
+        deps.fetchOptions ?? {},
+      )
+      yield* Effect.annotateCurrentSpan('scan.extract.outcome', result.kind)
+      if (result.kind === 'text') {
+        yield* Effect.annotateCurrentSpan(
+          'scan.extract.chars',
+          result.text.length,
+        )
+      }
+      return result
+    }).pipe(withTraceSpan('scan.extract', { 'scan.document.kind': kind }))
     if (usable.kind === 'text') {
+      yield* Effect.annotateCurrentSpan('scan.extraction', 'text')
       return yield* structureDocumentText(
         usable.text,
         groupCurrencyInput,
         structureContext,
+      ).pipe(
+        withTraceSpan('scan.structure', {
+          'llm.model': env.AI_RECEIPT_MODEL,
+          'scan.structure.origin': 'document',
+          'scan.structure.chars': usable.text.length,
+        }),
       )
     }
     if (kind === 'text-document') {
       // No image flow exists for office/text formats: blank or garbled text
       // yields an empty result and the user fills in manually with the file
       // attached.
+      yield* Effect.annotateCurrentSpan('scan.extraction', 'text-empty')
       return emptyReceiptResult(groupCurrencyInput, false)
     }
     // Scanned-image PDF: fall through to the image flow below.
@@ -291,32 +336,84 @@ export const scanReceiptDocument = Effect.fnUntraced(function* (
   // Dedicated OCR path: raw text from the configured provider, structured by
   // a fast text-only LLM call. Falls back to the vision call below unless
   // AI_OCR_REQUIRED pins strict mode.
+  let ocrFailed = false
   if (ocr) {
     const ocrEffect = ocr.extractText(source.url, {
       timeoutMs: timeoutSecondsToMs(env.AI_OCRSPACE_TIMEOUT_SECONDS),
       contentType: source.contentType,
       fileName: source.fileName,
     })
+    const ocrText = yield* Effect.gen(function* () {
+      const effect = env.AI_OCR_REQUIRED
+        ? ocrEffect
+        : ocrEffect.pipe(
+            // Record the failure before degrading: the trace then shows an
+            // `ocr` step followed by a `vision-fallback` extraction, with the
+            // provider's reason attached (quota and key errors fail fast and
+            // look identical in timing alone).
+            Effect.tapError((error) =>
+              Effect.suspend(() => {
+                ocrFailed = true
+                return Effect.all(
+                  [
+                    Effect.annotateCurrentSpan('scan.ocr.failed', true),
+                    Effect.annotateCurrentSpan(
+                      'scan.ocr.error',
+                      describeErrorValue(error),
+                    ),
+                  ],
+                  { discard: true },
+                )
+              }),
+            ),
+            Effect.orElseSucceed(() => null),
+          )
+      const result = yield* effect
+      if (result !== null) {
+        yield* Effect.annotateCurrentSpan('scan.ocr.chars', result.text.length)
+      }
+      return result
+    }).pipe(
+      withTraceSpan('scan.ocr', {
+        'scan.ocr.provider': ocr.name,
+        'scan.ocr.strict': env.AI_OCR_REQUIRED,
+      }),
+    )
     // Strict mode fails the scan on OCR errors; otherwise a failed OCR step
     // degrades to the vision LLM below.
-    const ocrText = env.AI_OCR_REQUIRED
-      ? yield* ocrEffect
-      : yield* ocrEffect.pipe(Effect.orElseSucceed(() => null))
     if (ocrText !== null) {
+      yield* Effect.annotateCurrentSpan('scan.extraction', 'ocr')
       return yield* structureOcrText(
         ocrText.text,
         groupCurrencyInput,
         structureContext,
+      ).pipe(
+        withTraceSpan('scan.structure', {
+          'llm.model': env.AI_RECEIPT_MODEL,
+          'scan.structure.origin': 'ocr',
+          'scan.structure.chars': ocrText.text.length,
+        }),
       )
     }
   }
 
+  yield* Effect.annotateCurrentSpan(
+    'scan.extraction',
+    ocrFailed ? 'vision-fallback' : 'vision',
+  )
   return yield* extractWithVision(
     source,
     kind === 'pdf' ? 'pdf' : 'image',
     groupCurrencyInput,
     context,
     deps.fetchOptions ?? {},
+  ).pipe(
+    withTraceSpan('scan.vision', {
+      'llm.model': env.AI_RECEIPT_MODEL,
+      'scan.vision.kind': kind === 'pdf' ? 'pdf' : 'image',
+      'scan.vision.mode': (context.ocrOnly ?? false) ? 'ocr-only' : 'joint',
+      'scan.vision.history': (context.recentExpenses?.length ?? 0) > 0,
+    }),
   )
 })
 

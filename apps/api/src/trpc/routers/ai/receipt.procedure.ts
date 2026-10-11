@@ -1,9 +1,15 @@
 import { TRPCError } from '@trpc/server'
-import { Effect } from 'effect'
+import { Effect, Tracer } from 'effect'
 import { z } from 'zod'
 
 import { categoryIdSchema } from '@spliit/domain'
 
+import {
+  createRequestTracing,
+  withTraceSpan,
+  type FinishedSpan,
+  type RequestTracing,
+} from '../../../lib/ai-effects/spans'
 import { getRecentExpenseContext } from '../../../lib/ai/context'
 import { isTimeoutError } from '../../../lib/ai/timeout'
 import { suggestExpenseCategory } from '../../../lib/api/expenses/suggest-category'
@@ -94,86 +100,167 @@ export const extractExpenseInformationFromImageProcedure = protectedProcedure
       fileName: input.fileName,
     }
     let result: Awaited<ReturnType<typeof runScan>>
+    // Second half of the trace's routing summary (`vision+inline`,
+    // `ocr+separate(system-one)`, …): the extraction branch is recorded on
+    // the `scan.receipt` span by the pipeline, the categorization branch here.
+    let categorization: 'inline' | 'separate' | 'none' = 'none'
+    let categorizeEngine: string | undefined
+    // One collector for scan + categorization so the console tree shows the
+    // whole request; printing is gated on the operator flag in `finally` so
+    // failed scans still log their partial trace.
+    const tracing = createRequestTracing()
     try {
-      result = await runScan(
-        source,
-        {
-          currency: input.currency,
-          currencyCode: input.currencyCode,
-        },
-        useSeparateCategorization
-          ? {
-              ocrOnly: true,
-              locale: input.locale,
-              translateToLocale: input.translateToLocale,
-              currentExpense: input.currentExpense,
-            }
-          : {
-              // `context` is undefined on the dedicated OCR path (no history
-              // needed there); the vision fallback then runs without history
-              // hints, which is an acceptable degradation for that rare path.
-              recentExpenses: context?.expenses ?? [],
-              groupContext: context?.group,
-              locale: input.locale,
-              translateToLocale: input.translateToLocale,
-              currentExpense: input.currentExpense,
-            },
-      )
-    } catch (error) {
-      if (isTimeoutError(error)) {
-        // Name the stage that timed out: the dedicated OCR step has its own
-        // (shorter) budget, everything else uses the receipt model budget.
-        const seconds = isOcrError(error)
-          ? env.AI_OCRSPACE_TIMEOUT_SECONDS
-          : env.AI_RECEIPT_TIMEOUT_SECONDS
-        throw new TRPCError({
-          code: 'TIMEOUT',
-          message: `Receipt scanning failed due to timeout after ${seconds}s`,
-        })
-      }
-      throw error
-    }
-
-    let categoryId: string | null = result.categoryId
-    // Structured-text paths (dedicated OCR, native document text) never
-    // return a category (same as `ocrOnly` vision mode), so they always go
-    // through the separate suggestion step when category extraction is on —
-    // regardless of the configured engine or whether an OCR provider is set.
-    const separateCategorization =
-      useSeparateCategorization ||
-      (result.ocrUsed && env.PUBLIC_ENABLE_CATEGORY_EXTRACT)
-    if (separateCategorization && result.title) {
-      // Best-effort: text data is complete without a category, so a failed
-      // suggestion degrades to null instead of failing the whole scan.
       try {
-        const suggestion = await suggestExpenseCategory({
-          groupId: input.groupId,
-          title: result.title,
-          locale: input.locale,
-          allowAi: true,
-          receiptItems: result.items.map((item) => item.title),
-          receiptCurrencyCode: result.currencyCode,
-        })
-        categoryId = suggestion.categoryId
-      } catch {
-        categoryId = null
+        result = await runScan(
+          tracing,
+          source,
+          {
+            currency: input.currency,
+            currencyCode: input.currencyCode,
+          },
+          useSeparateCategorization
+            ? {
+                ocrOnly: true,
+                locale: input.locale,
+                translateToLocale: input.translateToLocale,
+                currentExpense: input.currentExpense,
+              }
+            : {
+                // `context` is undefined on the dedicated OCR path (no history
+                // needed there); the vision fallback then runs without history
+                // hints, which is an acceptable degradation for that rare path.
+                recentExpenses: context?.expenses ?? [],
+                groupContext: context?.group,
+                locale: input.locale,
+                translateToLocale: input.translateToLocale,
+                currentExpense: input.currentExpense,
+              },
+        )
+      } catch (error) {
+        if (isTimeoutError(error)) {
+          // Name the stage that timed out: the dedicated OCR step has its own
+          // (shorter) budget, everything else uses the receipt model budget.
+          const seconds = isOcrError(error)
+            ? env.AI_OCRSPACE_TIMEOUT_SECONDS
+            : env.AI_RECEIPT_TIMEOUT_SECONDS
+          throw new TRPCError({
+            code: 'TIMEOUT',
+            message: `Receipt scanning failed due to timeout after ${seconds}s`,
+          })
+        }
+        throw error
       }
-    }
-    const category = categoryIdSchema.safeParse(categoryId)
-    return {
-      ...result,
-      categoryId: category.success ? category.data : null,
-      empty: result.empty ?? false,
+
+      let categoryId: string | null = result.categoryId
+      // Structured-text paths (dedicated OCR, native document text) never
+      // return a category (same as `ocrOnly` vision mode), so they always go
+      // through the separate suggestion step when category extraction is on —
+      // regardless of the configured engine or whether an OCR provider is set.
+      const separateCategorization =
+        useSeparateCategorization ||
+        (result.ocrUsed && env.PUBLIC_ENABLE_CATEGORY_EXTRACT)
+      const title = result.title
+      if (separateCategorization && title) {
+        categorization = 'separate'
+        categorizeEngine = env.AI_CATEGORY_ENGINE
+        // Best-effort: text data is complete without a category, so a failed
+        // suggestion degrades to null instead of failing the whole scan.
+        // Traced as a sibling of `scan.receipt` in the same request collector.
+        // `aiRan` distinguishes a local-dictionary hit from an AI-engine call:
+        // the `beforeAi` hook runs only after local stages miss.
+        let aiRan = false
+        const suggestion = await Effect.runPromise(
+          Effect.gen(function* () {
+            // Best-effort recovery: any failure (rejection or defect) degrades
+            // to null, exactly like the `try/catch` this replaces.
+            const value = yield* Effect.tryPromise({
+              try: () =>
+                suggestExpenseCategory({
+                  groupId: input.groupId,
+                  title,
+                  locale: input.locale,
+                  allowAi: true,
+                  receiptItems: result.items.map((item) => item.title),
+                  receiptCurrencyCode: result.currencyCode,
+                  beforeAi: () => {
+                    aiRan = true
+                  },
+                }),
+              catch: (cause) => cause,
+            }).pipe(Effect.catchCause(() => Effect.succeed(null)))
+            yield* Effect.annotateCurrentSpan('scan.categorize.ai_ran', aiRan)
+            yield* Effect.annotateCurrentSpan(
+              'scan.categorize.hit',
+              value?.categoryId != null,
+            )
+            return value
+          }).pipe(
+            withTraceSpan('scan.categorize', {
+              'scan.categorize.engine': env.AI_CATEGORY_ENGINE,
+            }),
+            Effect.provideService(Tracer.Tracer, tracing.tracer),
+          ),
+        )
+        categoryId = suggestion?.categoryId ?? null
+      } else {
+        categorization = result.categoryId != null ? 'inline' : 'none'
+      }
+      const category = categoryIdSchema.safeParse(categoryId)
+      return {
+        ...result,
+        categoryId: category.success ? category.data : null,
+        empty: result.empty ?? false,
+      }
+    } finally {
+      if (env.TRACING_ENABLED) {
+        tracing.print({
+          label: 'scan',
+          route: buildScanRoute(
+            tracing.spans,
+            categorization,
+            categorizeEngine,
+          ),
+        })
+      }
     }
   })
 
 /**
+ * Combined routing summary for the trace header (`vision+inline`,
+ * `ocr+separate(system-one)`, `text+separate(llm)`, …): the extraction branch
+ * comes from the pipeline's `scan.receipt` span, the categorization branch from
+ * the procedure. Pure over the finished spans so tests assert the label without
+ * running a scan.
+ */
+export function buildScanRoute(
+  spans: ReadonlyArray<FinishedSpan>,
+  categorization: 'inline' | 'separate' | 'none',
+  engine?: string,
+): string {
+  const extraction = spans.find((span) => span.name === 'scan.receipt')
+    ?.attributes['scan.extraction']
+  const prefix =
+    typeof extraction === 'string' && extraction ? extraction : 'unknown'
+  if (categorization === 'separate') {
+    return `${prefix}+separate(${engine ?? 'unknown'})`
+  }
+  return `${prefix}+${categorization}`
+}
+
+/**
  * Single Effect entry point for the scan. The pipeline composes document
  * ingestion, OCR/vision routing, and LLM calls; the procedure stays a thin tRPC
- * boundary (auth, limits, error mapping, categorization merge).
+ * boundary (auth, limits, error mapping, categorization merge). The request
+ * collector activates the pipeline's step spans; without it they are no-ops.
  */
 async function runScan(
+  tracing: RequestTracing,
   ...args: Parameters<typeof scanReceiptDocument>
 ): Promise<ReceiptExtractedResult> {
-  return Effect.runPromise(scanReceiptDocument(...args))
+  return Effect.runPromise(
+    scanReceiptDocument(...args).pipe(
+      withTraceSpan('scan.receipt'),
+      Effect.provideService(Tracer.Tracer, tracing.tracer),
+    ),
+  )
 }

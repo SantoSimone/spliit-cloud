@@ -1,5 +1,5 @@
 import { generateText, Output } from 'ai'
-import { Effect } from 'effect'
+import { Effect, Tracer } from 'effect'
 import { z } from 'zod'
 
 import {
@@ -10,6 +10,11 @@ import {
 
 import { getVoiceModel } from './ai'
 import { liftAiCall } from './ai-effects/ai'
+import {
+  annotateTokenUsage,
+  createRequestTracing,
+  withTraceSpan,
+} from './ai-effects/spans'
 import { buildLocaleHint } from './ai/prompt'
 import { timeoutSecondsToMs } from './ai/timeout'
 import { env } from './env'
@@ -194,45 +199,67 @@ export async function extractExpenseInformationFromAudio(
   // The Responses API rejects audio file parts, so voice extraction goes
   // through the chat-completions client (see getVoiceModel).
   const model = await getVoiceModel(env.AI_VOICE_MODEL)
-  const { output } = await Effect.runPromise(
-    liftAiCall(
-      () =>
-        generateText({
-          model,
-          // Bound slow self-hosted models so the tRPC handler cannot hang,
-          // and fail fast instead of retrying an already-timed-out request.
-          maxRetries: 0,
-          timeout: timeoutSecondsToMs(env.AI_VOICE_TIMEOUT_SECONDS),
-          // No reasoning: extraction is a direct transcription task, same as
-          // the category verdict call.
-          reasoning: 'none',
-          instructions: buildPrompt(context, today),
-          messages: [
-            {
-              role: 'user',
-              content: [
+  // One collector for the whole extraction; printing is gated on the operator
+  // flag in `finally` so failed extractions still log their partial trace.
+  const tracing = createRequestTracing()
+  try {
+    const { output } = await Effect.runPromise(
+      Effect.gen(function* () {
+        const result = yield* liftAiCall(
+          () =>
+            generateText({
+              model,
+              // Bound slow self-hosted models so the tRPC handler cannot hang,
+              // and fail fast instead of retrying an already-timed-out request.
+              maxRetries: 0,
+              timeout: timeoutSecondsToMs(env.AI_VOICE_TIMEOUT_SECONDS),
+              // Minimal reasoning: extraction is a direct transcription task,
+              // same as the category verdict call. `'minimal'` is the floor
+              // every provider honors (Meta endpoints silently ignore
+              // `'none'` and run full reasoning instead).
+              reasoning: 'minimal',
+              instructions: buildPrompt(context, today),
+              messages: [
                 {
-                  type: 'file',
-                  data: context.audioDataUrl,
-                  mediaType: 'audio/wav',
-                },
-                {
-                  type: 'text',
-                  text: 'Extract the expense from this recording.',
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'file',
+                      data: context.audioDataUrl,
+                      mediaType: 'audio/wav',
+                    },
+                    {
+                      type: 'text',
+                      text: 'Extract the expense from this recording.',
+                    },
+                  ],
                 },
               ],
-            },
-          ],
-          // Keep JSON mode for audio-capable OpenAI-compatible models that do
-          // not consistently support provider-specific structured output.
-          output: Output.json(),
-          maxOutputTokens: 700,
+              // Keep JSON mode for audio-capable OpenAI-compatible models that do
+              // not consistently support provider-specific structured output.
+              output: Output.json(),
+              maxOutputTokens: 700,
+            }),
+          { timeoutSeconds: env.AI_VOICE_TIMEOUT_SECONDS },
+        )
+        // Token counts land on the step span below; a no-op without a tracer.
+        yield* annotateTokenUsage(result.usage)
+        return result
+      }).pipe(
+        withTraceSpan('voice.transcribe-structure', {
+          'llm.model': env.AI_VOICE_MODEL,
         }),
-      { timeoutSeconds: env.AI_VOICE_TIMEOUT_SECONDS },
-    ),
-  )
-  const parsed = audioModelOutputSchema.safeParse(output)
-  return normalizeOutput(parsed.success ? parsed.data : {}, context)
+        withTraceSpan('voice.expense'),
+        Effect.provideService(Tracer.Tracer, tracing.tracer),
+      ),
+    )
+    const parsed = audioModelOutputSchema.safeParse(output)
+    return normalizeOutput(parsed.success ? parsed.data : {}, context)
+  } finally {
+    if (env.TRACING_ENABLED) {
+      tracing.print({ label: 'voice' })
+    }
+  }
 }
 
 export function buildAudioExpensePromptForTest(
