@@ -18,6 +18,7 @@ Omit this section when there are none. Each entry names what breaks,
 who is affected, and the exact migration steps.
 
 - Item quantities are stored as milli-units: existing quantities migrate automatically (`2` → `2000`), pre-upgrade export backups scale on import, and webhook `quantity` values now read in thousandths (`1500` means 1.5 items — see the webhook docs). An outdated app tab that tries to save is stopped with a refresh prompt instead of writing a wrong quantity. (`TBD` by @TBD)
+- AI reasoning effort is now operator-configured and omitted by default: receipt scans, category suggestions, and voice extraction previously sent a hardcoded `minimal` reasoning level and now send no reasoning parameter unless configured. Affected instances are self-hosters with any `PUBLIC_ENABLE_*` AI feature on — responses may differ slightly in style, cost, or latency. To restore the previous behavior, set `AI_REASONING=minimal` (or `AI_RECEIPT_REASONING`, `AI_CATEGORY_REASONING`, and `AI_VOICE_REASONING` each to `minimal`). (`TBD` by @TBD)
 
 ### 🚀 Features
 
@@ -28,6 +29,7 @@ who is affected, and the exact migration steps.
 - More reliable receipt line items: the scanner now returns prices and quantities as exact integers (no more decimal drift), joins item details split across adjacent receipt lines, and double-checks easily confused digits (like 0 vs 8) against the printed line totals. It leaves the total blank instead of guessing when none is visible, drops store-wide discount summaries while keeping item-level discounts and deposits, and adds the billing period to titles like utility bills. (`TBD` by @TBD)
 - Fractional item quantities: quantities accept up to 3 decimals (for example `1.5` kg), whole numbers still display and type as whole, and the receipt scanner captures the true fractional quantity when the receipt shows one. (`TBD` by @TBD)
 - Clearer receipt total mismatches: when scanned items don't add up to the receipt total, the preview asks which total is correct — rounding-size gaps offer the choice immediately (receipt total preselected, with a "Rounding" line), while larger gaps warn they look bigger than rounding and offer an explicit "Other" (or "Other (excess)") line instead. What counts as rounding now follows each currency's real cash settlement (¥1 for yen, 3 fils for Gulf dinars, 51 cents for dollars). (`TBD` by @TBD)
+- Per-purpose AI configuration: receipt scans, category suggestions, and voice extraction can each use a different provider dialect, endpoint, and key via `AI_{RECEIPT,CATEGORY,VOICE}_PROVIDER`, `AI_{RECEIPT,CATEGORY,VOICE}_BASE_URL`, and `AI_{RECEIPT,CATEGORY,VOICE}_API_KEY` (each falls back to `AI_PROVIDER` / `AI_BASE_URL` / `AI_API_KEY`), plus per-purpose reasoning effort via `AI_{RECEIPT,CATEGORY,VOICE}_REASONING` with a shared `AI_REASONING` default. (`TBD` by @TBD)
 
 ### 🐛 Bug fixes
 

@@ -94,6 +94,40 @@ const optionalString = z.preprocess(
   z.string().optional(),
 )
 
+const aiProviderSchema = z.enum([
+  'openai',
+  'anthropic',
+  'openai-compatible',
+  'google',
+])
+
+const aiProviderOverride = z.preprocess(
+  emptyStringAsUndefined,
+  aiProviderSchema.optional(),
+)
+
+/**
+ * Portable `generateText` reasoning levels (a subset of the AI SDK enum that
+ * excludes `provider-default`: empty/unset already means "omit the parameter
+ * and let the provider decide"). Values pass through to the provider, which
+ * maps them to its native reasoning API.
+ */
+const aiReasoningSchema = z.enum([
+  'none',
+  'minimal',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+])
+
+const aiReasoning = z.preprocess(
+  emptyStringAsUndefined,
+  aiReasoningSchema.optional(),
+)
+
+export type AiReasoning = z.infer<typeof aiReasoningSchema>
+
 const envSchema = z
   .object({
     NODE_ENV: optionalString,
@@ -151,6 +185,46 @@ const envSchema = z
       .default('openai'),
     AI_API_KEY: optionalString,
     AI_BASE_URL: optionalUrlNormalized('AI_BASE_URL'),
+    /**
+     * Per-purpose provider override. Each AI purpose (receipt scan, category
+     * suggestion, voice extraction) can speak a different provider dialect by
+     * selecting its own `@ai-sdk/*` adapter; when unset it falls back to the
+     * shared `AI_PROVIDER`. Selection is explicit and is never inferred from a
+     * model ID or URL.
+     */
+    AI_RECEIPT_PROVIDER: aiProviderOverride,
+    AI_CATEGORY_PROVIDER: aiProviderOverride,
+    AI_VOICE_PROVIDER: aiProviderOverride,
+    /**
+     * Per-purpose endpoint override (the API root; the selected adapter appends
+     * its endpoint path). Falls back to `AI_BASE_URL` when unset, so mixed
+     * setups (e.g. a gateway that serves `/responses` for one model and
+     * `/chat/completions` for another) can point each purpose at the matching
+     * wire for its provider.
+     */
+    AI_RECEIPT_BASE_URL: optionalUrlNormalized('AI_RECEIPT_BASE_URL'),
+    AI_CATEGORY_BASE_URL: optionalUrlNormalized('AI_CATEGORY_BASE_URL'),
+    AI_VOICE_BASE_URL: optionalUrlNormalized('AI_VOICE_BASE_URL'),
+    /**
+     * Per-purpose API key override. Falls back to `AI_API_KEY` when unset, so
+     * endpoints with different credentials can be mixed per purpose.
+     */
+    AI_RECEIPT_API_KEY: optionalString,
+    AI_CATEGORY_API_KEY: optionalString,
+    AI_VOICE_API_KEY: optionalString,
+    /**
+     * Portable reasoning effort for `generateText` (see the AI SDK `reasoning`
+     * option). The operator owns the value: it is passed through to the
+     * configured provider, which maps it to its native setting. `AI_REASONING`
+     * is the shared default; each purpose overrides it when set. When both are
+     * unset the parameter is omitted and the provider decides — this is also
+     * the safest setting for models without reasoning support (local endpoints
+     * that reject the parameter with a 400).
+     */
+    AI_REASONING: aiReasoning,
+    AI_RECEIPT_REASONING: aiReasoning,
+    AI_CATEGORY_REASONING: aiReasoning,
+    AI_VOICE_REASONING: aiReasoning,
     AI_RECEIPT_MODEL: z.preprocess(
       emptyStringAsUndefined,
       z.string().default('gpt-5-nano'),
@@ -603,17 +677,39 @@ const envSchema = z
           'If PUBLIC_ENABLE_EXPENSE_DOCUMENTS is specified, then S3_* must be specified too',
       })
     }
+    // Each AI purpose resolves its key from the per-purpose override with
+    // fallback to the shared `AI_API_KEY`, so mixed endpoints with different
+    // credentials are supported. Validation mirrors that resolution: an
+    // enabled feature only requires its own resolved key.
     if (
-      (env.PUBLIC_ENABLE_RECEIPT_EXTRACT ||
-        env.PUBLIC_ENABLE_VOICE_EXPENSE ||
-        (env.PUBLIC_ENABLE_CATEGORY_EXTRACT &&
-          env.AI_CATEGORY_ENGINE === 'llm')) &&
-      !env.AI_API_KEY
+      env.PUBLIC_ENABLE_RECEIPT_EXTRACT &&
+      !(env.AI_RECEIPT_API_KEY ?? env.AI_API_KEY)
     ) {
       ctx.addIssue({
         code: 'custom',
         message:
-          'If PUBLIC_ENABLE_RECEIPT_EXTRACT, PUBLIC_ENABLE_VOICE_EXPENSE, or PUBLIC_ENABLE_CATEGORY_EXTRACT with AI_CATEGORY_ENGINE=llm is specified, then AI_API_KEY must be specified too',
+          'If PUBLIC_ENABLE_RECEIPT_EXTRACT is specified, then AI_API_KEY must be specified too (or the per-purpose AI_RECEIPT_API_KEY)',
+      })
+    }
+    if (
+      env.PUBLIC_ENABLE_VOICE_EXPENSE &&
+      !(env.AI_VOICE_API_KEY ?? env.AI_API_KEY)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          'If PUBLIC_ENABLE_VOICE_EXPENSE is specified, then AI_API_KEY must be specified too (or the per-purpose AI_VOICE_API_KEY)',
+      })
+    }
+    if (
+      env.PUBLIC_ENABLE_CATEGORY_EXTRACT &&
+      env.AI_CATEGORY_ENGINE === 'llm' &&
+      !(env.AI_CATEGORY_API_KEY ?? env.AI_API_KEY)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          'If PUBLIC_ENABLE_CATEGORY_EXTRACT with AI_CATEGORY_ENGINE=llm is specified, then AI_API_KEY must be specified too (or the per-purpose AI_CATEGORY_API_KEY)',
       })
     }
     if (

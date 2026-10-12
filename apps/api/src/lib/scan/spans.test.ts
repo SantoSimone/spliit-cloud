@@ -2,7 +2,10 @@ import { Effect, Tracer } from 'effect'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('ai', () => ({ generateText: vi.fn() }))
-vi.mock('../ai', () => ({ getModel: vi.fn() }))
+vi.mock('../ai', async (importOriginal) => ({
+  ...((await importOriginal()) as object),
+  getReceiptModel: vi.fn(),
+}))
 vi.mock('../ocr', async (importOriginal) => ({
   ...(await importOriginal()),
   getOcrProvider: vi.fn(() => null),
@@ -25,7 +28,7 @@ import type { OcrProvider } from '../ocr'
 import { OcrError } from '../ocr'
 
 const { generateText } = await import('ai')
-const { getModel } = await import('../ai')
+const { getReceiptModel } = await import('../ai')
 const { getOcrProvider } = await import('../ocr')
 const mockedEnv = (await import('../env')).env as {
   AI_OCR_REQUIRED: boolean
@@ -33,7 +36,7 @@ const mockedEnv = (await import('../env')).env as {
 const { scanReceiptDocument } = await import('./pipeline')
 
 const generateTextMock = vi.mocked(generateText)
-const getModelMock = vi.mocked(getModel)
+const getReceiptModelMock = vi.mocked(getReceiptModel)
 const getOcrProviderMock = vi.mocked(getOcrProvider)
 
 const groupCurrency = { currency: '$', currencyCode: 'USD' }
@@ -122,11 +125,11 @@ const fetchMock = vi.fn()
 
 beforeEach(() => {
   generateTextMock.mockReset()
-  getModelMock.mockReset()
+  getReceiptModelMock.mockReset()
   getOcrProviderMock.mockReset()
   getOcrProviderMock.mockReturnValue(null)
   mockedEnv.AI_OCR_REQUIRED = false
-  getModelMock.mockResolvedValue({ id: 'test-receipt-model' } as never)
+  getReceiptModelMock.mockResolvedValue({ id: 'test-receipt-model' } as never)
   vi.stubGlobal('fetch', fetchMock)
   fetchMock.mockReset()
   fetchMock.mockResolvedValue({

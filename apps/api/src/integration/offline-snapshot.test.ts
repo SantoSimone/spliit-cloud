@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { prisma } from '@spliit/db'
 
+import { OFFLINE_CONTRACT_VERSION } from '../trpc/outputs/offline'
 import { groupsRouter } from '../trpc/routers/groups'
 import { checkDbConnection, testRunId } from './setup'
 
@@ -107,13 +108,13 @@ describe('Offline catalog/snapshot — real DB', () => {
     expect(entry!.overview.access).toBe('MEMBER')
     expect(entry!.overview.viewKey).toBeNull()
     expect(catalog.accountId).toBe(adminId)
-    expect(catalog.schemaVersion).toBe(2)
+    expect(catalog.schemaVersion).toBe(OFFLINE_CONTRACT_VERSION)
   })
 
   it('returns a coherent snapshot with matching list/detail ids and no URLs', async () => {
     const { groupId } = await createGroupWithExpense(`Snapshot ${runId}`)
     const snapshot = await makeCaller().offlineSnapshot({ groupId })
-    expect(snapshot.schemaVersion).toBe(2)
+    expect(snapshot.schemaVersion).toBe(OFFLINE_CONTRACT_VERSION)
     expect(snapshot.accountId).toBe(adminId)
     expect(snapshot.groupId).toBe(groupId)
     expect(snapshot.group.viewer.source).toBe('MEMBER')

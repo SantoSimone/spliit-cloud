@@ -78,33 +78,80 @@ describe('getOpenCodeGoHeaders', () => {
   })
 })
 
-describe('getModel OpenCode Go headers', () => {
-  let originalProvider: unknown
-  let originalBaseUrl: unknown
-  let originalApiKey: unknown
+describe('purpose model resolution', () => {
+  const PURPOSE_KEYS = [
+    'AI_PROVIDER',
+    'AI_API_KEY',
+    'AI_BASE_URL',
+    'AI_RECEIPT_PROVIDER',
+    'AI_RECEIPT_API_KEY',
+    'AI_RECEIPT_BASE_URL',
+    'AI_CATEGORY_PROVIDER',
+    'AI_CATEGORY_API_KEY',
+    'AI_CATEGORY_BASE_URL',
+    'AI_VOICE_PROVIDER',
+    'AI_VOICE_API_KEY',
+    'AI_VOICE_BASE_URL',
+    'AI_VOICE_MODEL',
+    'AI_RECEIPT_MODEL',
+    'AI_CATEGORY_MODEL',
+  ] as const
 
-  beforeEach(async () => {
+  const saved = new Map<string, unknown>()
+
+  const BASELINE = {
+    AI_PROVIDER: 'openai-compatible',
+    AI_API_KEY: 'test-key',
+    AI_BASE_URL: 'https://example.com/v1',
+    AI_RECEIPT_PROVIDER: undefined,
+    AI_RECEIPT_API_KEY: undefined,
+    AI_RECEIPT_BASE_URL: undefined,
+    AI_CATEGORY_PROVIDER: undefined,
+    AI_CATEGORY_API_KEY: undefined,
+    AI_CATEGORY_BASE_URL: undefined,
+    AI_VOICE_PROVIDER: undefined,
+    AI_VOICE_API_KEY: undefined,
+    AI_VOICE_BASE_URL: undefined,
+    AI_VOICE_MODEL: 'test-voice-model',
+    AI_RECEIPT_MODEL: 'gpt-5-nano',
+    AI_CATEGORY_MODEL: 'gpt-5-nano',
+  } as const
+
+  async function setEnv(values: Record<string, unknown>) {
     const { env } = await import('./env')
-    originalProvider ??= env.AI_PROVIDER
-    originalBaseUrl ??= env.AI_BASE_URL
-    originalApiKey ??= env.AI_API_KEY
-    Object.values(mocks).forEach((fn) => fn.mockReset())
-    env.AI_API_KEY = 'test-key'
-  })
+    Object.assign(env, values)
+  }
 
-  afterEach(async () => {
-    const { env } = await import('./env')
-    env.AI_PROVIDER = originalProvider as never
-    env.AI_BASE_URL = originalBaseUrl as never
-    env.AI_API_KEY = originalApiKey as never
-  })
-
-  async function freshModelWith(
-    provider: 'anthropic' | 'google' | 'openai' | 'openai-compatible',
-    baseURL: string,
-  ) {
+  /** Fresh module registry with the baseline env re-applied. */
+  async function freshBaseline() {
     vi.resetModules()
-    const { env } = await import('./env')
+    Object.values(mocks).forEach((fn) => fn.mockReset())
+    await setEnv({ ...BASELINE })
+  }
+
+  function mockFactory(
+    provider: 'anthropic' | 'google' | 'openai' | 'openai-compatible',
+  ) {
+    if (provider === 'openai') {
+      const chat = vi.fn((id: string) => ({ id }))
+      const responses = vi.fn((id: string) => ({ id }))
+      mocks.createOpenAI.mockReturnValue({ chat, responses })
+      return { chat, responses }
+    }
+    const factory =
+      provider === 'anthropic'
+        ? mocks.createAnthropic
+        : provider === 'google'
+          ? mocks.createGoogle
+          : mocks.createOpenAICompatible
+    const fn = vi.fn((id: string) => ({ id }))
+    factory.mockReturnValue(fn)
+    return { fn }
+  }
+
+  function factoryArgs(
+    provider: 'anthropic' | 'google' | 'openai' | 'openai-compatible',
+  ) {
     const factory =
       provider === 'anthropic'
         ? mocks.createAnthropic
@@ -113,96 +160,158 @@ describe('getModel OpenCode Go headers', () => {
           : provider === 'openai'
             ? mocks.createOpenAI
             : mocks.createOpenAICompatible
-    factory.mockReset()
-    if (provider === 'openai') {
-      factory.mockReturnValue({
-        responses: (id: string) => ({ id }),
-      })
-    } else {
-      factory.mockReturnValue((id: string) => ({ id }))
-    }
-    env.AI_PROVIDER = provider
-    env.AI_BASE_URL = baseURL
-    env.AI_API_KEY = 'test-key'
-    const { getModel } = await import('./ai')
-    await getModel('test-model')
-    return factory.mock.calls[0]?.[0]?.headers as
-      | Record<string, string>
+    return factory.mock.calls[0]?.[0] as
+      | { apiKey?: unknown; baseURL?: unknown; headers?: unknown }
       | undefined
   }
 
-  it('passes x-opencode-session to the openai-compatible provider on Go', async () => {
-    const headers = await freshModelWith('openai-compatible', GO_CHAT_URL)
-    expect(mocks.createOpenAICompatible).toHaveBeenCalledTimes(1)
-    expect(headers?.['x-opencode-session']).toMatch(UUID_RE)
+  beforeEach(async () => {
+    const { env } = await import('./env')
+    if (saved.size === 0) {
+      for (const key of PURPOSE_KEYS) {
+        saved.set(key, (env as Record<string, unknown>)[key])
+      }
+    }
+    Object.values(mocks).forEach((fn) => fn.mockReset())
+    await setEnv({ ...BASELINE })
   })
 
-  it('passes x-opencode-session to every provider on Go', async () => {
+  afterEach(async () => {
+    const { env } = await import('./env')
+    for (const key of PURPOSE_KEYS) {
+      ;(env as Record<string, unknown>)[key] = saved.get(key)
+    }
+  })
+
+  it('resolves each purpose from the shared config when overrides are absent', async () => {
     for (const provider of [
       'anthropic',
       'google',
       'openai',
       'openai-compatible',
     ] as const) {
-      const headers = await freshModelWith(provider, GO_RESPONSES_URL)
-      expect(headers?.['x-opencode-session']).toMatch(UUID_RE)
+      await freshBaseline()
+      await setEnv({
+        AI_PROVIDER: provider,
+        AI_BASE_URL: 'https://example.com/v1',
+      })
+      mockFactory(provider)
+      const ai = await import('./ai')
+      const model = await ai.getReceiptModel()
+      expect(model).toEqual({ id: 'gpt-5-nano' })
+      expect(factoryArgs(provider)).toMatchObject({
+        apiKey: 'test-key',
+        baseURL: 'https://example.com/v1',
+      })
     }
   })
 
+  it('prefers the per-purpose provider, endpoint, and key over the shared config', async () => {
+    await freshBaseline()
+    await setEnv({
+      AI_PROVIDER: 'openai',
+      AI_API_KEY: 'global-key',
+      AI_BASE_URL: 'https://api.openai.com/v1',
+      AI_RECEIPT_PROVIDER: 'openai-compatible',
+      AI_RECEIPT_API_KEY: 'receipt-key',
+      AI_RECEIPT_BASE_URL: GO_CHAT_URL,
+    })
+    mockFactory('openai-compatible')
+    mockFactory('openai')
+    const { getReceiptModel } = await import('./ai')
+    const model = await getReceiptModel()
+    expect(mocks.createOpenAICompatible).toHaveBeenCalledTimes(1)
+    expect(mocks.createOpenAI).not.toHaveBeenCalled()
+    expect(factoryArgs('openai-compatible')).toMatchObject({
+      apiKey: 'receipt-key',
+      baseURL: GO_CHAT_URL,
+      headers: { 'x-opencode-session': expect.stringMatching(UUID_RE) },
+    })
+    expect(model).toEqual({ id: 'gpt-5-nano' })
+  })
+
+  it('sends the Go session header per resolved endpoint, not per global URL', async () => {
+    await freshBaseline()
+    await setEnv({
+      AI_PROVIDER: 'openai-compatible',
+      AI_BASE_URL: 'https://openrouter.ai/api/v1',
+      AI_RECEIPT_BASE_URL: GO_CHAT_URL,
+    })
+    mockFactory('openai-compatible')
+    const { getReceiptModel, getCategoryModel } = await import('./ai')
+    await getReceiptModel()
+    await getCategoryModel()
+    const [receiptArgs, categoryArgs] =
+      mocks.createOpenAICompatible.mock.calls.map(
+        ([arg]) => arg as { headers?: Record<string, string> },
+      )
+    // Separate clients per distinct endpoint: the receipt client carries the
+    // Go session header while the shared-config category client does not.
+    expect(receiptArgs?.headers?.['x-opencode-session']).toMatch(UUID_RE)
+    expect(categoryArgs?.headers ?? {}).toEqual({})
+  })
+
   it('passes empty headers off the Go endpoint', async () => {
-    const headers = await freshModelWith(
-      'openai-compatible',
-      'https://openrouter.ai/api/v1',
-    )
-    expect(headers).toEqual({})
+    await freshBaseline()
+    mockFactory('openai-compatible')
+    const { getReceiptModel } = await import('./ai')
+    await getReceiptModel()
+    expect(factoryArgs('openai-compatible')?.headers).toEqual({})
   })
 })
 
 describe('getVoiceModel audio routing', () => {
-  let originalProvider: unknown
-  let originalBaseUrl: unknown
-  let originalApiKey: unknown
+  async function freshVoiceBaseline() {
+    vi.resetModules()
+    Object.values(mocks).forEach((fn) => fn.mockReset())
+    const { env } = await import('./env')
+    Object.assign(env, {
+      AI_PROVIDER: 'openai-compatible',
+      AI_VOICE_PROVIDER: undefined,
+      AI_VOICE_BASE_URL: undefined,
+      AI_VOICE_API_KEY: undefined,
+      AI_BASE_URL: 'https://example.com/v1',
+      AI_API_KEY: 'test-key',
+      AI_VOICE_MODEL: 'test-voice-model',
+    })
+  }
 
   beforeEach(async () => {
-    const { env } = await import('./env')
-    originalProvider ??= env.AI_PROVIDER
-    originalBaseUrl ??= env.AI_BASE_URL
-    originalApiKey ??= env.AI_API_KEY
-    Object.values(mocks).forEach((fn) => fn.mockReset())
-    env.AI_API_KEY = 'test-key'
+    await freshVoiceBaseline()
   })
 
   afterEach(async () => {
     const { env } = await import('./env')
-    env.AI_PROVIDER = originalProvider as never
-    env.AI_BASE_URL = originalBaseUrl as never
-    env.AI_API_KEY = originalApiKey as never
+    env.AI_PROVIDER = 'openai'
+    env.AI_BASE_URL = undefined
+    env.AI_API_KEY = undefined
+    env.AI_VOICE_PROVIDER = undefined
+    env.AI_VOICE_MODEL = undefined as never
   })
 
-  it('routes the openai provider through chat completions so audio file parts map to input_audio', async () => {
-    vi.resetModules()
+  it('routes the openai dialect through chat completions so audio file parts map to input_audio', async () => {
+    await freshVoiceBaseline()
     const { env } = await import('./env')
     const chat = vi.fn((id: string) => ({ id }))
     const responses = vi.fn((id: string) => ({ id }))
     mocks.createOpenAI.mockReturnValue({ chat, responses })
     env.AI_PROVIDER = 'openai'
     env.AI_BASE_URL = 'https://api.openai.com/v1'
-    env.AI_API_KEY = 'test-key'
     const { getVoiceModel } = await import('./ai')
-    const model = await getVoiceModel('gpt-4o-mini-audio-preview')
+    const model = await getVoiceModel()
     expect(chat).toHaveBeenCalledTimes(1)
-    expect(chat).toHaveBeenCalledWith('gpt-4o-mini-audio-preview')
+    expect(chat).toHaveBeenCalledWith('test-voice-model')
     expect(responses).not.toHaveBeenCalled()
-    expect(model).toEqual({ id: 'gpt-4o-mini-audio-preview' })
+    expect(model).toEqual({ id: 'test-voice-model' })
   })
 
-  it('delegates non-openai providers to the shared text-path client', async () => {
+  it('delegates non-openai dialects to the shared text-path client', async () => {
     for (const provider of [
       'anthropic',
       'google',
       'openai-compatible',
     ] as const) {
-      vi.resetModules()
+      await freshVoiceBaseline()
       const { env } = await import('./env')
       const factory =
         provider === 'anthropic'
@@ -210,15 +319,70 @@ describe('getVoiceModel audio routing', () => {
           : provider === 'google'
             ? mocks.createGoogle
             : mocks.createOpenAICompatible
-      factory.mockReset()
       factory.mockReturnValue((id: string) => ({ id }))
       env.AI_PROVIDER = provider
-      env.AI_BASE_URL = 'https://example.com/v1'
-      env.AI_API_KEY = 'test-key'
       const { getVoiceModel } = await import('./ai')
-      const model = await getVoiceModel('test-model')
+      const model = await getVoiceModel()
       expect(factory).toHaveBeenCalledTimes(1)
-      expect(model).toEqual({ id: 'test-model' })
+      expect(model).toEqual({ id: 'test-voice-model' })
+    }
+  })
+
+  it('honors a per-purpose voice provider override', async () => {
+    await freshVoiceBaseline()
+    const { env } = await import('./env')
+    mocks.createAnthropic.mockReturnValue((id: string) => ({ id }))
+    env.AI_PROVIDER = 'openai'
+    env.AI_VOICE_PROVIDER = 'anthropic'
+    env.AI_BASE_URL = 'https://api.openai.com/v1'
+    const { getVoiceModel } = await import('./ai')
+    const model = await getVoiceModel()
+    expect(mocks.createAnthropic).toHaveBeenCalledTimes(1)
+    expect(mocks.createOpenAI).not.toHaveBeenCalled()
+    expect(model).toEqual({ id: 'test-voice-model' })
+  })
+})
+
+describe('resolveAiReasoning', () => {
+  it('omits reasoning when neither the purpose nor the shared value is set', async () => {
+    const { env } = await import('./env')
+    const { resolveAiReasoning } = await import('./ai')
+    const savedReasoning = env.AI_REASONING
+    const savedReceipt = env.AI_RECEIPT_REASONING
+    const savedCategory = env.AI_CATEGORY_REASONING
+    const savedVoice = env.AI_VOICE_REASONING
+    try {
+      env.AI_REASONING = undefined
+      env.AI_RECEIPT_REASONING = undefined
+      env.AI_CATEGORY_REASONING = undefined
+      env.AI_VOICE_REASONING = undefined
+      expect(resolveAiReasoning('receipt')).toBeUndefined()
+      expect(resolveAiReasoning('category')).toBeUndefined()
+      expect(resolveAiReasoning('voice')).toBeUndefined()
+    } finally {
+      env.AI_REASONING = savedReasoning
+      env.AI_RECEIPT_REASONING = savedReceipt
+      env.AI_CATEGORY_REASONING = savedCategory
+      env.AI_VOICE_REASONING = savedVoice
+    }
+  })
+
+  it('falls back to the shared value and prefers the per-purpose override', async () => {
+    const { env } = await import('./env')
+    const { resolveAiReasoning } = await import('./ai')
+    const savedReasoning = env.AI_REASONING
+    const savedReceipt = env.AI_RECEIPT_REASONING
+    try {
+      env.AI_REASONING = 'low'
+      env.AI_RECEIPT_REASONING = undefined
+      expect(resolveAiReasoning('receipt')).toBe('low')
+      expect(resolveAiReasoning('category')).toBe('low')
+      env.AI_RECEIPT_REASONING = 'high'
+      expect(resolveAiReasoning('receipt')).toBe('high')
+      expect(resolveAiReasoning('category')).toBe('low')
+    } finally {
+      env.AI_REASONING = savedReasoning
+      env.AI_RECEIPT_REASONING = savedReceipt
     }
   })
 })

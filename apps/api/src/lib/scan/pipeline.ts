@@ -3,7 +3,7 @@ import { Effect } from 'effect'
 
 import { DEFAULT_CATEGORIES } from '@spliit/domain'
 
-import { getModel } from '../ai'
+import { getReceiptModel, resolveAiReasoning } from '../ai'
 import { liftAiCall } from '../ai-effects/ai'
 import {
   annotateTokenUsage,
@@ -102,7 +102,7 @@ export const structureDocumentText = Effect.fnUntraced(function* (
     currentExpense: context.currentExpense,
   })
   const model = yield* Effect.tryPromise({
-    try: () => getModel(env.AI_RECEIPT_MODEL),
+    try: () => getReceiptModel(),
     // Pass through unwrapped so a provider/config failure keeps its message
     // at the tRPC boundary instead of surfacing as a generic Effect error.
     catch: (cause) => cause,
@@ -117,10 +117,10 @@ export const structureDocumentText = Effect.fnUntraced(function* (
         timeout: timeoutSecondsToMs(env.AI_RECEIPT_TIMEOUT_SECONDS),
         // Low temperature so the same text structures deterministically.
         temperature: 0.1,
-        // Minimal reasoning: extraction is a direct structuring task, same as
-        // the category verdict call. `'minimal'` is the lowest value the
-        // endpoint accepts (`'none'` is rejected with a 400).
-        reasoning: 'minimal',
+        // Operator-configured reasoning effort (`AI_RECEIPT_REASONING`,
+        // falling back to `AI_REASONING`). When both are unset the parameter
+        // is omitted and the provider decides.
+        reasoning: resolveAiReasoning('receipt'),
         prompt,
       }),
     { timeoutSeconds: env.AI_RECEIPT_TIMEOUT_SECONDS },
@@ -213,7 +213,7 @@ const extractWithVision = Effect.fnUntraced(function* (
     return data
   }).pipe(withTraceSpan('scan.fetch'))
   const model = yield* Effect.tryPromise({
-    try: () => getModel(env.AI_RECEIPT_MODEL),
+    try: () => getReceiptModel(),
     // Same passthrough as the structuring call above.
     catch: (cause) => cause,
   })
@@ -225,10 +225,10 @@ const extractWithVision = Effect.fnUntraced(function* (
         // fail fast instead of retrying an already-timed-out request.
         maxRetries: 0,
         timeout: timeoutSecondsToMs(env.AI_RECEIPT_TIMEOUT_SECONDS),
-        // Minimal reasoning: extraction is a direct read-off-the-receipt
-        // task. `'minimal'` is the floor every provider honors (see the
-        // structuring call above for why not `'none'`).
-        reasoning: 'minimal',
+        // Operator-configured reasoning effort (`AI_RECEIPT_REASONING`,
+        // falling back to `AI_REASONING`). When both are unset the parameter
+        // is omitted and the provider decides.
+        reasoning: resolveAiReasoning('receipt'),
         messages: [
           {
             role: 'user',

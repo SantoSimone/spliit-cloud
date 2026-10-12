@@ -8,7 +8,7 @@ import {
   getCurrency,
 } from '@spliit/domain'
 
-import { getVoiceModel } from './ai'
+import { getVoiceModel, resolveAiReasoning } from './ai'
 import { liftAiCall } from './ai-effects/ai'
 import {
   annotateTokenUsage,
@@ -198,7 +198,7 @@ export async function extractExpenseInformationFromAudio(
   // hung provider maps to TIMEOUT at the procedure boundary either way.
   // The Responses API rejects audio file parts, so voice extraction goes
   // through the chat-completions client (see getVoiceModel).
-  const model = await getVoiceModel(env.AI_VOICE_MODEL)
+  const model = await getVoiceModel()
   // One collector for the whole extraction; printing is gated on the operator
   // flag in `finally` so failed extractions still log their partial trace.
   const tracing = createRequestTracing()
@@ -213,11 +213,10 @@ export async function extractExpenseInformationFromAudio(
               // and fail fast instead of retrying an already-timed-out request.
               maxRetries: 0,
               timeout: timeoutSecondsToMs(env.AI_VOICE_TIMEOUT_SECONDS),
-              // Minimal reasoning: extraction is a direct transcription task,
-              // same as the category verdict call. `'minimal'` is the floor
-              // every provider honors (Meta endpoints silently ignore
-              // `'none'` and run full reasoning instead).
-              reasoning: 'minimal',
+              // Operator-configured reasoning effort (`AI_VOICE_REASONING`,
+              // falling back to `AI_REASONING`). When both are unset the
+              // parameter is omitted and the provider decides.
+              reasoning: resolveAiReasoning('voice'),
               instructions: buildPrompt(context, today),
               messages: [
                 {

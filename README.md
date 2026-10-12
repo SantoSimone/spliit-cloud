@@ -412,6 +412,20 @@ AI_CATEGORY_MODEL=openai/gpt-4o-mini
 
 Supported providers are `openai` (Responses API), `anthropic` (Messages API), `openai-compatible` (Chat Completions API), and `google` (Gemini API). `AI_BASE_URL` is optional and must be the API root; the selected SDK adapter appends its endpoint path.
 
+Each purpose can override the shared config with `AI_{RECEIPT,CATEGORY,VOICE}_PROVIDER`, `AI_{RECEIPT,CATEGORY,VOICE}_BASE_URL`, and `AI_{RECEIPT,CATEGORY,VOICE}_API_KEY` (each falls back to `AI_PROVIDER` / `AI_BASE_URL` / `AI_API_KEY` when empty), so one instance can scan receipts through an OpenAI-compatible gateway path while categorizing with Anthropic:
+
+```.env
+AI_PROVIDER=openai-compatible
+AI_BASE_URL=https://openrouter.ai/api/v1
+AI_CATEGORY_PROVIDER=anthropic
+AI_CATEGORY_BASE_URL=https://opencode.ai/zen/go/v1/messages
+AI_CATEGORY_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+The provider must match the endpoint's wire. Voice extraction works with any provider; when the resolved provider is `openai` it uses the Chat Completions API (the Responses API rejects audio input).
+
+Reasoning effort is operator-configured and shared the same way: `AI_REASONING` is the default and `AI_{RECEIPT,CATEGORY,VOICE}_REASONING` (`none|minimal|low|medium|high|xhigh`) override it per purpose. Values pass through to the provider, which maps them to its native reasoning setting — support varies per model, so check your model's docs. When both are empty the parameter is omitted and the provider decides.
+
 ## Stack
 
 - [Vite](https://vite.dev/) + [React](https://react.dev/) for the web SPA, replacing Next.js in favor of simplicity, efficiency, and room for future expansion

@@ -45,7 +45,7 @@ export type VisionPromptInput = {
  * milli-units (1000 = 1 item). The parser rejects anything else.
  */
 function buildUnitsLine(groupCurrency: { decimal_digits: number }): string {
-  return `Return amount and every unitPrice as integer minor units of the receipt currency (${groupCurrency.decimal_digits} minor digits per major unit, so 47.00 is 4700 in a 2-digit currency). Return every quantity as integer milli-units (1000 = 1 item, 495 = 0.495 items, 2000 = 2 items). No decimals, symbols, or separators in any number.`
+  return `Amounts are integer minor units of the receipt currency (${groupCurrency.decimal_digits} minor digits per major unit, so 47.00 is 4700 in a 2-digit currency); quantities are integer milli-units (1000 = 1 item).`
 }
 
 /**
@@ -54,7 +54,7 @@ function buildUnitsLine(groupCurrency: { decimal_digits: number }): string {
  * produce carries fractional quantities.
  */
 function buildItemsLine(): string {
-  return 'Make a best-effort attempt to extract the purchased receipt line items. Join details split across adjacent lines (title, quantity × unit price, and line total may print in any order or on separate lines); never emit a bare quantity or price line as its own item. For each clearly readable item, return its display title, signed non-zero unitPrice, and positive quantity; preserve explicit discounts or credits as negative line items. If only the line total is readable, compute the minor-unit unitPrice as line total × 1000 ÷ milli-unit quantity (quantity is thousandths, so 1500 = 1.5 items). Exclude taxes, service charges, subtotals, totals, payment details, and unreadable or uncertain lines. Return an empty items array when no line items can be identified.'
+  return "Extract the purchased line items so that they add up to the grand total, which includes everything the customer pays — items, taxes, fees, and deposits. The total is the check on your work. When the receipt offers no clear item breakdown (tickets, slips, confirmations, bills), return an empty items array rather than forcing uncertain lines. Join details split across adjacent lines (title, quantity, price, and total can print in any order or on separate lines); never emit a bare quantity or price line as its own item. If two lines look like the same item, keep both as separate items with identical title and price, preferring the version that reads as a correct word in the receipt's language and lets the items add up to the grand total. For each item return its display title and whatever you can read — unitPrice with quantity, lineTotal with quantity, or lineTotal alone; we derive the missing value. Preserve explicit discounts as negative line items. Exclude subtotals, totals, payment details, and unreadable lines — omit a line entirely when its title or total cannot be read. Exclude a tax or fee line only if the remaining items still sum to the grand total; if the items fall short, keep it as an item. Drop deposit and fee lines marked as already included in the prices. Each printed total belongs to at most one item. Return an empty items array when no line items can be identified."
 }
 
 /**
@@ -64,11 +64,20 @@ function buildItemsLine(): string {
  * needs neither.
  */
 function buildOcrCautionLine(): string {
-  return 'The OCR text misreads digits (0/8/6/9, 1/7, 5/6), inserts spaces inside numbers (1239, 08), and leaves trailing tax letters (47,00 Б): strip those before converting to minor units. When readings compete, prefer the one where milli-unit quantity × minor-unit unitPrice ÷ 1000 matches the printed line total and items plus tax match the grand total; drop lines that cannot be reconciled instead of guessing.'
+  return 'The OCR text misreads digits and inserts spaces inside numbers: strip those before converting to minor units. When readings compete, prefer the one where quantity × unitPrice matches the printed line total and the items add up to the grand total; drop the rest.'
 }
 
 function buildVisionCautionLine(): string {
-  return 'Read digits carefully (0/8 and 1/7 look alike at receipt resolution); drop uncertain lines instead of guessing.'
+  return 'Read digits carefully; drop uncertain lines instead of guessing.'
+}
+
+/**
+ * Merchant title rule shared by every prompt: clean name with branch, plus the
+ * service period only when the document states one the payment covers (utility
+ * bill, pass, rent, subscription) — never from the issue date alone.
+ */
+function buildTitleLine(): string {
+  return 'Title is the merchant name (with branch when shown); reconstruct it when garbled instead of copying the garble. If the document states a billing or validity period the payment covers, append it as `Merchant - Month YYYY`; otherwise merchant name alone.'
 }
 
 export function buildVisionPrompt(input: VisionPromptInput): string {
@@ -100,20 +109,22 @@ export function buildVisionPrompt(input: VisionPromptInput): string {
   const hintsLine = ocrOnly
     ? `The receipt ${input.noun} is the source of truth.`
     : `Use the group context and past-expense examples only as soft hints for currency, merchant/title, and category; the receipt ${input.noun} is the source of truth. Do not copy an example's amount, date, or items.`
+  const itemShape =
+    'items: Array<{ title: string, unitPrice?: number, quantity?: number, lineTotal?: number }>'
+  const shapeLine =
+    'amount, unitPrice and lineTotal are integer minor units; quantity is integer milli-units; date is yyyy-mm-dd or "" when unreadable; title is "" when not a receipt.'
   const fieldsLine = ocrOnly
-    ? 'Return exactly one JSON object with these fields: amount (integer), currencyCode (string), date (string), title (string), and items (array of objects with title (string), unitPrice (integer), and quantity (integer)). Do not explain.'
-    : 'Return exactly one JSON object with these fields: amount (integer), categoryId (string), currencyCode (string), date (string), title (string), and items (array of objects with title (string), unitPrice (integer), and quantity (integer)). Do not explain.'
+    ? `Return exactly one JSON object of this shape (integers only — no decimals, symbols, or separators): { amount: number | null, currencyCode: string, date: string, title: string, ${itemShape} }. ${shapeLine} Do not explain.`
+    : `Return exactly one JSON object of this shape (integers only — no decimals, symbols, or separators): { amount: number | null, categoryId: string, currencyCode: string, date: string, title: string, ${itemShape} }. ${shapeLine} Do not explain.`
 
   return `
-    This ${input.noun} contains a receipt.
+    This ${input.noun} contains a receipt. If it is not a receipt, return null amount, empty strings, and empty items.
     ${taskLine}
-    Use the final amount charged, including tax and service charges when visible.
+    Use the final amount charged, including tax and service charges when visible. If no grand total is visible, return amount as null — never estimate it, and never return 0.
+    ${buildTitleLine()}
     ${buildUnitsLine(groupCurrency)}
-    Return currencyCode as the ISO 4217 code printed or implied by the receipt.
-    If the currency is not printed clearly, infer it from receipt language, merchant name, address, tax labels, phone number, country/city hints, and any other local clues.
-    If those clues strongly indicate a country, use that country's normal currency.
-    Only return an empty string when there is no reasonable currency inference.
-    Return the date as yyyy-mm-dd. If the date is unreadable, return an empty string.
+    Return currencyCode as the ISO 4217 code printed or implied by the receipt (language, merchant, address, tax labels, or phone). Only return an empty string when no inference is possible.
+    Return the date as yyyy-mm-dd; empty string when unreadable — never infer it.
     ${categoryLine}
     ${groupSection}
     ${localeHint}
@@ -161,21 +172,19 @@ export function buildStructurePrompt(input: StructurePromptInput): string {
   return `
     ${sourceLine}
     Extract the receipt total, receipt currency, receipt date, and merchant/title.
-    Use the final amount charged, including tax and service charges when visible.
+    Use the final amount charged, including tax and service charges when visible. If no grand total is visible, return amount as null — never estimate it, and never return 0.
+    ${buildTitleLine()}
     ${buildUnitsLine(groupCurrency)}
-    Return currencyCode as the ISO 4217 code printed or implied by the text.
-    If the currency is not printed clearly, infer it from receipt language, merchant name, address, tax labels, phone number, country/city hints, and any other local clues.
-    If those clues strongly indicate a country, use that country's normal currency.
-    Only return an empty string when there is no reasonable currency inference.
-    Return the date as yyyy-mm-dd. If the date is unreadable, return an empty string.
+    Return currencyCode as the ISO 4217 code printed or implied by the text (language, merchant, address, tax labels, or phone). Only return an empty string when no inference is possible.
+    Return the date as yyyy-mm-dd; empty string when unreadable — never infer it.
     ${localeHint}
     ${translationDirective}
     ${currentExpenseSection}
-    The receipt text is the source of truth. Do not invent values that are not supported by it; leave unreadable fields as empty strings.
+    The receipt text is the source of truth. Do not invent values that are not supported by it; leave unreadable fields as empty strings. If the text is not a receipt, return null amount, empty strings, and empty items.
     ${ocrCautionLine}
     ${buildItemsLine()}
     The group's currency is ${groupCurrency.code || groupCurrency.symbol}; use the receipt total as written and do not convert currencies.
-    Return exactly one JSON object with these fields: amount (integer), currencyCode (string), date (string), title (string), and items (array of objects with title (string), unitPrice (integer), and quantity (integer)). Do not explain.
+    Return exactly one JSON object of this shape (integers only — no decimals, symbols, or separators): { amount: number | null, currencyCode: string, date: string, title: string, items: Array<{ title: string, unitPrice?: number, quantity?: number, lineTotal?: number }> }. amount, unitPrice and lineTotal are integer minor units; quantity is integer milli-units; date is yyyy-mm-dd or "" when unreadable; title is "" when not a receipt. Do not explain.
     Receipt text:
     ${input.documentText}`
 }

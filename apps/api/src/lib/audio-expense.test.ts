@@ -6,7 +6,8 @@ vi.mock('ai', () => ({
   Output: { json: vi.fn(() => ({ type: 'json' })) },
   generateText: vi.fn(),
 }))
-vi.mock('./ai', () => ({
+vi.mock('./ai', async (importOriginal) => ({
+  ...((await importOriginal()) as object),
   getVoiceModel: vi.fn(async () => ({ modelId: 'test' })),
 }))
 
@@ -144,7 +145,34 @@ describe('audio expense extraction', () => {
       participants: [],
     })
 
-    expect(vi.mocked(getVoiceModel)).toHaveBeenCalledWith('test-voice-model')
+    expect(vi.mocked(getVoiceModel)).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(getVoiceModel)).toHaveBeenCalledWith()
+  })
+
+  it('omits reasoning when unconfigured and passes through the configured effort', async () => {
+    const { env } = await import('./env')
+    const input = {
+      audioDataUrl: 'data:audio/wav;base64,AAAA',
+      group,
+      participants: [],
+    }
+    type ReasoningRequest = { reasoning?: unknown }
+    const reasoningOf = () =>
+      generateTextMock.mock.calls[0]?.[0] as ReasoningRequest
+    generateTextMock.mockResolvedValue({ output: {} } as never)
+
+    await extractExpenseInformationFromAudio(input)
+    expect(reasoningOf().reasoning).toBeUndefined()
+
+    generateTextMock.mockClear()
+    const original = env.AI_REASONING
+    env.AI_REASONING = 'low'
+    try {
+      await extractExpenseInformationFromAudio(input)
+      expect(reasoningOf().reasoning).toBe('low')
+    } finally {
+      env.AI_REASONING = original
+    }
   })
 
   it('bounds the provider call with the configured timeout and no retries', async () => {

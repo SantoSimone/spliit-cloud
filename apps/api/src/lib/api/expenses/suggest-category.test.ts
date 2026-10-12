@@ -22,6 +22,8 @@ const envState = vi.hoisted(() => ({
   AI_SYSTEM_ONE_TIMEOUT_SECONDS: 10,
   AI_SYSTEM_ONE_BASE_URL: 'https://api.typesafe.ai/v1/systemone',
   AI_CATEGORY_MIN_CONFIDENCE: 0.5,
+  AI_REASONING: undefined as string | undefined,
+  AI_CATEGORY_REASONING: undefined as string | undefined,
 }))
 
 function systemOneResponse(choice: string, confidence = 0.9) {
@@ -47,8 +49,9 @@ vi.mock('ai', async (importOriginal) => ({
   generateText: (...args: unknown[]) => generateText(...args),
 }))
 
-vi.mock('../../ai', () => ({
-  getModel: vi.fn(async () => ({})),
+vi.mock('../../ai', async (importOriginal) => ({
+  ...((await importOriginal()) as object),
+  getCategoryModel: vi.fn(async () => ({})),
 }))
 
 vi.mock('../../env', () => ({ env: envState }))
@@ -70,6 +73,8 @@ beforeEach(() => {
   envState.CATEGORY_HISTORY_ENABLED = true
   envState.AI_SYSTEM_ONE_API_KEY = undefined
   envState.AI_CATEGORY_MIN_CONFIDENCE = 0.5
+  envState.AI_REASONING = undefined
+  envState.AI_CATEGORY_REASONING = undefined
   vi.spyOn(console, 'info').mockImplementation(() => {})
   prismaMock.group.findUnique.mockResolvedValue({
     name: 'Test Group',
@@ -217,6 +222,34 @@ describe('suggestExpenseCategory', () => {
     expect(request.prompt).toBe('a'.repeat(40))
     expect(request.maxRetries).toBe(0)
     expect(request.timeout).toBe(30_000)
+  })
+
+  it('omits reasoning when unconfigured and passes through the configured effort', async () => {
+    envState.PUBLIC_ENABLE_CATEGORY_EXTRACT = true
+    prismaMock.expense.findMany.mockResolvedValue([
+      { title: 'Luigi mysterious trattoria', categoryId: 'dining-out' },
+    ] as never)
+    const input = {
+      groupId: 'group-1',
+      title: 'Luigi mysterious trattoria xyzzy',
+      allowAi: true,
+    }
+    type ReasoningRequest = { reasoning?: unknown }
+    const reasoningOf = () =>
+      generateText.mock.calls[0]?.[0] as ReasoningRequest
+
+    await suggestExpenseCategory(input)
+    expect(reasoningOf().reasoning).toBeUndefined()
+
+    generateText.mockClear()
+    envState.AI_REASONING = 'low'
+    await suggestExpenseCategory(input)
+    expect(reasoningOf().reasoning).toBe('low')
+
+    generateText.mockClear()
+    envState.AI_CATEGORY_REASONING = 'high'
+    await suggestExpenseCategory(input)
+    expect(reasoningOf().reasoning).toBe('high')
   })
 
   it('returns null when the LLM confidence is below the minimum', async () => {

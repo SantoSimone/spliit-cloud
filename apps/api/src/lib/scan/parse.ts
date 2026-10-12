@@ -64,18 +64,86 @@ export function parseReceiptItems(value: unknown): ParsedReceiptItem[] {
     const unitPrice = parseAIMinorAmount(
       item.unitPrice ?? item.unit_price ?? item.price ?? item.amount,
     )
-    const quantity = parseAIStoredQuantity(item.quantity ?? item.qty ?? 1000)
+    const qtyValue = item.quantity ?? item.qty
+    const rawQuantity = parseAIStoredQuantity(qtyValue)
+    const lineTotal = parseAIMinorAmount(
+      item.lineTotal ?? item.line_total ?? item.total,
+    )
 
+    if (!title) return []
+    // An explicitly provided but unparseable quantity marks a confused line:
+    // drop it unless a readable line total rescues the money.
     if (
-      !title ||
-      !Number.isSafeInteger(unitPrice) ||
-      unitPrice === 0 ||
-      !quantity
+      qtyValue !== undefined &&
+      rawQuantity === null &&
+      !(Number.isSafeInteger(lineTotal) && lineTotal !== 0)
     ) {
       return []
     }
-    return [{ title, unitPrice, quantity }]
+    const resolved = resolveItemAmounts(unitPrice, rawQuantity, lineTotal)
+    if (!resolved) return []
+    return [{ title, ...resolved }]
   })
+}
+
+/**
+ * Best-effort local reconstruction of stored units from whatever the model
+ * managed to read. The model reports; it never divides: any missing
+ * unitPrice/quantity is derived here from the printed line total instead.
+ *
+ * Resolution order: unitPrice + quantity (consistency-checked against the total
+ * when present) → lineTotal + quantity → lineTotal + unitPrice → lineTotal
+ * alone → unitPrice alone. Anything degenerate falls back to the line total as
+ * a single unit; a line with no readable money is dropped.
+ */
+function resolveItemAmounts(
+  unitPrice: number,
+  rawQuantity: number | null,
+  lineTotal: number,
+): { unitPrice: number; quantity: number } | null {
+  const validUnit = Number.isSafeInteger(unitPrice) && unitPrice !== 0
+  const validTotal = Number.isSafeInteger(lineTotal) && lineTotal !== 0
+  const quantity = rawQuantity ?? 1000
+
+  if (validUnit && rawQuantity !== null) {
+    if (
+      validTotal &&
+      Math.abs(unitPrice * quantity - lineTotal * 1000) > quantity
+    ) {
+      // Disagreement beyond sub-minor rounding: the printed total wins,
+      // since totals OCR best and tie to the grand total.
+      return deriveUnitPriceFromTotal(lineTotal, quantity)
+    }
+    return { unitPrice, quantity }
+  }
+  if (validTotal && rawQuantity !== null) {
+    return deriveUnitPriceFromTotal(lineTotal, quantity)
+  }
+  if (validTotal && validUnit) {
+    const derivedQty = Math.round((lineTotal * 1000) / unitPrice)
+    if (Number.isSafeInteger(derivedQty) && derivedQty >= 1) {
+      return { unitPrice, quantity: derivedQty }
+    }
+    return { unitPrice: lineTotal, quantity: 1000 }
+  }
+  if (validTotal) {
+    return { unitPrice: lineTotal, quantity: 1000 }
+  }
+  if (validUnit) {
+    return { unitPrice, quantity: 1000 }
+  }
+  return null
+}
+
+function deriveUnitPriceFromTotal(
+  lineTotal: number,
+  quantity: number,
+): { unitPrice: number; quantity: number } {
+  const derived = Math.round((lineTotal * 1000) / quantity)
+  if (Number.isSafeInteger(derived) && derived !== 0) {
+    return { unitPrice: derived, quantity }
+  }
+  return { unitPrice: lineTotal, quantity: 1000 }
 }
 
 export function parseReceiptJSONResponse(
@@ -152,7 +220,8 @@ export function parseReceiptAIResponse(
 /**
  * True when the parsed receipt holds nothing worth prefilling. Currency is
  * ignored: it always falls back to the group currency, so it never counts as
- * extracted signal on its own.
+ * extracted signal on its own. A zero amount counts as missing: no receipt has
+ * a €0.00 grand total, so `0` means the model found no total.
  */
 export function isEmptyReceiptResult(result: {
   amount: number
@@ -161,7 +230,7 @@ export function isEmptyReceiptResult(result: {
   items: ParsedReceiptItem[]
 }): boolean {
   return (
-    Number.isNaN(result.amount) &&
+    (Number.isNaN(result.amount) || result.amount === 0) &&
     !result.title &&
     !result.date &&
     result.items.length === 0

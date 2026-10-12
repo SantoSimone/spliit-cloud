@@ -381,6 +381,81 @@ describe('envSchema — AI', () => {
     expect(env.AI_CATEGORY_MODEL).toBe('claude-sonnet-4-5')
   })
 
+  it('leaves per-purpose provider, endpoint, key, and reasoning unset by default', () => {
+    const env = parseTestEnv()
+    expect(env.AI_RECEIPT_PROVIDER).toBeUndefined()
+    expect(env.AI_CATEGORY_PROVIDER).toBeUndefined()
+    expect(env.AI_VOICE_PROVIDER).toBeUndefined()
+    expect(env.AI_RECEIPT_BASE_URL).toBeUndefined()
+    expect(env.AI_CATEGORY_BASE_URL).toBeUndefined()
+    expect(env.AI_VOICE_BASE_URL).toBeUndefined()
+    expect(env.AI_RECEIPT_API_KEY).toBeUndefined()
+    expect(env.AI_CATEGORY_API_KEY).toBeUndefined()
+    expect(env.AI_VOICE_API_KEY).toBeUndefined()
+    expect(env.AI_REASONING).toBeUndefined()
+    expect(env.AI_RECEIPT_REASONING).toBeUndefined()
+    expect(env.AI_CATEGORY_REASONING).toBeUndefined()
+    expect(env.AI_VOICE_REASONING).toBeUndefined()
+  })
+
+  it('parses per-purpose provider, endpoint, key, and reasoning overrides', () => {
+    const env = parseTestEnv({
+      AI_RECEIPT_PROVIDER: 'anthropic',
+      AI_RECEIPT_BASE_URL: 'https://opencode.ai/zen/go/v1/messages',
+      AI_RECEIPT_API_KEY: 'receipt-key',
+      AI_RECEIPT_REASONING: 'low',
+      AI_CATEGORY_PROVIDER: 'google',
+      AI_CATEGORY_REASONING: 'high',
+      AI_VOICE_PROVIDER: 'openai-compatible',
+      AI_VOICE_BASE_URL: 'https://openrouter.ai/api/v1',
+      AI_VOICE_API_KEY: 'voice-key',
+      AI_VOICE_REASONING: 'minimal',
+      AI_REASONING: 'medium',
+    })
+    expect(env.AI_RECEIPT_PROVIDER).toBe('anthropic')
+    expect(env.AI_RECEIPT_BASE_URL).toBe(
+      'https://opencode.ai/zen/go/v1/messages',
+    )
+    expect(env.AI_RECEIPT_API_KEY).toBe('receipt-key')
+    expect(env.AI_RECEIPT_REASONING).toBe('low')
+    expect(env.AI_CATEGORY_PROVIDER).toBe('google')
+    expect(env.AI_CATEGORY_REASONING).toBe('high')
+    expect(env.AI_VOICE_PROVIDER).toBe('openai-compatible')
+    expect(env.AI_VOICE_BASE_URL).toBe('https://openrouter.ai/api/v1')
+    expect(env.AI_VOICE_API_KEY).toBe('voice-key')
+    expect(env.AI_VOICE_REASONING).toBe('minimal')
+    expect(env.AI_REASONING).toBe('medium')
+  })
+
+  it('treats empty per-purpose values as unset', () => {
+    const env = parseTestEnv({
+      AI_RECEIPT_PROVIDER: '',
+      AI_RECEIPT_BASE_URL: '',
+      AI_RECEIPT_API_KEY: '',
+      AI_REASONING: '',
+      AI_RECEIPT_REASONING: '',
+      AI_CATEGORY_REASONING: '',
+      AI_VOICE_REASONING: '',
+    })
+    expect(env.AI_RECEIPT_PROVIDER).toBeUndefined()
+    expect(env.AI_RECEIPT_BASE_URL).toBeUndefined()
+    expect(env.AI_RECEIPT_API_KEY).toBeUndefined()
+    expect(env.AI_REASONING).toBeUndefined()
+    expect(env.AI_RECEIPT_REASONING).toBeUndefined()
+    expect(env.AI_CATEGORY_REASONING).toBeUndefined()
+    expect(env.AI_VOICE_REASONING).toBeUndefined()
+  })
+
+  it.each([
+    'AI_REASONING',
+    'AI_RECEIPT_REASONING',
+    'AI_CATEGORY_REASONING',
+    'AI_VOICE_REASONING',
+  ])('rejects an unsupported %s value', (key) => {
+    expect(() => parseTestEnv({ [key]: 'max' })).toThrow()
+    expect(() => parseTestEnv({ [key]: 'provider-default' })).toThrow()
+  })
+
   it.each(['openai', 'anthropic', 'openai-compatible', 'google'] as const)(
     'accepts the %s provider',
     (provider) => {
@@ -433,6 +508,32 @@ describe('envSchema — AI', () => {
     expect(() =>
       parseTestEnv({ PUBLIC_ENABLE_RECEIPT_EXTRACT: 'true' }),
     ).toThrow(/AI_API_KEY must be specified/)
+  })
+
+  it('accepts a per-purpose receipt key without the shared key', () => {
+    const env = parseTestEnv({
+      PUBLIC_ENABLE_RECEIPT_EXTRACT: 'true',
+      AI_RECEIPT_API_KEY: 'receipt-key',
+    })
+    expect(env.AI_RECEIPT_API_KEY).toBe('receipt-key')
+    expect(env.AI_API_KEY).toBeUndefined()
+  })
+
+  it('accepts a per-purpose voice key without the shared key', () => {
+    const env = parseTestEnv({
+      PUBLIC_ENABLE_VOICE_EXPENSE: 'true',
+      AI_VOICE_MODEL: 'test-voice-model',
+      AI_VOICE_API_KEY: 'voice-key',
+    })
+    expect(env.AI_VOICE_API_KEY).toBe('voice-key')
+  })
+
+  it('accepts a per-purpose category key without the shared key', () => {
+    const env = parseTestEnv({
+      PUBLIC_ENABLE_CATEGORY_EXTRACT: 'true',
+      AI_CATEGORY_API_KEY: 'category-key',
+    })
+    expect(env.AI_CATEGORY_API_KEY).toBe('category-key')
   })
 
   it('throws when PUBLIC_ENABLE_CATEGORY_EXTRACT is true but AI_API_KEY is missing', () => {

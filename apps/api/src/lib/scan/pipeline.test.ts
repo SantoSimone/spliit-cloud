@@ -2,7 +2,10 @@ import { Effect } from 'effect'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('ai', () => ({ generateText: vi.fn() }))
-vi.mock('../ai', () => ({ getModel: vi.fn() }))
+vi.mock('../ai', async (importOriginal) => ({
+  ...((await importOriginal()) as object),
+  getReceiptModel: vi.fn(),
+}))
 vi.mock('../ocr', async (importOriginal) => ({
   ...(await importOriginal()),
   getOcrProvider: vi.fn(() => null),
@@ -20,17 +23,19 @@ import type { OcrProvider } from '../ocr'
 import { OcrError } from '../ocr'
 
 const { generateText } = await import('ai')
-const { getModel } = await import('../ai')
+const { getReceiptModel } = await import('../ai')
 const { getOcrProvider } = await import('../ocr')
 const mockedEnv = (await import('../env')).env as {
   AI_OCR_REQUIRED: boolean
+  AI_REASONING?: string
+  AI_RECEIPT_REASONING?: string
 }
 const { scanReceiptDocument, structureDocumentText, structureOcrText } =
   await import('./pipeline')
 const { isEmptyReceiptResult } = await import('./parse')
 
 const generateTextMock = vi.mocked(generateText)
-const getModelMock = vi.mocked(getModel)
+const getReceiptModelMock = vi.mocked(getReceiptModel)
 const getOcrProviderMock = vi.mocked(getOcrProvider)
 
 const groupCurrency = { currency: '$', currencyCode: 'USD' }
@@ -71,11 +76,13 @@ const fetchMock = vi.fn()
 
 beforeEach(() => {
   generateTextMock.mockReset()
-  getModelMock.mockReset()
+  getReceiptModelMock.mockReset()
   getOcrProviderMock.mockReset()
   getOcrProviderMock.mockReturnValue(null)
   mockedEnv.AI_OCR_REQUIRED = false
-  getModelMock.mockResolvedValue({ id: 'test-receipt-model' } as never)
+  mockedEnv.AI_REASONING = undefined
+  mockedEnv.AI_RECEIPT_REASONING = undefined
+  getReceiptModelMock.mockResolvedValue({ id: 'test-receipt-model' } as never)
   vi.stubGlobal('fetch', fetchMock)
   fetchMock.mockReset()
   // Default vision-path download: image tests hit the server-side fetch for
@@ -206,6 +213,47 @@ describe('scanReceiptDocument image flow', () => {
     ])
   })
 
+  it('reconstructs stored units from whatever item fields the model read', async () => {
+    generateTextMock.mockResolvedValue({
+      text: JSON.stringify({
+        amount: 5000,
+        currencyCode: 'USD',
+        items: [
+          // Printed total + quantity, no unit price: derived locally.
+          { title: 'Crate', lineTotal: 1656, quantity: 24000 },
+          // Printed total alone: single unit at the total.
+          { title: 'Flat', lineTotal: 500 },
+          // Printed total + unit price: derived quantity.
+          { title: 'Pair', lineTotal: 398, unitPrice: 199 },
+          // All three but disagreeing: the printed total wins.
+          { title: 'Weighed', lineTotal: 53, unitPrice: 1250, quantity: 425 },
+          // Rounding resolves deterministically in the parser.
+          { title: 'Produce', lineTotal: 120, quantity: 710 },
+          // Signed totals stay negative.
+          { title: 'Rebate', lineTotal: -140 },
+          // Invalid quantity rescued by the line total.
+          { title: 'Rescued', lineTotal: 300, quantity: 'many' },
+          // No money at all: dropped.
+          { title: 'Mystery', quantity: 2000 },
+        ],
+      }),
+    })
+
+    const result = await run(
+      scanReceiptDocument(image, groupCurrency, {}, imageDeps),
+    )
+
+    expect(result.items).toEqual([
+      { title: 'Crate', unitPrice: 69, quantity: 24000 },
+      { title: 'Flat', unitPrice: 500, quantity: 1000 },
+      { title: 'Pair', unitPrice: 199, quantity: 2000 },
+      { title: 'Weighed', unitPrice: 125, quantity: 425 },
+      { title: 'Produce', unitPrice: 169, quantity: 710 },
+      { title: 'Rebate', unitPrice: -140, quantity: 1000 },
+      { title: 'Rescued', unitPrice: 300, quantity: 1000 },
+    ])
+  })
+
   it('returns no items for the legacy comma-separated response format', async () => {
     generateTextMock.mockResolvedValue({
       text: '1234,groceries,2025-01-02,USD,Corner Market',
@@ -316,6 +364,28 @@ describe('scanReceiptDocument image flow', () => {
     }
     expect(request.maxRetries).toBe(0)
     expect(request.timeout).toBe(120_000)
+  })
+
+  it('omits reasoning when unconfigured and passes through the configured effort', async () => {
+    generateTextMock.mockResolvedValue({
+      text: JSON.stringify({ amount: 1, items: [] }),
+    })
+    type ReasoningRequest = { reasoning?: unknown }
+    const reasoningOf = (callIndex: number) =>
+      generateTextMock.mock.calls[callIndex]?.[0] as ReasoningRequest
+
+    await run(scanReceiptDocument(image, groupCurrency, {}, imageDeps))
+    expect(reasoningOf(0).reasoning).toBeUndefined()
+
+    generateTextMock.mockClear()
+    mockedEnv.AI_REASONING = 'low'
+    await run(scanReceiptDocument(image, groupCurrency, {}, imageDeps))
+    expect(reasoningOf(0).reasoning).toBe('low')
+
+    generateTextMock.mockClear()
+    mockedEnv.AI_RECEIPT_REASONING = 'high'
+    await run(scanReceiptDocument(image, groupCurrency, {}, imageDeps))
+    expect(reasoningOf(0).reasoning).toBe('high')
   })
 
   it('includes group, locale, and past-expense context as soft hints', async () => {
@@ -458,6 +528,9 @@ describe('scanReceiptDocument image flow', () => {
       isEmptyReceiptResult({ amount: NaN, title: null, date: null, items: [] }),
     ).toBe(true)
     expect(
+      isEmptyReceiptResult({ amount: 0, title: null, date: null, items: [] }),
+    ).toBe(true)
+    expect(
       isEmptyReceiptResult({
         amount: 1000,
         title: null,
@@ -547,10 +620,9 @@ describe('structureDocumentText', () => {
     expect(ocrRequest.prompt).toContain('extracted from a receipt by OCR')
     expect(ocrRequest.prompt).toContain('misread characters')
     // OCR-only caution: digit confusion with arithmetic reconciliation.
-    expect(ocrRequest.prompt).toContain('0/8')
-    expect(ocrRequest.prompt).toContain(
-      'quantity × minor-unit unitPrice ÷ 1000',
-    )
+    expect(ocrRequest.prompt).toContain('misreads digits')
+    expect(ocrRequest.prompt).toContain('quantity × unitPrice')
+    expect(ocrRequest.prompt).toContain('return amount as null')
   })
 })
 

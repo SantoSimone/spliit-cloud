@@ -11,7 +11,7 @@ import {
   type CategoryId,
 } from '@spliit/domain'
 
-import { getModel } from './ai'
+import { getCategoryModel, resolveAiReasoning } from './ai'
 import { extractAllowedIdFromAIResponse } from './ai-response'
 import type { GroupContext, RecentExpense } from './ai/context'
 import {
@@ -151,17 +151,17 @@ async function generateVerdict(
 ): Promise<{ output: unknown; text: string }> {
   try {
     const { output, text } = await generateText({
-      model: await getModel(env.AI_CATEGORY_MODEL),
+      model: await getCategoryModel(),
       // Bound slow providers so category suggestion cannot hang the caller,
       // and fail fast instead of retrying an already-timed-out request.
       maxRetries: 0,
       timeout: timeoutSecondsToMs(env.AI_CATEGORY_TIMEOUT_SECONDS),
       instructions,
       prompt: description.substring(0, limit),
-      // Minimal reasoning: the verdict is a direct classification. `'minimal'`
-      // is the floor every provider honors (Meta endpoints silently ignore
-      // `'none'` and run full reasoning instead).
-      reasoning: 'minimal',
+      // Operator-configured reasoning effort (`AI_CATEGORY_REASONING`,
+      // falling back to `AI_REASONING`). When both are unset the parameter
+      // is omitted and the provider decides.
+      reasoning: resolveAiReasoning('category'),
       // Try to be highly deterministic so a title has a consistent category.
       temperature: 0.1,
       // Keep JSON mode for OpenAI-compatible models that do not consistently

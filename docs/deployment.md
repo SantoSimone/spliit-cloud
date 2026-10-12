@@ -174,6 +174,19 @@ may remain empty.
   when exporting groups with documents).
 - AI features require their corresponding `PUBLIC_ENABLE_*` flag and
   `AI_API_KEY`. `AI_PROVIDER`, model names, and `AI_BASE_URL` are optional.
+  Each purpose (receipt scan, category suggestion, voice extraction) can
+  override the shared wire config with `AI_{RECEIPT,CATEGORY,VOICE}_PROVIDER`,
+  `AI_{RECEIPT,CATEGORY,VOICE}_BASE_URL`, and
+  `AI_{RECEIPT,CATEGORY,VOICE}_API_KEY`, each falling back to its shared
+  counterpart when empty. The provider must match the endpoint's wire
+  (`openai` speaks Responses, `openai-compatible` speaks Chat Completions,
+  `anthropic` speaks Messages), and boot validation requires the resolved key
+  (shared or per-purpose) for every enabled feature.
+  Reasoning effort is operator-configured via `AI_REASONING` (shared default)
+  and `AI_{RECEIPT,CATEGORY,VOICE}_REASONING` (per-purpose override;
+  `none|minimal|low|medium|high|xhigh`, passed through to the provider). When
+  both are empty the parameter is omitted and the provider decides — the
+  safest setting for models without reasoning support.
   Provider calls are bounded by `AI_RECEIPT_TIMEOUT_SECONDS` (default 120),
   `AI_VOICE_TIMEOUT_SECONDS` (default 120), and `AI_CATEGORY_TIMEOUT_SECONDS`
   (default 30); raise them when self-hosting a slow model.
