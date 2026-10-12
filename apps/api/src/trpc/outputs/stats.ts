@@ -53,6 +53,7 @@ export const getStatsOutputSchema = z.object({
         name: z.string(),
         account: accountSummarySchema.nullable(),
         amount: z.number().int(),
+        paid: z.number().int(),
         percentage: z.number(),
       }),
     ),

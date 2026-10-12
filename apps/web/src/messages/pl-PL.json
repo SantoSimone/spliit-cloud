@@ -1369,7 +1369,9 @@
       "customRange": {
         "from": "Od",
         "to": "Do"
-      }
+      },
+      "paid": "Zapłacone",
+      "paidDescription": "Ile zapłaciła każda osoba"
     }
   },
   "Activity": {

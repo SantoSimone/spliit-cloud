@@ -1353,7 +1353,9 @@
       "customRange": {
         "from": "Alkaen",
         "to": "Asti"
-      }
+      },
+      "paid": "Maksettu",
+      "paidDescription": "Kuinka paljon kukin maksoi"
     }
   },
   "Activity": {

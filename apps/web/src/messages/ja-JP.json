@@ -1346,7 +1346,9 @@
       "customRange": {
         "from": "開始",
         "to": "終了"
-      }
+      },
+      "paid": "支払い",
+      "paidDescription": "各参加者が支払った金額"
     }
   },
   "Activity": {

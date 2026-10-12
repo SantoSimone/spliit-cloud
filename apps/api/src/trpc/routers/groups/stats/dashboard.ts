@@ -343,8 +343,9 @@ export function buildGroupStatsDashboard(
       name: participantNames.get(participantId) ?? '',
       account: participantAccounts.get(participantId) ?? null,
       amount: balance.paidFor,
+      paid: balance.paid,
     }))
-    .filter((participant) => participant.amount !== 0)
+    .filter((participant) => participant.amount !== 0 || participant.paid !== 0)
   const participantAbsTotal = participants.reduce(
     (total, participant) => total + Math.abs(participant.amount),
     0,

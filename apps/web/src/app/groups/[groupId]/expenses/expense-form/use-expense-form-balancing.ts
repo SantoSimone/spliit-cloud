@@ -24,15 +24,18 @@ export function useExpenseFormBalancing(args: {
     name: 'paidBySplitMode',
   })
   // `amount` is the typed value in the selected expense currency, which
-  // matches the units paidFor and paidBy BY_AMOUNT shares live in.
+  // matches the units paidFor and paidBy BY_AMOUNT shares live in. Amount
+  // changes must NOT reset manual edits: the balancing effects below
+  // re-run on `amount` and redistribute only the automatic rows around the
+  // preserved manual values.
   const amount = useWatch({ control: args.form.control, name: 'amount' })
 
   // Instead of useEffect + setState to reset the sets when splitMode or
-  // amount/currency changes, we store the edits together with an "epoch"
+  // currency changes, we store the edits together with an "epoch"
   // derived from the watched values. When the epoch changes, the effective
   // set is automatically empty — no effect needed.
-  const participantsEpoch = `${splitMode}-${amount}-${args.payerCurrency.code}`
-  const payersEpoch = `${paidBySplitMode}-${amount}-${args.payerCurrency.code}`
+  const participantsEpoch = `${splitMode}-${args.payerCurrency.code}`
+  const payersEpoch = `${paidBySplitMode}-${args.payerCurrency.code}`
 
   const [participantEdits, setParticipantEdits] = useState(() => ({
     epoch: participantsEpoch,

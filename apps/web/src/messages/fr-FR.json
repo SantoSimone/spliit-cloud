@@ -1361,7 +1361,9 @@
       "customRange": {
         "from": "Du",
         "to": "Au"
-      }
+      },
+      "paid": "Payé",
+      "paidDescription": "Combien chaque personne a payé"
     }
   },
   "Activity": {

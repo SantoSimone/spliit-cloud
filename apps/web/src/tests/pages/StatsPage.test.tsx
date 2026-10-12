@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     data: {
       dashboard: {
         lifetimeTotal: 16625,
+        participants: [],
         period: {
           from: new Date('2026-08-25T00:00:00.000Z'),
           to: new Date('2026-08-25T00:00:00.000Z'),
@@ -66,6 +67,10 @@ vi.mock('@/app/groups/[groupId]/stats/participant-breakdown', () => ({
   ParticipantBreakdown: () => <div data-testid="participant-breakdown" />,
 }))
 
+vi.mock('@/app/groups/[groupId]/stats/paid-breakdown', () => ({
+  PaidBreakdown: () => <div data-testid="paid-breakdown" />,
+}))
+
 import { StatsDashboard } from '@/app/groups/[groupId]/stats/dashboard'
 import { TotalsPageClient } from '@/app/groups/[groupId]/stats/page.client'
 
@@ -82,7 +87,7 @@ describe('Stats mobile surface hierarchy', () => {
     const { container } = render(<StatsDashboard />)
     const surfaces = container.querySelectorAll('[data-stats-surface]')
 
-    expect(surfaces).toHaveLength(6)
+    expect(surfaces).toHaveLength(7)
     surfaces.forEach((surface) => {
       expect(surface.parentElement?.closest('[data-stats-surface]')).toBeNull()
       expect(surface).toHaveClass('rounded-lg', 'border', 'bg-card')

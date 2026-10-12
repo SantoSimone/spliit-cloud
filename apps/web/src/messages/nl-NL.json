@@ -1381,7 +1381,9 @@
       "customRange": {
         "from": "Van",
         "to": "Tot"
-      }
+      },
+      "paid": "Betaald",
+      "paidDescription": "Hoeveel elke persoon heeft betaald"
     }
   },
   "Activity": {

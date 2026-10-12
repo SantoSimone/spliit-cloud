@@ -1346,7 +1346,9 @@
       "customRange": {
         "from": "从",
         "to": "到"
-      }
+      },
+      "paid": "已支付",
+      "paidDescription": "每人支付的金额"
     }
   },
   "Activity": {

@@ -28,6 +28,7 @@ export type StatsDashboardData = {
     name: string
     account: { id: string; name: string; image: string | null } | null
     amount: number
+    paid: number
     percentage: number
   }>
 }

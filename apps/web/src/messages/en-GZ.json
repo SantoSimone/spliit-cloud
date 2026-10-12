@@ -3548,7 +3548,9 @@
         "QUARTER": "3M",
         "YEAR": "1Y",
         "CUSTOM": "custom range"
-      }
+      },
+      "paid": "paid",
+      "paidDescription": "how much each person paid"
     },
     "title": "stats zone",
     "Totals": {

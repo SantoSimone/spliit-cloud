@@ -1353,7 +1353,9 @@
       "customRange": {
         "from": "Başlangıç",
         "to": "Bitiş"
-      }
+      },
+      "paid": "Ödenen",
+      "paidDescription": "Her kişinin ne kadar ödediği"
     }
   },
   "Activity": {

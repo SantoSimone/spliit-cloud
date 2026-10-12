@@ -38,40 +38,43 @@ export function ParticipantBreakdown({ data, currency }: Props) {
         {t('participantsDescription')}
       </p>
       <div className="mt-5 space-y-4">
-        {data.participants.slice(0, 8).map((participant, index) => (
-          <div key={participant.participantId}>
-            <div className="mb-1.5 flex items-center gap-2 text-sm">
-              <ParticipantAvatar
-                participant={{
-                  id: participant.participantId,
-                  name: participant.name,
-                  account: participant.account,
-                }}
-                size="lg"
-              />
-              <span className="min-w-0 flex-1 truncate">
-                {participant.name}
-              </span>
-              <span className="font-medium tabular-nums">
-                {formatCurrency(currency, participant.amount, locale)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{
-                    width: `${Math.max(Math.abs(participant.percentage) * 100, 3)}%`,
-                    opacity: 1 - index * 0.07,
+        {data.participants
+          .filter((participant) => participant.amount !== 0)
+          .slice(0, 8)
+          .map((participant, index) => (
+            <div key={participant.participantId}>
+              <div className="mb-1.5 flex items-center gap-2 text-sm">
+                <ParticipantAvatar
+                  participant={{
+                    id: participant.participantId,
+                    name: participant.name,
+                    account: participant.account,
                   }}
+                  size="lg"
                 />
+                <span className="min-w-0 flex-1 truncate">
+                  {participant.name}
+                </span>
+                <span className="font-medium tabular-nums">
+                  {formatCurrency(currency, participant.amount, locale)}
+                </span>
               </div>
-              <span className="w-9 text-end text-xs text-muted-foreground tabular-nums">
-                {percentFormatter.format(participant.percentage)}
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{
+                      width: `${Math.max(Math.abs(participant.percentage) * 100, 3)}%`,
+                      opacity: 1 - index * 0.07,
+                    }}
+                  />
+                </div>
+                <span className="w-9 text-end text-xs text-muted-foreground tabular-nums">
+                  {percentFormatter.format(participant.percentage)}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </section>
   )

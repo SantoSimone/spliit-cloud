@@ -1381,7 +1381,9 @@
       "customRange": {
         "from": "Von",
         "to": "Bis"
-      }
+      },
+      "paid": "Bezahlt",
+      "paidDescription": "Wie viel jede Person bezahlt hat"
     }
   },
   "Activity": {

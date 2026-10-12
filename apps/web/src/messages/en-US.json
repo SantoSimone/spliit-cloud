@@ -2090,7 +2090,9 @@
       "customRange": {
         "from": "From",
         "to": "To"
-      }
+      },
+      "paid": "Paid",
+      "paidDescription": "How much each person paid"
     }
   },
   "Activity": {

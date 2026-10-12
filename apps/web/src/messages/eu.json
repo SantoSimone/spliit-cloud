@@ -1360,7 +1360,9 @@
       "customRange": {
         "from": "Noiztik",
         "to": "Noiz arte"
-      }
+      },
+      "paid": "Ordaindua",
+      "paidDescription": "Pertsona bakoitzak zenbat ordaindu duen"
     }
   },
   "Activity": {

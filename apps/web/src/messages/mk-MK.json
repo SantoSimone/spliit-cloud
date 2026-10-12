@@ -1954,7 +1954,9 @@
       "customRange": {
         "from": "Од",
         "to": "До"
-      }
+      },
+      "paid": "Платено",
+      "paidDescription": "Колку платил секој учесник"
     }
   },
   "Activity": {

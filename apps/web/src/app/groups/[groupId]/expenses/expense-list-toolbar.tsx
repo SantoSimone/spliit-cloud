@@ -255,6 +255,9 @@ export function ExpenseListFilterChips({ className }: { className?: string }) {
   const { t: tFilters } = useTranslation(undefined, {
     keyPrefix: 'Expenses.filters',
   })
+  const { t: tMembers } = useTranslation(undefined, {
+    keyPrefix: 'Members',
+  })
   const { t: tCategories } = useTranslation(undefined, {
     keyPrefix: 'Categories',
   })
@@ -289,7 +292,7 @@ export function ExpenseListFilterChips({ className }: { className?: string }) {
   for (const pId of filters.paidBy) {
     chips.push({
       key: `pb-${pId}`,
-      label: participantMap.get(pId) ?? pId,
+      label: participantMap.get(pId) || tMembers('unknownMember'),
       onRemove: () =>
         setFilters({
           ...filters,
@@ -312,7 +315,7 @@ export function ExpenseListFilterChips({ className }: { className?: string }) {
   for (const pId of filters.paidFor) {
     chips.push({
       key: `pf-${pId}`,
-      label: participantMap.get(pId) ?? pId,
+      label: participantMap.get(pId) || tMembers('unknownMember'),
       onRemove: () =>
         setFilters({
           ...filters,

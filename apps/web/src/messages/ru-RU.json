@@ -1369,7 +1369,9 @@
       "customRange": {
         "from": "С",
         "to": "По"
-      }
+      },
+      "paid": "Оплачено",
+      "paidDescription": "Сколько каждый заплатил"
     }
   },
   "Activity": {

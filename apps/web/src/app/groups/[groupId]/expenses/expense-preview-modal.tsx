@@ -214,6 +214,9 @@ export function ExpensePreviewModal({
   const { t: tCategories } = useTranslation(undefined, {
     keyPrefix: 'Categories',
   })
+  const { t: tMembers } = useTranslation(undefined, {
+    keyPrefix: 'Members',
+  })
   const { t: tOffline } = useTranslation()
 
   const { data, isLoading, error } = trpc.groups.expenses.get.useQuery(
@@ -329,14 +332,20 @@ export function ExpensePreviewModal({
     sourceRows: Array<{ ledgerParticipantId: string; shares: number }>,
     mode: SplitMode,
   ) => {
+    const unknownMember = tMembers('unknownMember')
     return Object.entries(shares).map(([id, amount]) => {
       const participant = participants.find((item) => item.id === id)
       return {
         id,
-        name: participant?.name ?? id,
+        name: participant?.name || unknownMember,
         amount,
         value: expenseShareRatioLabel(mode, sourceRows, id, locale),
-        participant,
+        participant: participant
+          ? {
+              ...participant,
+              name: participant.name || unknownMember,
+            }
+          : undefined,
       }
     })
   }

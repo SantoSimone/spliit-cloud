@@ -3222,7 +3222,9 @@
         "QUARTER": "3M",
         "YEAR": "1Å",
         "CUSTOM": "Anpassad"
-      }
+      },
+      "paid": "Betalt",
+      "paidDescription": "Hur mycket varje person betalade"
     },
     "title": "Statistik",
     "Totals": {

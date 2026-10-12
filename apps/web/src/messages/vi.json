@@ -2062,7 +2062,9 @@
       "customRange": {
         "from": "Từ",
         "to": "Đến"
-      }
+      },
+      "paid": "Đã trả",
+      "paidDescription": "Mỗi người đã trả bao nhiêu"
     }
   },
   "Activity": {

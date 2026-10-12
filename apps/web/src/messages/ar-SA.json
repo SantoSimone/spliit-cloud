@@ -885,7 +885,9 @@
       "customRange": {
         "from": "من",
         "to": "إلى"
-      }
+      },
+      "paid": "المدفوع",
+      "paidDescription": "مقدار ما دفعه كل شخص"
     },
     "Totals": {
       "yourEarnings": "إجمالي دخلك",

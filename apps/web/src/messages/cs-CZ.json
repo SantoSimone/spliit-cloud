@@ -1369,7 +1369,9 @@
       "customRange": {
         "from": "Od",
         "to": "Do"
-      }
+      },
+      "paid": "Zaplaceno",
+      "paidDescription": "Kolik kdo zaplatil"
     }
   },
   "Activity": {

@@ -69,12 +69,79 @@ describe('buildGroupStatsDashboard', () => {
       expect.objectContaining({
         participantId: 'maria',
         amount: 3000,
+        paid: 3000,
         percentage: 0.75,
       }),
       expect.objectContaining({
         participantId: 'antonio',
         amount: 1000,
+        paid: 1000,
         percentage: 0.25,
+      }),
+    ])
+  })
+
+  it('reports how much each participant paid alongside their share', () => {
+    const dashboard = buildGroupStatsDashboard(
+      [
+        {
+          ...expense('dinner', '2024-06-07', 3000, 'dining-out', 'antonio'),
+          paidByList: [
+            {
+              shares: 3000,
+              participant: { id: 'maria', name: 'maria' },
+            },
+          ],
+          paidFor: [
+            { shares: 1, participant: { id: 'antonio', name: 'antonio' } },
+            { shares: 1, participant: { id: 'maria', name: 'maria' } },
+          ],
+        },
+      ],
+      'WEEK',
+    )
+
+    expect(dashboard.participants).toEqual([
+      expect.objectContaining({
+        participantId: 'maria',
+        amount: 1500,
+        paid: 3000,
+      }),
+      expect.objectContaining({
+        participantId: 'antonio',
+        amount: 1500,
+        paid: 0,
+      }),
+    ])
+  })
+
+  it('keeps pure payers with zero share so the paid card stays complete', () => {
+    const dashboard = buildGroupStatsDashboard(
+      [
+        {
+          ...expense('gift', '2024-06-07', 1000, 'groceries', 'antonio'),
+          paidByList: [
+            {
+              shares: 1000,
+              participant: { id: 'antonio', name: 'antonio' },
+            },
+          ],
+          paidFor: [{ shares: 1, participant: { id: 'maria', name: 'maria' } }],
+        },
+      ],
+      'WEEK',
+    )
+
+    expect(dashboard.participants).toEqual([
+      expect.objectContaining({
+        participantId: 'maria',
+        amount: 1000,
+        paid: 0,
+      }),
+      expect.objectContaining({
+        participantId: 'antonio',
+        amount: 0,
+        paid: 1000,
       }),
     ])
   })

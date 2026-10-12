@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CategoryBreakdown } from '@/app/groups/[groupId]/stats/category-breakdown'
+import { PaidBreakdown } from '@/app/groups/[groupId]/stats/paid-breakdown'
 import { ParticipantBreakdown } from '@/app/groups/[groupId]/stats/participant-breakdown'
 import { StatsPeriodPicker } from '@/app/groups/[groupId]/stats/period-picker'
 import { SpendingChart } from '@/app/groups/[groupId]/stats/spending-chart'
@@ -288,6 +289,20 @@ export function StatsDashboard() {
           )}
           <CardContent spacing="standalone" aria-busy={isFetching}>
             <ParticipantBreakdown data={dashboard} currency={currency} />
+          </CardContent>
+        </Card>
+        <Card
+          data-stats-surface="paid"
+          className="relative overflow-hidden shadow-none"
+        >
+          {isFetching && (
+            <span
+              className="absolute inset-x-0 top-0 h-0.5 animate-pulse bg-primary/70"
+              aria-hidden
+            />
+          )}
+          <CardContent spacing="standalone" aria-busy={isFetching}>
+            <PaidBreakdown data={dashboard} currency={currency} />
           </CardContent>
         </Card>
       </div>

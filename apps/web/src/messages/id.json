@@ -1655,7 +1655,9 @@
       "customRange": {
         "from": "Dari",
         "to": "Sampai"
-      }
+      },
+      "paid": "Dibayar",
+      "paidDescription": "Berapa yang dibayar setiap orang"
     }
   },
   "Activity": {

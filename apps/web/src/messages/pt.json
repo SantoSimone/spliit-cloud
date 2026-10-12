@@ -1475,7 +1475,9 @@
       "customRange": {
         "from": "De",
         "to": "Até"
-      }
+      },
+      "paid": "Pago",
+      "paidDescription": "Quanto cada pessoa pagou"
     }
   },
   "Activity": {

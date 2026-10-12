@@ -1369,7 +1369,9 @@
       "customRange": {
         "from": "Від",
         "to": "До"
-      }
+      },
+      "paid": "Сплачено",
+      "paidDescription": "Скільки сплатила кожна людина"
     }
   },
   "Activity": {

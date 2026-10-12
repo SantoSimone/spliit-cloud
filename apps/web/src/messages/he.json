@@ -1361,7 +1361,9 @@
       "customRange": {
         "from": "מ",
         "to": "עד"
-      }
+      },
+      "paid": "שולם",
+      "paidDescription": "כמה כל אדם שילם"
     }
   },
   "Activity": {

@@ -45,6 +45,9 @@ export function SplitDistributionEditor(props: {
   dataTestId?: string
 }) {
   const { t } = useTranslation(undefined, { keyPrefix: 'ExpenseForm' })
+  const { t: tMembers } = useTranslation(undefined, {
+    keyPrefix: 'Members',
+  })
 
   return (
     <>
@@ -74,7 +77,7 @@ export function SplitDistributionEditor(props: {
         errors={props.errors ?? []}
         participantName={(id) =>
           props.participants.find((participant) => participant.id === id)
-            ?.name ?? id
+            ?.name || tMembers('unknownMember')
         }
       />
       <div className="w-full min-w-0 space-y-0">
