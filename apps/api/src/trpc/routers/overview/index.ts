@@ -570,7 +570,7 @@ export const overviewRouter = createTRPCRouter({
         name: resolveParticipantDisplayName(participant),
         account: participant.groupMember?.account ?? null,
         inviteEmail: normalizeOverviewInviteEmail(
-          participant.invitations[0]?.email,
+          participant.invitations?.[0]?.email,
         ),
       }))
       const pendingEmails = Array.from(

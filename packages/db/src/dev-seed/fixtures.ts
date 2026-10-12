@@ -204,7 +204,7 @@ export function buildScenarios(
           {
             title: 'Pizza',
             unitPrice: 1800,
-            quantity: 2,
+            quantity: 2000,
             amount: 3600,
             splitMode: 'EVENLY',
             paidFor: rows([100, 100]),
@@ -212,7 +212,7 @@ export function buildScenarios(
           {
             title: 'Pasta',
             unitPrice: 2200,
-            quantity: 1,
+            quantity: 1000,
             amount: 2200,
             splitMode: 'BY_SHARES',
             paidFor: rows([100, 200, 100]),
@@ -220,7 +220,7 @@ export function buildScenarios(
           {
             title: 'Drinks',
             unitPrice: 600,
-            quantity: 4,
+            quantity: 4000,
             amount: 2400,
             splitMode: 'BY_PERCENTAGE',
             paidFor: rows([2500, 2500, 2500, 2500]),

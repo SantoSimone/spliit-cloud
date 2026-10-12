@@ -24,6 +24,8 @@ function participant(id: string, accountId = 'viewer', name = 'Me') {
   return {
     id: `${accountId}-${id}`,
     ledgerId: `ledger-${id}`,
+    displayName: name,
+    invitations: [],
     groupMember: { account: { id: accountId, name } },
   }
 }

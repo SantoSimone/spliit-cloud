@@ -217,7 +217,10 @@ export async function seedDevelopmentData(
           time: expense.expenseDate,
           type: 'EXPENSE_CREATED',
           actorType: scenario.key === 'imported' ? 'SYSTEM' : 'ACCOUNT',
-          actorId: account.id,
+          actorId:
+            scenario.key === 'member' && fixture.key === 'peer'
+              ? peerId(1)
+              : account.id,
           subjectType: 'EXPENSE',
           subjectId: expenseId,
           visibleInGroupFeed: scenario.key !== 'imported',

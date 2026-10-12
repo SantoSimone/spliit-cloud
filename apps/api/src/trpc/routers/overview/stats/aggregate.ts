@@ -188,6 +188,14 @@ export function aggregateOverviewStats(
     string,
     OverviewStatsOutput['currencies'][number]
   >()
+  const timelineByCurrency = new Map<
+    string,
+    Map<string, OverviewStatsOutput['currencies'][number]['timeline'][number]>
+  >()
+  const categoriesByCurrency = new Map<
+    string,
+    Map<string, OverviewStatsOutput['currencies'][number]['categories'][number]>
+  >()
   const shared = input.person.kind === 'SHARED'
   for (const ledger of ledgers) {
     const key = ledger.currencyCode
@@ -207,6 +215,8 @@ export function aggregateOverviewStats(
         ledgers: [],
       }
       currencies.set(key, currency)
+      timelineByCurrency.set(key, new Map())
+      categoriesByCurrency.set(key, new Map())
     }
     if (!shared && !ledger.participantId) continue
     const ledgerRows = rowsByLedger.get(ledger.id) ?? []
@@ -240,18 +250,18 @@ export function aggregateOverviewStats(
           granularity === 'MONTH'
             ? `${date.slice(0, 7)}-01`
             : bucketStart.toISOString().slice(0, 10)
-        let bucket = currency.timeline.find((item) => item.date === bucketDate)
+        let bucket = timelineByCurrency.get(key)!.get(bucketDate)
         if (!bucket) {
           bucket = { date: bucketDate, ...emptyAmounts() }
+          timelineByCurrency.get(key)!.set(bucketDate, bucket)
           currency.timeline.push(bucket)
         }
         addContribution(bucket, amount, income)
         if (!income) {
-          let category = currency.categories.find(
-            (item) => item.categoryId === row.categoryId,
-          )
+          let category = categoriesByCurrency.get(key)!.get(row.categoryId)
           if (!category) {
             category = { categoryId: row.categoryId, amount: 0 }
+            categoriesByCurrency.get(key)!.set(row.categoryId, category)
             currency.categories.push(category)
           }
           category.amount += amount

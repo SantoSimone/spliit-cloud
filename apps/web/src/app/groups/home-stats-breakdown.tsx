@@ -29,7 +29,7 @@ export function HomeStatsBreakdown({
     0,
   )
   return (
-    <div className="grid gap-4 lg:grid-cols-2" aria-label={t('breakdown')}>
+    <section className="grid gap-4 lg:grid-cols-2" aria-label={t('breakdown')}>
       <Card className="overflow-hidden shadow-none">
         <CardContent spacing="standalone">
           <CategoryBreakdown
@@ -89,6 +89,6 @@ export function HomeStatsBreakdown({
           </div>
         </CardContent>
       </Card>
-    </div>
+    </section>
   )
 }
