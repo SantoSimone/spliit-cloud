@@ -1,4 +1,5 @@
 import type { Currency } from './currency'
+import { roundingGapMinor } from './currency'
 import type { RemainderAllocationMode, SplitMode } from './enums'
 import {
   addExactAmount,
@@ -217,13 +218,18 @@ export function gapMinorAsMajor(gapMinor: number, currency: Currency): number {
 }
 
 /**
- * Whether a scan gap fits in the last two digits of the minor-unit amount —
- * `xx.yy → yy` for decimal currencies, `xxyy → yy` for zero-decimal ones — and
- * can therefore plausibly be rounding (per-line minor-unit rounding, an
- * excluded tax line). Anything larger is a real mismatch, not rounding.
+ * Whether a scan gap fits the receipt currency's researched rounding tolerance
+ * (`rounding_gap_minor` in `currencies.json`: half the cash settlement step + 1
+ * minor unit, e.g. 51 for USD, 3 for CHF/BHD, 1 for JPY) and can therefore
+ * plausibly be rounding (per-line minor-unit rounding, an excluded tax line).
+ * Anything larger is a real mismatch the user must resolve explicitly, not
+ * rounding.
  */
-export function isRoundingSizeGap(gapMinor: number): boolean {
-  return Math.abs(gapMinor) <= 99
+export function isRoundingSizeGap(
+  gapMinor: number,
+  currency: Currency,
+): boolean {
+  return Math.abs(gapMinor) <= roundingGapMinor(currency)
 }
 
 /**

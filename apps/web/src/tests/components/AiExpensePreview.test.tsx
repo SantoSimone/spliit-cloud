@@ -100,7 +100,7 @@ function itemsRadio() {
 describe('AiExpensePreview rounding-size gap', () => {
   it('preselects the receipt total', () => {
     // 2 × $2.50 = $5.00 scanned against a $5.05 total: a +$0.05 gap within
-    // the last two minor-unit digits. The choice is immediate,
+    // the dollar's rounding tolerance. The choice is immediate,
     // defaulting to the receipt total with a rounding row.
     renderPreview(
       receiptDraft([{ title: 'Apples', unitPrice: 2.5, quantity: 2 }], 505),
@@ -130,11 +130,11 @@ describe('AiExpensePreview rounding-size gap', () => {
     expect(getItemizedFormMinorTotals(handedOff, 5.05, USD).gapMinor).toBe(0)
   })
 
-  it('treats a 99-minor gap as rounding but a 100-minor gap as a mismatch', () => {
+  it('treats a 51-minor gap as rounding but a 52-minor gap as a mismatch', () => {
     const { rerender } = renderPreview(
-      receiptDraft([{ title: 'Apples', unitPrice: 2.5, quantity: 2 }], 599),
+      receiptDraft([{ title: 'Apples', unitPrice: 2.5, quantity: 2 }], 551),
     )
-    // $0.99 gap: rounding wording, preselected receipt total.
+    // $0.51 gap: rounding wording, preselected receipt total.
     expect(totalRadio()).toBeChecked()
     expect(totalRadio()).toHaveAccessibleName(/rounding/i)
 
@@ -146,11 +146,11 @@ describe('AiExpensePreview rounding-size gap', () => {
         currentLedgerParticipantId={null}
         draft={receiptDraft(
           [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
-          600,
+          552,
         )}
       />,
     )
-    // $1.00 gap: "Other" wording with the mismatch note, still
+    // $0.52 gap: "Other" wording with the mismatch note, still
     // preselected and immediately actionable.
     expect(totalRadio()).toBeChecked()
     expect(totalRadio()).toHaveAccessibleName(/as other/i)

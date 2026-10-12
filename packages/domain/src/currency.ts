@@ -11,6 +11,14 @@ export type Currency = {
   rounding: number
   decimal_digits: number
   /**
+   * Max absolute item/total gap in minor units that still counts as rounding
+   * (per-line tax rounding, cash-step settlement) rather than a real mismatch.
+   * Researched per currency against circulating denominations and cash-rounding
+   * rules (e.g. USD 51, JPY 1, BHD 3, CHF 3); absent entries fall back to the
+   * digit-based default in `roundingGapMinor`.
+   */
+  rounding_gap_minor?: number
+  /**
    * Crypto assets (BTC, ETH, ...) vs fiat ISO currencies. Crypto assets trade
    * 24/7 and are quoted by the crypto rate provider instead of Frankfurter.
    */
@@ -63,6 +71,24 @@ const byCode = new Map<string, Currency>(currencyList.map((c) => [c.code, c]))
 /** Look up a currency by its ISO code. Returns undefined for unknown codes. */
 export function getCurrency(code: string): Currency | undefined {
   return byCode.get(code)
+}
+
+/**
+ * Rounding-size threshold for `code`'s item/total gap, in minor units. Prefers
+ * the researched per-currency `rounding_gap_minor` from `currencies.json`;
+ * synthetic or unknown records (custom currencies, forward references) fall
+ * back to the digit-based default (0 digits → 1, 3 digits → 3, high-precision
+ * crypto → 1, everything else → 51).
+ */
+export function roundingGapMinor(currency: Currency): number {
+  const value = currency.rounding_gap_minor
+  if (Number.isSafeInteger(value) && (value as number) >= 1) {
+    return value as number
+  }
+  if (currency.crypto) return 1
+  if (currency.decimal_digits === 0) return 1
+  if (currency.decimal_digits === 3) return 3
+  return 51
 }
 
 /** Best-effort resolution of imported currency text to a supported ISO code. */

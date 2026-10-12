@@ -155,8 +155,9 @@ export function AiExpensePreview({
   // total is the source of truth. Either choice balances, so quick-create
   // stays available; the edit form remains for manual fixes.
   //
-  // Gaps within the last two minor-unit digits are plausibly rounding and
-  // use the "Rounding" wording. Larger gaps are a real mismatch: the box
+  // Gaps within the receipt currency's researched rounding tolerance
+  // (`rounding_gap_minor`: 51 minor for USD, 1 for JPY, 3 for CHF/BHD) are
+  // plausibly rounding and use the "Rounding" wording. Larger gaps are a real
   // says so, and the adjustment item follows the "Other" convention
   // instead — an "Other" row when items fall short, an "Other (excess)"
   // row when they overshoot. Both adjustment rows are real items with
@@ -173,7 +174,8 @@ export function AiExpensePreview({
   )
   const gapMinor = baseTotals?.gapMinor ?? 0
   const hasItemsGap = baseTotals != null && gapMinor !== 0
-  const isRoundingSize = hasItemsGap && isRoundingSizeGap(gapMinor)
+  const isRoundingSize =
+    hasItemsGap && isRoundingSizeGap(gapMinor, inputCurrency)
   const adjustmentItemMajor =
     hasItemsGap && baseTotals != null
       ? gapMinorAsMajor(gapMinor, inputCurrency)

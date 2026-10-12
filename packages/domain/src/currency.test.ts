@@ -6,6 +6,7 @@ import {
   intermediaryCurrenciesFor,
   isCryptoCurrency,
   resolveCurrencyCode,
+  roundingGapMinor,
   supportedCurrencyCodes,
 } from './currency'
 import {
@@ -167,6 +168,59 @@ describe('currencyList', () => {
     for (const code of supportedCurrencyCodes) {
       expect(codes.has(code)).toBe(true)
     }
+  })
+
+  it('carries an explicit researched rounding threshold on every entry', () => {
+    for (const currency of currencyList) {
+      expect(
+        Number.isInteger(currency.rounding_gap_minor) &&
+          (currency.rounding_gap_minor as number) >= 1,
+      ).toBe(true)
+    }
+  })
+})
+
+describe('roundingGapMinor', () => {
+  it('returns the researched per-currency threshold', () => {
+    expect(roundingGapMinor(getCurrency('USD')!)).toBe(51)
+    expect(roundingGapMinor(getCurrency('EUR')!)).toBe(51)
+    expect(roundingGapMinor(getCurrency('CHF')!)).toBe(3)
+    expect(roundingGapMinor(getCurrency('CAD')!)).toBe(3)
+    expect(roundingGapMinor(getCurrency('NZD')!)).toBe(6)
+    expect(roundingGapMinor(getCurrency('AED')!)).toBe(13)
+    expect(roundingGapMinor(getCurrency('DKK')!)).toBe(26)
+    expect(roundingGapMinor(getCurrency('JPY')!)).toBe(1)
+    expect(roundingGapMinor(getCurrency('KRW')!)).toBe(1)
+    expect(roundingGapMinor(getCurrency('BHD')!)).toBe(3)
+    expect(roundingGapMinor(getCurrency('KWD')!)).toBe(3)
+    expect(roundingGapMinor(getCurrency('BTC')!)).toBe(1)
+  })
+
+  it('falls back to the digit-based default without a researched value', () => {
+    expect(
+      roundingGapMinor({
+        code: '',
+        symbol: 'X',
+        rounding: 0,
+        decimal_digits: 2,
+      }),
+    ).toBe(51)
+    expect(
+      roundingGapMinor({
+        code: '',
+        symbol: 'Y',
+        rounding: 0,
+        decimal_digits: 0,
+      }),
+    ).toBe(1)
+    expect(
+      roundingGapMinor({
+        code: '',
+        symbol: 'Z',
+        rounding: 0,
+        decimal_digits: 3,
+      }),
+    ).toBe(3)
   })
 })
 

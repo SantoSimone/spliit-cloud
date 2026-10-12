@@ -835,16 +835,55 @@ describe('getItemizedFormMinorTotals', () => {
 })
 
 describe('isRoundingSizeGap', () => {
-  it('accepts gaps in the last two minor-unit digits, rejects larger ones', async () => {
+  it('applies the receipt currency researched rounding tolerance', async () => {
+    const { isRoundingSizeGap } = await import('./itemized-expenses')
+    const { getCurrency } = await import('./index')
+    const USD = getCurrency('USD')!
+    const CHF = getCurrency('CHF')!
+    const JPY = getCurrency('JPY')!
+    const BHD = getCurrency('BHD')!
+    const NZD = getCurrency('NZD')!
+
+    // USD 51: half a dollar + 1 cent.
+    for (const gap of [0, 1, -1, 50, -51, 51]) {
+      expect(isRoundingSizeGap(gap, USD)).toBe(true)
+    }
+    for (const gap of [52, -52, 99, 100, -2500]) {
+      expect(isRoundingSizeGap(gap, USD)).toBe(false)
+    }
+    // CHF 3: half the 5-rappen cash step + 1.
+    expect(isRoundingSizeGap(3, CHF)).toBe(true)
+    expect(isRoundingSizeGap(4, CHF)).toBe(false)
+    // JPY 1: a single yen; ¥2+ is a real mismatch, not rounding.
+    expect(isRoundingSizeGap(1, JPY)).toBe(true)
+    expect(isRoundingSizeGap(2, JPY)).toBe(false)
+    expect(isRoundingSizeGap(99, JPY)).toBe(false)
+    // BHD 3: half the 5-fils smallest coin + 1.
+    expect(isRoundingSizeGap(3, BHD)).toBe(true)
+    expect(isRoundingSizeGap(4, BHD)).toBe(false)
+    // NZD 6: half the 10-cent smallest coin + 1.
+    expect(isRoundingSizeGap(6, NZD)).toBe(true)
+    expect(isRoundingSizeGap(7, NZD)).toBe(false)
+  })
+
+  it('falls back to the digit-based default for records without a threshold', async () => {
     const { isRoundingSizeGap } = await import('./itemized-expenses')
 
-    // $0.99 / ¥99 and below: plausibly rounding.
-    for (const gap of [0, 1, -1, 50, -99, 99]) {
-      expect(isRoundingSizeGap(gap)).toBe(true)
+    const syntheticTwoDigit = {
+      code: '',
+      symbol: 'X',
+      rounding: 0,
+      decimal_digits: 2,
     }
-    // $1.00 and above: a real mismatch, not rounding.
-    for (const gap of [100, -100, 500, -2500]) {
-      expect(isRoundingSizeGap(gap)).toBe(false)
+    expect(isRoundingSizeGap(51, syntheticTwoDigit)).toBe(true)
+    expect(isRoundingSizeGap(52, syntheticTwoDigit)).toBe(false)
+    const syntheticZeroDigit = {
+      code: '',
+      symbol: 'Y',
+      rounding: 0,
+      decimal_digits: 0,
     }
+    expect(isRoundingSizeGap(1, syntheticZeroDigit)).toBe(true)
+    expect(isRoundingSizeGap(2, syntheticZeroDigit)).toBe(false)
   })
 })

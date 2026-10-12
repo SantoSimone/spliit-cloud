@@ -3,6 +3,7 @@
     "code": "AED",
     "symbol": "AED",
     "rounding": 0,
+    "rounding_gap_minor": 13,
     "decimal_digits": 2,
     "aliases": ["د.إ"]
   },
@@ -10,12 +11,14 @@
     "code": "ARS",
     "symbol": "AR$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "AUD",
     "symbol": "AU$",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2,
     "aliases": ["A$"]
   },
@@ -23,6 +26,7 @@
     "code": "BDT",
     "symbol": "Tk",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["৳"]
   },
@@ -30,6 +34,7 @@
     "code": "BGN",
     "symbol": "BGN",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["лв", "лв."]
   },
@@ -37,6 +42,7 @@
     "code": "BHD",
     "symbol": "BD",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 3,
     "aliases": ["د.ب"]
   },
@@ -44,6 +50,7 @@
     "code": "BND",
     "symbol": "BN$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["B$"]
   },
@@ -51,6 +58,7 @@
     "code": "BOB",
     "symbol": "Bs",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["Bs.", "boliviano"]
   },
@@ -58,12 +66,14 @@
     "code": "BRL",
     "symbol": "R$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "BWP",
     "symbol": "P",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["pula"]
   },
@@ -71,6 +81,7 @@
     "code": "BTC",
     "symbol": "₿",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 8,
     "crypto": true
   },
@@ -78,6 +89,7 @@
     "code": "CAD",
     "symbol": "CA$",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2,
     "aliases": ["C$"]
   },
@@ -85,6 +97,7 @@
     "code": "CHF",
     "symbol": "CHF",
     "rounding": 0.05,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2,
     "aliases": ["Fr", "Fr.", "SFr"]
   },
@@ -92,6 +105,7 @@
     "code": "CLP",
     "symbol": "CL$",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["CLP$"]
   },
@@ -99,6 +113,7 @@
     "code": "CNY",
     "symbol": "CN¥",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["RMB", "元"]
   },
@@ -106,6 +121,7 @@
     "code": "COP",
     "symbol": "CO$",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["COP$"]
   },
@@ -113,12 +129,14 @@
     "code": "CRC",
     "symbol": "₡",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0
   },
   {
     "code": "CZK",
     "symbol": "Kč",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["Kč."]
   },
@@ -126,6 +144,7 @@
     "code": "DKK",
     "symbol": "Dkr",
     "rounding": 0,
+    "rounding_gap_minor": 26,
     "decimal_digits": 2,
     "aliases": ["Dkr."]
   },
@@ -133,6 +152,7 @@
     "code": "DOGE",
     "symbol": "DOGE",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 2,
     "crypto": true
   },
@@ -140,12 +160,14 @@
     "code": "DOP",
     "symbol": "RD$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "EGP",
     "symbol": "E£",
     "rounding": 0,
+    "rounding_gap_minor": 13,
     "decimal_digits": 2,
     "aliases": ["ج.م"]
   },
@@ -153,6 +175,7 @@
     "code": "ETB",
     "symbol": "Br",
     "rounding": 0,
+    "rounding_gap_minor": 13,
     "decimal_digits": 2,
     "aliases": ["ብር", "birr"]
   },
@@ -160,6 +183,7 @@
     "code": "ETH",
     "symbol": "ETH",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 6,
     "crypto": true
   },
@@ -167,18 +191,21 @@
     "code": "EUR",
     "symbol": "€",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "GBP",
     "symbol": "£",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "GEL",
     "symbol": "₾",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2,
     "aliases": ["ლარი", "lari"]
   },
@@ -186,6 +213,7 @@
     "code": "GHS",
     "symbol": "GH₵",
     "rounding": 0,
+    "rounding_gap_minor": 26,
     "decimal_digits": 2,
     "aliases": ["₵", "GH¢", "cedi"]
   },
@@ -193,6 +221,7 @@
     "code": "GTQ",
     "symbol": "Q",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["quetzal"]
   },
@@ -200,6 +229,7 @@
     "code": "HKD",
     "symbol": "HK$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["HKD$"]
   },
@@ -207,6 +237,7 @@
     "code": "HNL",
     "symbol": "L",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["L.", "lempira"]
   },
@@ -214,6 +245,7 @@
     "code": "HRK",
     "symbol": "kn",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["kn.", "kuna"]
   },
@@ -221,6 +253,7 @@
     "code": "HUF",
     "symbol": "Ft",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["Ft."]
   },
@@ -228,6 +261,7 @@
     "code": "IDR",
     "symbol": "Rp",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["Rp."]
   },
@@ -235,6 +269,7 @@
     "code": "ILS",
     "symbol": "₪",
     "rounding": 0,
+    "rounding_gap_minor": 6,
     "decimal_digits": 2,
     "aliases": ["NIS", "שח", "ש״ח"]
   },
@@ -242,6 +277,7 @@
     "code": "INR",
     "symbol": "₹",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["Rs", "Rs.", "रु"]
   },
@@ -249,6 +285,7 @@
     "code": "IQD",
     "symbol": "IQD",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["ع.د", "د.ع"]
   },
@@ -256,6 +293,7 @@
     "code": "IRR",
     "symbol": "IRR",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["ریال"]
   },
@@ -263,12 +301,14 @@
     "code": "ISK",
     "symbol": "Ikr",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0
   },
   {
     "code": "JOD",
     "symbol": "JD",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 3,
     "aliases": ["د.ا"]
   },
@@ -276,6 +316,7 @@
     "code": "JPY",
     "symbol": "¥",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["￥", "円"]
   },
@@ -283,6 +324,7 @@
     "code": "KES",
     "symbol": "Ksh",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["KShs"]
   },
@@ -290,6 +332,7 @@
     "code": "KGS",
     "symbol": "som",
     "rounding": 0,
+    "rounding_gap_minor": 6,
     "decimal_digits": 2,
     "aliases": ["сом", "сом."]
   },
@@ -297,6 +340,7 @@
     "code": "KHR",
     "symbol": "៛",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["riel"]
   },
@@ -304,6 +348,7 @@
     "code": "KRW",
     "symbol": "₩",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["원", "won"]
   },
@@ -311,6 +356,7 @@
     "code": "KWD",
     "symbol": "KD",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 3,
     "aliases": ["د.ك"]
   },
@@ -318,6 +364,7 @@
     "code": "KZT",
     "symbol": "₸",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["тг", "тг.", "теңге", "tenge"]
   },
@@ -325,6 +372,7 @@
     "code": "LAK",
     "symbol": "₭",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["kip"]
   },
@@ -332,6 +380,7 @@
     "code": "LBP",
     "symbol": "LB£",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["ل.ل"]
   },
@@ -339,6 +388,7 @@
     "code": "LKR",
     "symbol": "SLRs",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["රු", "රුපියල්"]
   },
@@ -346,6 +396,7 @@
     "code": "LTC",
     "symbol": "LTC",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 6,
     "crypto": true
   },
@@ -353,6 +404,7 @@
     "code": "MAD",
     "symbol": "MAD",
     "rounding": 0,
+    "rounding_gap_minor": 6,
     "decimal_digits": 2,
     "aliases": ["د.م", "د.م."]
   },
@@ -360,6 +412,7 @@
     "code": "MDL",
     "symbol": "MDL",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2,
     "aliases": ["leu"]
   },
@@ -367,6 +420,7 @@
     "code": "MKD",
     "symbol": "MKD",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["МКД", "ден", "ден."]
   },
@@ -374,6 +428,7 @@
     "code": "MMK",
     "symbol": "K",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["ကျပ်", "kyat"]
   },
@@ -381,6 +436,7 @@
     "code": "MNT",
     "symbol": "₮",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["төг", "төгрөг", "tugrik"]
   },
@@ -388,6 +444,7 @@
     "code": "MOP",
     "symbol": "MOP$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["pataca"]
   },
@@ -395,18 +452,21 @@
     "code": "MUR",
     "symbol": "MURs",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0
   },
   {
     "code": "MWK",
     "symbol": "MK",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "MXN",
     "symbol": "MX$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["MXN$"]
   },
@@ -414,12 +474,14 @@
     "code": "MYR",
     "symbol": "RM",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2
   },
   {
     "code": "MZN",
     "symbol": "MTn",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["MT"]
   },
@@ -427,6 +489,7 @@
     "code": "NAD",
     "symbol": "N$",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2,
     "aliases": ["NAD$"]
   },
@@ -434,6 +497,7 @@
     "code": "NGN",
     "symbol": "₦",
     "rounding": 0,
+    "rounding_gap_minor": 26,
     "decimal_digits": 2,
     "aliases": ["naira"]
   },
@@ -441,6 +505,7 @@
     "code": "NIO",
     "symbol": "C$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["córdoba", "cordoba"]
   },
@@ -448,12 +513,14 @@
     "code": "NOK",
     "symbol": "Nkr",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "NPR",
     "symbol": "Rs",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["Rs.", "रु", "रू"]
   },
@@ -461,6 +528,7 @@
     "code": "NZD",
     "symbol": "NZ$",
     "rounding": 0,
+    "rounding_gap_minor": 6,
     "decimal_digits": 2,
     "aliases": ["NZD$"]
   },
@@ -468,6 +536,7 @@
     "code": "OMR",
     "symbol": "OMR",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 3,
     "aliases": ["ر.ع", "ر.ع."]
   },
@@ -475,6 +544,7 @@
     "code": "PAB",
     "symbol": "B/.",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["balboa"]
   },
@@ -482,6 +552,7 @@
     "code": "PEN",
     "symbol": "S/.",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["S/", "sol"]
   },
@@ -489,18 +560,21 @@
     "code": "PHP",
     "symbol": "₱",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "PKR",
     "symbol": "PKRs",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0
   },
   {
     "code": "PLN",
     "symbol": "zł",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["zl", "zł."]
   },
@@ -508,6 +582,7 @@
     "code": "PYG",
     "symbol": "₲",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["Gs"]
   },
@@ -515,6 +590,7 @@
     "code": "QAR",
     "symbol": "QR",
     "rounding": 0,
+    "rounding_gap_minor": 13,
     "decimal_digits": 2,
     "aliases": ["ر.ق", "ر.ق."]
   },
@@ -522,6 +598,7 @@
     "code": "RON",
     "symbol": "lei",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["leu"]
   },
@@ -529,6 +606,7 @@
     "code": "RSD",
     "symbol": "din.",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["дин", "дин."]
   },
@@ -536,6 +614,7 @@
     "code": "RUB",
     "symbol": "₽",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["руб", "руб.", "рубль", "рубли"]
   },
@@ -543,6 +622,7 @@
     "code": "SAR",
     "symbol": "SR",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["ر.س", "ر.س."]
   },
@@ -550,6 +630,7 @@
     "code": "SAT",
     "symbol": "sats",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "crypto": true,
     "aliasOf": "BTC",
@@ -559,12 +640,14 @@
     "code": "SEK",
     "symbol": "Skr",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2
   },
   {
     "code": "SGD",
     "symbol": "S$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["SGD$"]
   },
@@ -572,6 +655,7 @@
     "code": "SOL",
     "symbol": "SOL",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 6,
     "crypto": true
   },
@@ -579,6 +663,7 @@
     "code": "THB",
     "symbol": "฿",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["บาท", "baht"]
   },
@@ -586,6 +671,7 @@
     "code": "TJS",
     "symbol": "SM",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["сомонӣ", "somoni"]
   },
@@ -593,6 +679,7 @@
     "code": "TND",
     "symbol": "DT",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 3,
     "aliases": ["د.ت", "د.ت."]
   },
@@ -600,6 +687,7 @@
     "code": "TRY",
     "symbol": "TL",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["₺"]
   },
@@ -607,6 +695,7 @@
     "code": "TWD",
     "symbol": "NT$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["TW$", "NTD", "元"]
   },
@@ -614,6 +703,7 @@
     "code": "TZS",
     "symbol": "TSh",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["TShs"]
   },
@@ -621,6 +711,7 @@
     "code": "UAH",
     "symbol": "₴",
     "rounding": 0,
+    "rounding_gap_minor": 6,
     "decimal_digits": 2,
     "aliases": ["грн", "грн.", "гривня", "hryvnia"]
   },
@@ -628,6 +719,7 @@
     "code": "UGX",
     "symbol": "USh",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["UShs"]
   },
@@ -635,6 +727,7 @@
     "code": "USD",
     "symbol": "$",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["US$"]
   },
@@ -642,6 +735,7 @@
     "code": "UYU",
     "symbol": "$U",
     "rounding": 0,
+    "rounding_gap_minor": 51,
     "decimal_digits": 2,
     "aliases": ["UY$"]
   },
@@ -649,6 +743,7 @@
     "code": "UZS",
     "symbol": "UZS",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["сўм", "сум", "soʻm"]
   },
@@ -656,6 +751,7 @@
     "code": "VND",
     "symbol": "₫",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0,
     "aliases": ["đ", "đồng", "dong"]
   },
@@ -663,18 +759,21 @@
     "code": "XAF",
     "symbol": "FCFA",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0
   },
   {
     "code": "XOF",
     "symbol": "CFA",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 0
   },
   {
     "code": "XRP",
     "symbol": "XRP",
     "rounding": 0,
+    "rounding_gap_minor": 1,
     "decimal_digits": 4,
     "crypto": true
   },
@@ -682,6 +781,7 @@
     "code": "ZAR",
     "symbol": "R",
     "rounding": 0,
+    "rounding_gap_minor": 6,
     "decimal_digits": 2,
     "aliases": ["rand"]
   },
@@ -689,6 +789,7 @@
     "code": "ZMW",
     "symbol": "ZK",
     "rounding": 0,
+    "rounding_gap_minor": 3,
     "decimal_digits": 2
   }
 ]
