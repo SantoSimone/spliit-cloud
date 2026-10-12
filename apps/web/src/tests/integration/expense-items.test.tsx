@@ -360,7 +360,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Pizza',
             unitPrice: 1500,
-            quantity: 1,
+            quantity: 1000,
             amount: 1500,
             splitMode: 'EVENLY',
             paidFor: [
@@ -438,7 +438,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Bread',
             unitPrice: 800,
-            quantity: 1,
+            quantity: 1000,
             amount: 800,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -446,7 +446,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Cheese',
             unitPrice: 1200,
-            quantity: 1,
+            quantity: 1000,
             amount: 1200,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -511,7 +511,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Apples',
             unitPrice: 1000,
-            quantity: 1,
+            quantity: 1000,
             amount: 1000,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -519,7 +519,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Bananas',
             unitPrice: 1500,
-            quantity: 1,
+            quantity: 1000,
             amount: 1500,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -527,7 +527,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Cherries',
             unitPrice: 2000,
-            quantity: 1,
+            quantity: 1000,
             amount: 2000,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -601,7 +601,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Item A',
             unitPrice: 3000,
-            quantity: 1,
+            quantity: 1000,
             amount: 3000,
             splitMode: 'EVENLY',
             paidFor: [
@@ -612,7 +612,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Item B',
             unitPrice: 2000,
-            quantity: 1,
+            quantity: 1000,
             amount: 2000,
             splitMode: 'BY_SHARES',
             paidFor: [
@@ -679,7 +679,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Old item 1',
             unitPrice: 1500,
-            quantity: 1,
+            quantity: 1000,
             amount: 1500,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -687,7 +687,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Old item 2',
             unitPrice: 1500,
-            quantity: 1,
+            quantity: 1000,
             amount: 1500,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
@@ -718,7 +718,7 @@ describe('Expense items — ExpenseCard via existing API', () => {
           {
             title: 'Replacement item',
             unitPrice: 4000,
-            quantity: 1,
+            quantity: 1000,
             amount: 4000,
             splitMode: 'EVENLY',
             paidFor: [{ participant: adminId, shares: 1 }],
