@@ -81,11 +81,11 @@ function fakeOcr(text: string): OcrProvider {
 }
 
 const MOCK_RECEIPT_JSON = JSON.stringify({
-  amount: 18.5,
+  amount: 1850,
   currencyCode: 'USD',
   date: '2025-01-02',
   title: 'Corner Market',
-  items: [{ title: 'Apples', unitPrice: 2.5, quantity: 2 }],
+  items: [{ title: 'Apples', unitPrice: 250, quantity: 2000 }],
 })
 
 function mockReceiptJson() {

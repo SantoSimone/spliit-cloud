@@ -63,4 +63,17 @@ describe('AiReceiptItems', () => {
 
     expect(container).toBeEmptyDOMElement()
   })
+
+  it('localizes the quantity decimal separator', () => {
+    render(
+      <AiReceiptItems
+        items={[{ title: 'Cheese', unitPrice: 2.5, quantity: 1.5 }]}
+        currency={USD}
+        locale="de-DE"
+        heading="Items"
+      />,
+    )
+
+    expect(screen.getByText(/1,5 ×/)).toBeInTheDocument()
+  })
 })

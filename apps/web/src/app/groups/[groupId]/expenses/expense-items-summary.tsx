@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { getCurrency, type Currency } from '@/lib/currency'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatNumber } from '@/lib/utils'
 import type { SplitMode } from '@spliit/domain'
 import { formatQuantity, quantityFromStored } from '@spliit/domain'
 
@@ -193,7 +193,7 @@ export function ExpenseItemsSummary({
                 item.quantity != null &&
                 quantityFromStored(item.quantity) !== 1 ? (
                   <div className="min-w-0 truncate text-xs leading-5 text-muted-foreground tabular-nums">
-                    {`${formatQuantity(quantityFromStored(item.quantity))} × ${formatCurrency(currency, item.unitPrice, locale)}`}
+                    {`${locale ? formatNumber(quantityFromStored(item.quantity), locale, { useGrouping: false }) : formatQuantity(quantityFromStored(item.quantity))} × ${formatCurrency(currency, item.unitPrice, locale)}`}
                   </div>
                 ) : null}
                 {names.length > 0 ? (

@@ -71,7 +71,11 @@ export function lineAmountMinorFromStored(
   unitPriceMinor: number,
   quantityStored: number,
 ): number {
-  return Math.round((unitPriceMinor * quantityStored) / QUANTITY_SCALE)
+  const value = (unitPriceMinor * quantityStored) / QUANTITY_SCALE
+  // Round half away from zero so negative .5 boundaries mirror positive
+  // ones (Math.round ties toward +Inf: -101.5 -> -101, +101.5 -> 102).
+  // Math.sign(0) is 0, so zero stays zero.
+  return Math.sign(value) * Math.round(Math.abs(value))
 }
 
 /**

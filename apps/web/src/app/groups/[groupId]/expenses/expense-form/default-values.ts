@@ -13,8 +13,10 @@ import {
   DEFAULT_CATEGORY_ID,
   SETTLEMENT_CATEGORY_ID,
   amountAsDecimal,
+  amountAsMinorUnits,
   categoryIdSchema,
   getCurrency,
+  lineAmountMinorFromMajor,
   quantityFromStored,
   randomId,
   sharesAsDecimal,
@@ -717,10 +719,20 @@ export function buildExpenseFormDefaults(args: {
       searchParams.amount != null
         ? amountAsDecimal(Number(searchParams.amount) || 0, searchCurrency)
         : prefilledItems.length
-          ? prefilledItems.reduce(
-              (sum, item) =>
-                sum + Number(item.unitPrice) * Number(item.quantity),
-              0,
+          ? amountAsDecimal(
+              prefilledItems.reduce(
+                (sum, item) =>
+                  sum +
+                  lineAmountMinorFromMajor(
+                    amountAsMinorUnits(
+                      Number(item.unitPrice) || 0,
+                      searchCurrency,
+                    ),
+                    Number(item.quantity) || 0,
+                  ),
+                0,
+              ),
+              searchCurrency,
             )
           : ('' as unknown as number),
     originalCurrency: searchOriginalCurrency,

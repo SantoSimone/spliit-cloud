@@ -73,6 +73,14 @@ describe('quantity', () => {
     expect(lineAmountMinorFromStored(300, 1005)).toBe(302)
   })
 
+  it('rounds negative .5 boundaries away from zero', () => {
+    // Mirror of the positive case: true value -101.5 must round to -102,
+    // not toward +Inf (-101).
+    expect(lineAmountMinorFromStored(-100, 1015)).toBe(-102)
+    expect(lineAmountMinorFromStored(100, -1015)).toBe(-102)
+    expect(lineAmountMinorFromStored(0, 1015)).toBe(0)
+  })
+
   it('identifies legacy whole-unit payloads without false positives', () => {
     // Old client: 2 whole units with the legacy amount formula.
     expect(

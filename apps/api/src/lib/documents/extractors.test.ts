@@ -146,6 +146,29 @@ describe('extractOdtText', () => {
     )
     expect(error._tag).toBe('DocumentParseError')
   })
+
+  it('decodes predefined XML entities in paragraphs', async () => {
+    const text = await run(
+      extractOdtText(
+        minimalOdt([
+          'Fish &amp; Chips &lt;3&gt; &quot;Yum&quot; &apos;OK&apos;',
+        ]),
+      ),
+    )
+    expect(text).toContain(`Fish & Chips <3> "Yum" 'OK'`)
+  })
+
+  it('rejects content.xml exceeding the decompression limit without parsing it', async () => {
+    // Highly compressible: tiny on the wire, but inflates past the cap, so the
+    // post-inflate check must reject it before paragraph parsing.
+    const bomb = zipSync({
+      mimetype: strToU8('application/vnd.oasis.opendocument.text'),
+      'content.xml': new Uint8Array(17 * 1024 * 1024),
+    })
+    const error = await run(extractOdtText(bomb).pipe(Effect.flip))
+    expect(error._tag).toBe('DocumentParseError')
+    expect(error.reason).toContain('decompression limit')
+  })
 })
 
 describe('extractPlainText', () => {

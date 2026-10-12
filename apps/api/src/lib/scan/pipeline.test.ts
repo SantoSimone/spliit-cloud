@@ -85,10 +85,10 @@ beforeEach(() => {
   getReceiptModelMock.mockResolvedValue({ id: 'test-receipt-model' } as never)
   vi.stubGlobal('fetch', fetchMock)
   fetchMock.mockReset()
-  // Default vision-path download: image tests hit the server-side fetch for
-  // embedded bytes (no per-test mock needed); document tests override the
-  // first call with `mockResolvedValueOnce` for native-text content and fall
-  // through to this default for the vision fallback fetch.
+  // Default download for tests without a per-test override (image tests hit
+  // the server-side fetch for embedded bytes). Document tests override the
+  // single call with `mockResolvedValueOnce` for native-text content; the
+  // vision fallback reuses those bytes instead of fetching again.
   fetchMock.mockResolvedValue({
     ok: true,
     status: 200,
@@ -771,9 +771,12 @@ describe('scanReceiptDocument document flow', () => {
     expect(request.messages[1]?.content).toContainEqual({
       type: 'file',
       mediaType: 'application/pdf',
-      data: new TextEncoder().encode('fake-image-bytes'),
+      // Reused native-step download: the vision fallback must not fetch the
+      // same URL a second time.
+      data: new TextEncoder().encode('no pdf here'),
       filename: 'invoice.pdf',
     })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   it('throws instead of falling back when AI_OCR_REQUIRED is set', async () => {

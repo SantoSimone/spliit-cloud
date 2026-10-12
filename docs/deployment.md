@@ -190,6 +190,18 @@ may remain empty.
   Provider calls are bounded by `AI_RECEIPT_TIMEOUT_SECONDS` (default 120),
   `AI_VOICE_TIMEOUT_SECONDS` (default 120), and `AI_CATEGORY_TIMEOUT_SECONDS`
   (default 30); raise them when self-hosting a slow model.
+  Receipt scans optionally use a dedicated OCR backend: `AI_OCR_PROVIDER=ocrspace`
+  extracts raw text via OCR.space (Engine 2, language autodetect) and structures
+  it with a fast text-only call to the receipt model, instead of the default
+  single vision-LLM call (`AI_OCR_PROVIDER=none`). OCR requires
+  `AI_OCRSPACE_API_KEY` when receipt extract is enabled;
+  `AI_OCRSPACE_TIMEOUT_SECONDS` (default 30) bounds the OCR request, and
+  `AI_OCR_REQUIRED=true` fails the scan when OCR fails instead of falling back
+  to the vision LLM (default `false` falls back, so a free-tier quota error
+  never breaks scanning). The free OCR.space tier caps files at 1 MB and reads
+  at most 3 PDF pages. Set `TRACING_ENABLED=true` to log one human-readable
+  timing tree per AI scan/voice request (step durations, routing branch, token
+  usage) to the API console; off by default, enable when debugging slow scans.
   Category suggestions run dictionary, then group history, then one AI engine
   (`AI_CATEGORY_ENGINE=llm|system-one`, default `llm`). The system-one engine
   needs `AI_SYSTEM_ONE_API_KEY` instead of `AI_API_KEY`, plus optional

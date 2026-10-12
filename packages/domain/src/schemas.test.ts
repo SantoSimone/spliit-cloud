@@ -1896,6 +1896,26 @@ describe('fractional quantities (milli-units)', () => {
     ).toBe(true)
   })
 
+  it('form reports a single issue for tiny over-precise quantities', () => {
+    // 0.0001 is over-precise (itemQuantityMaxDecimals) and its line amount
+    // rounds to zero minor units; the zero-amount guard must skip rows the
+    // field refines already flag to avoid duplicate issues on one path.
+    const result = expenseFormInputSchema.safeParse({
+      ...itemizedBase,
+      amount: 0.01,
+      items: [
+        { title: 'Dust', unitPrice: 0.01, quantity: 0.0001, ...evenRow() },
+      ],
+    })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    const quantityIssues = result.error.issues.filter(
+      (issue) => issue.path.join('.') === 'items.0.quantity',
+    )
+    expect(quantityIssues).toHaveLength(1)
+    expect(quantityIssues[0]?.message).toBe('itemQuantityMaxDecimals')
+  })
+
   it('api accepts stored milli-units with the scaled amount invariant', () => {
     // 1.5 units × 250 minor = 375 minor.
     const ok = expenseApiSchema.safeParse({

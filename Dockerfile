@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache bunx turbo@2.10.7 prune "
 FROM base AS installer
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/bun.lock ./bun.lock
-RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile --ignore-scripts
 
 # Generate the Prisma client from schema inputs only so app-source-only
 # commits can reuse this layer via BuildKit content hashing.

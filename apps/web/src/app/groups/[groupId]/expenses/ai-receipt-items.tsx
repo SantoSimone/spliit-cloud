@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { Currency } from '@/lib/currency'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatNumber } from '@/lib/utils'
 import { amountAsMinorUnits, lineAmountMinorFromMajor } from '@spliit/domain'
 
 import { ExpenseItemsOverflowToggle } from './expense-items-overflow-toggle'
@@ -67,7 +67,7 @@ export function AiReceiptItems({
           detail={
             item.quantity !== 1 ? (
               <div className="min-w-0 truncate text-xs leading-5 text-muted-foreground tabular-nums">
-                {`${item.quantity} × ${formatCurrency(currency, item.unitPrice, locale, true)}`}
+                {`${locale ? formatNumber(item.quantity, locale, { useGrouping: false }) : String(item.quantity)} × ${formatCurrency(currency, item.unitPrice, locale, true)}`}
               </div>
             ) : undefined
           }

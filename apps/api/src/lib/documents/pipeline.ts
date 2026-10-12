@@ -22,6 +22,53 @@ export type UsableDocumentText =
  * modes. Explicit routing value, not a silent catch-and-ignore — every collapse
  * point is this function, and it is unit-tested.
  */
+export const extractUsableDocumentTextWithBytes = Effect.fnUntraced(function* (
+  source: DocumentSource,
+  options: {
+    maxChars?: number
+    maxBytes?: number
+    maxPages?: number
+    allowedHosts?: string[]
+  } = {},
+): Effect.fn.Return<
+  { readonly result: UsableDocumentText; readonly bytes?: Uint8Array },
+  never
+> {
+  const kind = classifyDocument(source)
+  const nativeKind = nativeKindFor(kind, source.contentType, source.fileName)
+  if (nativeKind === 'none') return { result: { kind: 'none' } as const }
+
+  const maxChars = options.maxChars ?? NATIVE_TEXT_MAX_CHARS
+  // Fetch once: the bytes are returned alongside the outcome so the scan
+  // pipeline can reuse them for the vision fallback instead of downloading
+  // the same document a second time. A failed fetch carries no bytes, so the
+  // fallback still fetches (and fails) exactly as before.
+  const fetched = yield* fetchDocumentBytes(source.url, {
+    maxBytes: options.maxBytes,
+    allowedHosts: options.allowedHosts,
+  }).pipe(Effect.orElseSucceed(() => null))
+  if (fetched === null) return { result: { kind: 'none' } as const }
+  // Snapshot before extraction: PDF parsing (pdfjs via unpdf) neuters the
+  // input buffer, so the bytes handed back for vision reuse must be an
+  // independent copy.
+  const bytes = fetched.slice()
+  const text = yield* extractNativeText(
+    nativeKind,
+    fetched,
+    source.contentType,
+    {
+      maxPages: options.maxPages,
+    },
+  ).pipe(
+    Effect.map((full) => full.slice(0, maxChars)),
+    Effect.orElseSucceed(() => null),
+  )
+  if (text === null || !isUsableReceiptText(text)) {
+    return { result: { kind: 'none' } as const, bytes }
+  }
+  return { result: { kind: 'text', text } as const, bytes }
+})
+
 export const extractUsableDocumentText = Effect.fnUntraced(function* (
   source: DocumentSource,
   options: {
@@ -31,24 +78,6 @@ export const extractUsableDocumentText = Effect.fnUntraced(function* (
     allowedHosts?: string[]
   } = {},
 ): Effect.fn.Return<UsableDocumentText, never> {
-  const kind = classifyDocument(source)
-  const nativeKind = nativeKindFor(kind, source.contentType, source.fileName)
-  if (nativeKind === 'none') return { kind: 'none' } as const
-
-  const maxChars = options.maxChars ?? NATIVE_TEXT_MAX_CHARS
-  const text = yield* fetchDocumentBytes(source.url, {
-    maxBytes: options.maxBytes,
-    allowedHosts: options.allowedHosts,
-  }).pipe(
-    Effect.flatMap((bytes) =>
-      extractNativeText(nativeKind, bytes, source.contentType, {
-        maxPages: options.maxPages,
-      }).pipe(Effect.map((full) => full.slice(0, maxChars))),
-    ),
-    Effect.orElseSucceed(() => null),
-  )
-  if (text === null || !isUsableReceiptText(text)) {
-    return { kind: 'none' } as const
-  }
-  return { kind: 'text', text } as const
+  const { result } = yield* extractUsableDocumentTextWithBytes(source, options)
+  return result
 })

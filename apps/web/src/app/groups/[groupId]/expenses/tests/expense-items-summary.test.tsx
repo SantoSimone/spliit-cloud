@@ -287,6 +287,27 @@ describe('ExpenseItemsSummary', () => {
 
     expect(screen.getByText('Alice, Bob')).toBeInTheDocument()
   })
+
+  it('localizes the quantity decimal separator', () => {
+    render(
+      <ExpenseItemsSummary
+        items={[
+          {
+            id: 'item-1',
+            title: 'Cheese',
+            amount: 375,
+            unitPrice: 250,
+            // Stored milli-units: 1500 = 1.5.
+            quantity: 1500,
+          },
+        ]}
+        currency={USD}
+        locale="de-DE"
+      />,
+    )
+
+    expect(screen.getByText(/1,5 ×/)).toBeInTheDocument()
+  })
 })
 
 describe('resolveExpenseItemsCurrency', () => {

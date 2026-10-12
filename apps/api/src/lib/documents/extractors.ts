@@ -119,6 +119,29 @@ const ODT_PARAGRAPH_PATTERN = /<text:p[^>]*>([\s\S]*?)<\/text:p>/g
 const XML_TAG_PATTERN = /<[^>]+>/g
 
 /**
+ * Total uncompressed cap for ODT `content.xml`, mirroring the DOCX per-entry
+ * budget (`DOCX_MAX_ENTRY_UNCOMPRESSED_BYTES`). Receipt documents are small
+ * text payloads; this only rejects hostile or non-receipt archives. Checked
+ * post-inflate, pre-parse so a hostile archive cannot expand memory unbounded.
+ */
+export const ODT_MAX_CONTENT_XML_BYTES = 16 * 1024 * 1024
+
+/**
+ * Decode the five predefined XML entities. ODT paragraphs are read with a
+ * tag-stripping regex (not a real XML parser), so `&amp;` etc. would otherwise
+ * leak into the extracted text. `&amp;` decodes last so `&amp;lt;` yields
+ * `&lt;`, not `<` (single-level decode).
+ */
+function decodeXmlEntities(text: string): string {
+  return text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+}
+
+/**
  * ODT raw text: unzip `content.xml` (via the already-present `fflate`) and read
  * paragraphs.
  */
@@ -136,13 +159,23 @@ export const extractOdtText = Effect.fnUntraced(function* (
   })
   const xml = files['content.xml']
   if (!xml) return yield* fail()
+  if (xml.byteLength > ODT_MAX_CONTENT_XML_BYTES) {
+    return yield* Effect.fail(
+      parseError(
+        contentType,
+        'ODT content.xml exceeds the decompression limit',
+      ),
+    )
+  }
   const xmlText = yield* Effect.try({
     try: () => strFromU8(xml),
     catch: fail,
   })
   const paragraphs: string[] = []
   for (const match of xmlText.matchAll(ODT_PARAGRAPH_PATTERN)) {
-    const paragraph = match[1]?.replace(XML_TAG_PATTERN, '').trim()
+    const paragraph = decodeXmlEntities(
+      match[1]?.replace(XML_TAG_PATTERN, '') ?? '',
+    ).trim()
     if (paragraph) paragraphs.push(paragraph)
   }
   return paragraphs.join('\n')

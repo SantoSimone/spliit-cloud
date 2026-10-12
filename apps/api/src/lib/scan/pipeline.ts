@@ -14,7 +14,7 @@ import { extractAllowedIdFromAIResponse } from '../ai-response'
 import { timeoutSecondsToMs } from '../ai/timeout'
 import { classifyDocument } from '../documents/classify'
 import { fetchDocumentBytes } from '../documents/fetch'
-import { extractUsableDocumentText } from '../documents/pipeline'
+import { extractUsableDocumentTextWithBytes } from '../documents/pipeline'
 import type { DocumentSource } from '../documents/types'
 import { env } from '../env'
 import { getOcrProvider, type OcrProvider } from '../ocr'
@@ -185,6 +185,12 @@ const extractWithVision = Effect.fnUntraced(function* (
   fetchOptions: {
     maxBytes?: number
     allowedHosts?: string[]
+    /**
+     * Already-downloaded document bytes (from the native-text step). When
+     * present the vision call reuses them instead of fetching the same URL a
+     * second time; when absent it fetches exactly as before.
+     */
+    bytes?: Uint8Array
   } = {},
 ): Effect.fn.Return<ReceiptExtractedResult, unknown> {
   const ocrOnly = context.ocrOnly ?? false
@@ -204,14 +210,25 @@ const extractWithVision = Effect.fnUntraced(function* (
   // not be checked"). The server-side fetch reuses the SSRF-guarded downloader
   // (allowlisted storage hosts, byte cap), so private/presigned URLs work and
   // a crafted documentUrl cannot turn the vision call into a fetch proxy.
-  const bytes = yield* Effect.gen(function* () {
-    const data = yield* fetchDocumentBytes(source.url, {
-      maxBytes: fetchOptions.maxBytes,
-      allowedHosts: fetchOptions.allowedHosts,
-    })
-    yield* Effect.annotateCurrentSpan('scan.fetch.bytes', data.byteLength)
-    return data
-  }).pipe(withTraceSpan('scan.fetch'))
+  const bytes = yield* (() => {
+    const reused = fetchOptions.bytes
+    if (reused) {
+      // Reused bytes from the native-text step: no second download, same
+      // byte-length annotation the fetch path records.
+      return Effect.annotateCurrentSpan(
+        'scan.fetch.bytes',
+        reused.byteLength,
+      ).pipe(Effect.as(reused))
+    }
+    return Effect.gen(function* () {
+      const data = yield* fetchDocumentBytes(source.url, {
+        maxBytes: fetchOptions.maxBytes,
+        allowedHosts: fetchOptions.allowedHosts,
+      })
+      yield* Effect.annotateCurrentSpan('scan.fetch.bytes', data.byteLength)
+      return data
+    }).pipe(withTraceSpan('scan.fetch'))
+  })()
   const model = yield* Effect.tryPromise({
     try: () => getReceiptModel(),
     // Same passthrough as the structuring call above.
@@ -294,21 +311,32 @@ export const scanReceiptDocument = Effect.fnUntraced(function* (
     currentExpense: context.currentExpense,
   }
 
+  // Already-downloaded document bytes for a scanned-image PDF: the vision
+  // fallback below reuses them instead of fetching the same URL a second
+  // time. Stays undefined when the download itself failed, so the fallback
+  // still fetches (and fails) exactly as before.
+  let documentBytes: Uint8Array | undefined
+
   if (kind === 'pdf' || kind === 'text-document') {
-    const usable = yield* Effect.gen(function* () {
-      const result = yield* extractUsableDocumentText(
+    const extracted = yield* Effect.gen(function* () {
+      const result = yield* extractUsableDocumentTextWithBytes(
         source,
         deps.fetchOptions ?? {},
       )
-      yield* Effect.annotateCurrentSpan('scan.extract.outcome', result.kind)
-      if (result.kind === 'text') {
+      yield* Effect.annotateCurrentSpan(
+        'scan.extract.outcome',
+        result.result.kind,
+      )
+      if (result.result.kind === 'text') {
         yield* Effect.annotateCurrentSpan(
           'scan.extract.chars',
-          result.text.length,
+          result.result.text.length,
         )
       }
       return result
     }).pipe(withTraceSpan('scan.extract', { 'scan.document.kind': kind }))
+    const usable = extracted.result
+    documentBytes = extracted.bytes
     if (usable.kind === 'text') {
       yield* Effect.annotateCurrentSpan('scan.extraction', 'text')
       return yield* structureDocumentText(
@@ -406,7 +434,10 @@ export const scanReceiptDocument = Effect.fnUntraced(function* (
     kind === 'pdf' ? 'pdf' : 'image',
     groupCurrencyInput,
     context,
-    deps.fetchOptions ?? {},
+    {
+      ...deps.fetchOptions,
+      ...(documentBytes ? { bytes: documentBytes } : {}),
+    },
   ).pipe(
     withTraceSpan('scan.vision', {
       'llm.model': env.AI_RECEIPT_MODEL,

@@ -25,6 +25,21 @@ describe('isUsableReceiptText', () => {
     ).toBe(true)
   })
 
+  it('accepts receipts in Cyrillic and Arabic scripts', () => {
+    expect(
+      isUsableReceiptText(
+        'Магазин Угловой\nул Ленина 1\nЯблоки 2 x 250\nХлеб 350\nНалог 120\nИтого 1850 руб\n2025-01-02\nспасибо за покупку приходите снова\n',
+      ),
+    ).toBe(true)
+    // Arabic-Indic digits (١٨٥٠) exercise the Unicode digit check: ASCII-only
+    // `\d` would find no digit here and reject the receipt.
+    expect(
+      isUsableReceiptText(
+        'متجر البقالة المركزي\nشارع الرئيسي ١٢٣\nتفاح ٢ × ٢٥٠\nخبز ٣٥٠\nضريبة ١٢٠\nالمجموع ١٨٥٠ ريال\n٢٠٢٥-٠١-٠٢\nشكرا لتسوقكم معنا\n',
+      ),
+    ).toBe(true)
+  })
+
   it('rejects blank and tiny texts', () => {
     expect(isUsableReceiptText('')).toBe(false)
     expect(isUsableReceiptText('   \n  ')).toBe(false)

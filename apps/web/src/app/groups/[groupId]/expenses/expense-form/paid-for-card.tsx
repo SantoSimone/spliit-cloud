@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card'
 import { FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { getCurrency } from '@/lib/currency'
-import { amountAsMinorUnits } from '@/lib/utils'
+import { amountAsDecimal, amountAsMinorUnits } from '@/lib/utils'
 import type { AppRouterOutput } from '@spliit/api/router'
 import type {
   Currency,
@@ -23,6 +23,7 @@ import type {
 } from '@spliit/domain'
 import {
   computePaidForFromItems,
+  lineAmountMinorFromMajor,
   lineAmountMinorFromStored,
   quantityToStored,
   type SplitMode,
@@ -361,22 +362,40 @@ export function PaidForCard(props: {
         }))
       }
 
-      const nextItems = (form.getValues('items') ?? []).map((item) => ({
-        ...item,
-        splitMode: itemMode,
-        paidFor: buildRows(Number(item.unitPrice) * Number(item.quantity)),
-      }))
+      const inputCurrency = conversionRequired
+        ? originalCurrency
+        : groupCurrency
+      const nextItems = (form.getValues('items') ?? []).map((item) => {
+        const lineMinor = lineAmountMinorFromMajor(
+          amountAsMinorUnits(Number(item.unitPrice) || 0, inputCurrency),
+          Number(item.quantity) || 0,
+        )
+        return {
+          ...item,
+          splitMode: itemMode,
+          paidFor: buildRows(amountAsDecimal(lineMinor, inputCurrency)),
+        }
+      })
       form.setValue('items', nextItems, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
       })
 
-      const itemTotal = nextItems.reduce(
-        (sum, item) => sum + Number(item.unitPrice) * Number(item.quantity),
+      const itemsMinorTotal = nextItems.reduce(
+        (sum, item) =>
+          sum +
+          lineAmountMinorFromMajor(
+            amountAsMinorUnits(Number(item.unitPrice) || 0, inputCurrency),
+            Number(item.quantity) || 0,
+          ),
         0,
       )
-      const remainderAmount = (Number(amount) || 0) - itemTotal
+      const remainderAmount = amountAsDecimal(
+        amountAsMinorUnits(Number(amount) || 0, inputCurrency) -
+          itemsMinorTotal,
+        inputCurrency,
+      )
       form.setValue(
         'itemizedRemainder',
         {

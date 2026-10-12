@@ -1087,13 +1087,15 @@ export function createExpenseFormInputSchema(fallbackCurrency: Currency) {
         fallbackCurrency,
       )
       ;(expense.items ?? []).forEach((item, index) => {
-        // Skip rows the field refines already flag (non-finite, zero, or
-        // negative inputs) to avoid duplicate issues on one row.
+        // Skip rows the field refines already flag (non-finite, zero,
+        // negative, or over-precise inputs) to avoid duplicate issues on
+        // one row.
         if (
           !Number.isFinite(item.unitPrice) ||
           !Number.isFinite(item.quantity) ||
           item.unitPrice === 0 ||
-          item.quantity <= 0
+          item.quantity <= 0 ||
+          !isValidMajorQuantity(item.quantity)
         ) {
           return
         }

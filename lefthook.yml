@@ -1,7 +1,6 @@
 # Fast local gates. Type checks stay in CI (`bun run check`): `tsc --noEmit`
 # is too slow for every commit. Bypass a hook once with --no-verify.
 pre-commit:
-  parallel: true
   jobs:
     - run: bun x oxfmt -- {staged_files}
       glob:
